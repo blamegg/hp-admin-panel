@@ -104,7 +104,7 @@ const DataTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false); // State to control the drawer
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleChangePage = (event: any, newPage: number) => {
     setPage(newPage);
@@ -134,13 +134,11 @@ const DataTable = () => {
     };
 
   return (
-    <div>
-      {/* Button to open sidebar */}
+    <div className="h-full">
       <Button variant="contained" size="small" onClick={toggleDrawer(true)}>
         Open Side Bar
       </Button>
 
-      {/* Search input */}
       <div className="w-[200px]">
         <TextField
           label="Search by Name"
@@ -152,7 +150,6 @@ const DataTable = () => {
         />
       </div>
 
-      {/* Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -180,7 +177,6 @@ const DataTable = () => {
         </Table>
       </TableContainer>
 
-      {/* Pagination */}
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
@@ -191,15 +187,21 @@ const DataTable = () => {
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
 
-      {/* Sidebar (Drawer component) */}
-      <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer(false)}>
+      <Drawer
+        anchor="right"
+        open={isDrawerOpen}
+        onClose={toggleDrawer(false)}
+        PaperProps={{
+          sx: {
+            width: "50%",
+          },
+        }}
+      >
         <div
           role="presentation"
           onClick={toggleDrawer(false)}
           onKeyDown={toggleDrawer(false)}
-          className="h-full w-[800px]"
         >
-          {/* Drawer Header */}
           <div className="flex items-center justify-between bg-blue-600 p-4 text-white">
             <h2 className="text-xl font-bold">Drawer Title</h2>
             <Button
@@ -211,9 +213,7 @@ const DataTable = () => {
             </Button>
           </div>
 
-          {/* Drawer Content */}
           <div className="bg-gray-100 h-full overflow-y-auto p-6">
-            {/* You can display some data here in a table or list */}
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded bg-white p-4 shadow">
                 <h3 className="text-lg font-semibold">Item 1</h3>
@@ -233,7 +233,6 @@ const DataTable = () => {
               </div>
             </div>
 
-            {/* Additional content */}
             <div className="mt-6">
               <p>
                 Lorem ipsum dolor sit, amet consectetur adipisicing elit.
