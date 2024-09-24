@@ -247,3 +247,21 @@ input[type="search"]::-webkit-search-cancel-button {
 .MuiTableCell-root {
   padding: 4px !important;
 }
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1976d2;
+  border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
