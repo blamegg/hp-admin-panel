@@ -4,6 +4,7 @@ import DropdownMessage from "./DropdownMessage";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
 import Image from "next/image";
+import RTLSwitcher from "./RTLSwitcher";
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
@@ -105,6 +106,7 @@ const Header = (props: {
         <div className="flex items-center gap-3 2xsm:gap-7">
           <ul className="flex items-center gap-2 2xsm:gap-4">
             {/* <!-- Dark Mode Toggler --> */}
+            <RTLSwitcher />
             <DarkModeSwitcher />
             {/* <!-- Dark Mode Toggler --> */}
 

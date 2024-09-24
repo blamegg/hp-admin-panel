@@ -2,9 +2,11 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
+import { useDirection } from "@/context/DirectionContext";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { direction, toggleDirection } = useDirection();
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">

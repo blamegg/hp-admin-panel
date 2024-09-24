@@ -7,13 +7,13 @@ import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/provider/theme";
+import { DirectionProvider, useDirection } from "@/context/DirectionContext"; // Adjust the path as necessary
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -21,14 +21,33 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en">
+    <DirectionProvider>
+      <InnerRootLayout loading={loading}>{children}</InnerRootLayout>
+    </DirectionProvider>
+  );
+}
+
+// Inner component to access the direction context
+const InnerRootLayout = ({
+  loading,
+  children,
+}: {
+  loading: boolean;
+  children: React.ReactNode;
+}) => {
+  const { direction, toggleDirection } = useDirection();
+
+  return (
+    <html lang="en" dir={direction}>
       <body suppressHydrationWarning={true}>
-        <ThemeProvider theme={theme}>
-          <div className="dark:bg-boxdark-2 dark:text-bodydark">
+        <ThemeProvider theme={{ ...theme, direction }}>
+          <div
+            className={`dark:bg-boxdark-2 dark:text-bodydark ${direction === "rtl" ? "rtl" : "ltr"}`}
+          >
             {loading ? <Loader /> : children}
           </div>
         </ThemeProvider>
       </body>
     </html>
   );
-}
+};
