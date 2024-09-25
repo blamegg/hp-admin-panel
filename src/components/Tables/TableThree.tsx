@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -16,6 +16,7 @@ import {
   ListItem,
   ListItemText,
 } from "@mui/material";
+import useLocalStorageWithExpiration from "@/hooks/useLocalStorageWithExpiration";
 
 const data = [
   {
@@ -105,6 +106,21 @@ const DataTable = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [storedData, addObject, deleteValue] = useLocalStorageWithExpiration(
+    "myArrayKey",
+    [],
+    1,
+  );
+
+  // useEffect(() => {
+  //   addObject({ id: 1, name: "Item 1", value: "This is item 1" });
+  // }, []);
+
+  const handleLocal = () => {
+    addObject({ id: 1, name: "Item 1", value: "This is item 1" });
+
+    // deleteValue(1);
+  };
 
   const handleChangePage = (event: any, newPage: number) => {
     setPage(newPage);
@@ -135,6 +151,7 @@ const DataTable = () => {
 
   return (
     <div className="h-full">
+      <button onClick={() => handleLocal()}>check localstorage</button>
       <Button variant="contained" size="small" onClick={toggleDrawer(true)}>
         Open Side Bar
       </Button>

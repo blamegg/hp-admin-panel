@@ -325,7 +325,9 @@ const menuGroups = [
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
+  const [menuList, setMenuList] = useState(menuGroups);
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
+  const color = "#FF505D";
 
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
@@ -368,7 +370,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
           {/* <!-- Sidebar Menu --> */}
           <nav className="px-4 lg:px-6">
-            {menuGroups.map((group, groupIndex) => (
+            {menuList.map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
                   {group.name}
@@ -381,6 +383,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       item={menuItem}
                       pageName={pageName}
                       setPageName={setPageName}
+                      color={color}
                     />
                   ))}
                 </ul>
