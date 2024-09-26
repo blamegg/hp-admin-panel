@@ -1,251 +1,180 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TablePagination,
-  TextField,
-  Button,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-} from "@mui/material";
+import React, { useState, useEffect } from "react";
+import DataTable from "react-data-table-component";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import CustomPagination from "@/components/CustomPagination";
 
-const data = [
+const generateData = (count: number) => {
+  return Array.from({ length: count }, (v, i) => ({
+    id: i + 1,
+    name: `Item ${i + 1}`,
+    description: `description of ${i + 1}`,
+    email: `item${i + 1}@example.com`, // Generating email addresses
+    dateCreated: new Date().toLocaleDateString(), // Adding date created
+    status: i % 2 === 0 ? "Active" : "Inactive", // Adding status field
+  }));
+};
+
+const columns = [
   {
-    id: 1,
-    name: "Item 1",
-    value: 10,
-    description: "Description 1",
-    category: "A",
-    status: "Available",
+    name: "Name",
+    selector: (row: any) => row.name,
+    sortable: true,
+    width: "200px",
   },
   {
-    id: 2,
-    name: "Item 2",
-    value: 20,
-    description: "Description 2",
-    category: "B",
-    status: "Unavailable",
+    name: "Description",
+    selector: (row: any) => row.description,
+    width: "300px",
   },
   {
-    id: 3,
-    name: "Item 3",
-    value: 30,
-    description: "Description 3",
-    category: "A",
-    status: "Available",
+    name: "Email",
+    selector: (row: any) => row.email,
+    sortable: true,
+    width: "200px",
   },
   {
-    id: 4,
-    name: "Item 4",
-    value: 40,
-    description: "Description 4",
-    category: "C",
-    status: "Available",
+    name: "Date Created",
+    selector: (row: any) => row.dateCreated,
+    sortable: true,
+    width: "150px",
   },
   {
-    id: 5,
-    name: "Item 5",
-    value: 50,
-    description: "Description 5",
-    category: "B",
-    status: "Unavailable",
+    name: "Status",
+    selector: (row: any) => row.status,
+    sortable: true,
+    width: "100px",
   },
   {
-    id: 6,
-    name: "Item 6",
-    value: 60,
-    description: "Description 6",
-    category: "A",
-    status: "Available",
-  },
-  {
-    id: 7,
-    name: "Item 7",
-    value: 70,
-    description: "Description 7",
-    category: "C",
-    status: "Available",
-  },
-  {
-    id: 8,
-    name: "Item 8",
-    value: 80,
-    description: "Description 8",
-    category: "B",
-    status: "Unavailable",
-  },
-  {
-    id: 9,
-    name: "Item 9",
-    value: 90,
-    description: "Description 9",
-    category: "A",
-    status: "Available",
-  },
-  {
-    id: 10,
-    name: "Item 10",
-    value: 100,
-    description: "Description 10",
-    category: "C",
-    status: "Available",
+    name: "Actions",
+    cell: (row: any) => (
+      <div className="flex space-x-2">
+        <button
+          onClick={() => handleEdit(row.id)}
+          className="text-blue-500 hover:text-blue-700"
+        >
+          <FaEdit />
+        </button>
+        <button
+          onClick={() => handleDelete(row.id)}
+          className="text-red-500 hover:text-red-700"
+        >
+          <FaTrash />
+        </button>
+      </div>
+    ),
+    width: "120px",
   },
 ];
 
-const DataTable = () => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+const TableThree = () => {
+  const [mockData, setMockData] = useState<any[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChangePage = (event: any, newPage: number) => {
-    setPage(newPage);
+  useEffect(() => {
+    const data = generateData(100);
+    setMockData(data);
+    setTotalItems(data.length);
+  }, []);
+
+  useEffect(() => {
+    const totalPages = Math.ceil(totalItems / rowsPerPage);
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages > 0 ? totalPages : 1);
+    }
+  }, [totalItems, rowsPerPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
-  const handleChangeRowsPerPage = (event: any) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
   };
 
-  const handleSearch = (event: any) => {
-    setSearchTerm(event.target.value);
+  const handleEdit = (id: number) => {
+    console.log(`Edit item with ID: ${id}`);
+    // Add your edit logic here
   };
 
-  const filteredData = data.filter((row) =>
-    row.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  const paginatedData = filteredData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  );
-
-  const toggleDrawer =
-    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
-      setIsDrawerOpen(open);
-    };
+  const handleDelete = (id: number) => {
+    console.log(`Delete item with ID: ${id}`);
+    // Add your delete logic here
+  };
 
   return (
-    <div className="h-full">
-      <Button variant="contained" size="small" onClick={toggleDrawer(true)}>
-        Open Side Bar
-      </Button>
-
-      <div className="w-[200px]">
-        <TextField
-          label="Search by Name"
-          variant="standard"
-          fullWidth
-          size="small"
-          margin="normal"
-          onChange={handleSearch}
+    <div className="custom_tbl_container max-w-[800px] md:max-w-full">
+      <div className="overflow-x-auto">
+        <DataTable
+          columns={columns}
+          data={mockData.slice(
+            (currentPage - 1) * rowsPerPage,
+            currentPage * rowsPerPage,
+          )}
+          pagination
+          paginationPerPage={rowsPerPage}
+          paginationTotalRows={totalItems}
+          paginationComponent={() => (
+            <CustomPagination
+              rowsPerPage={rowsPerPage}
+              currentPage={currentPage}
+              rowCount={totalItems}
+              onChangePage={handlePageChange}
+              onChangeRowsPerPage={handleRowsPerPageChange}
+            />
+          )}
+          className="custom_tbl"
+          progressPending={isLoading}
+          customStyles={{
+            header: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                padding: "0 8px",
+              },
+            },
+            headRow: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                padding: "0 8px",
+              },
+            },
+            headCells: {
+              style: {
+                fontWeight: 700,
+                padding: "0 8px",
+              },
+            },
+            cells: {
+              style: {
+                fontSize: "11px",
+                fontWeight: 500,
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                padding: "0 8px",
+                height: "27px",
+              },
+            },
+            rows: {
+              style: {
+                fontSize: "11px",
+                minHeight: "27px",
+                "&:not(:last-of-type)": {
+                  borderBottomStyle: "solid",
+                  borderBottomWidth: "1px",
+                },
+              },
+            },
+          }}
         />
       </div>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Value</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Status</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedData.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.value}</TableCell>
-                <TableCell>{row.description}</TableCell>
-                <TableCell>{row.category}</TableCell>
-                <TableCell>{row.status}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={filteredData.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-
-      <Drawer
-        anchor="right"
-        open={isDrawerOpen}
-        onClose={toggleDrawer(false)}
-        PaperProps={{
-          sx: {
-            width: "50%",
-          },
-        }}
-      >
-        <div
-          role="presentation"
-          onClick={toggleDrawer(false)}
-          onKeyDown={toggleDrawer(false)}
-        >
-          <div className="flex items-center justify-between bg-blue-600 p-4 text-white">
-            <h2 className="text-xl font-bold">Drawer Title</h2>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={toggleDrawer(false)}
-            >
-              Close
-            </Button>
-          </div>
-
-          <div className="bg-gray-100 h-full overflow-y-auto p-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded bg-white p-4 shadow">
-                <h3 className="text-lg font-semibold">Item 1</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-              </div>
-              <div className="rounded bg-white p-4 shadow">
-                <h3 className="text-lg font-semibold">Item 2</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-              </div>
-              <div className="rounded bg-white p-4 shadow">
-                <h3 className="text-lg font-semibold">Item 3</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-              </div>
-              <div className="rounded bg-white p-4 shadow">
-                <h3 className="text-lg font-semibold">Item 4</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <p>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                Voluptatem nostrum alias nesciunt numquam aperiam ipsam aut
-                voluptates omnis veritatis id non tempora porro sit deserunt
-                ipsum quisquam neque, suscipit fuga.
-              </p>
-            </div>
-          </div>
-        </div>
-      </Drawer>
     </div>
   );
 };
 
-export default DataTable;
+export default TableThree;

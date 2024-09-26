@@ -23,23 +23,10 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
     setCurrentPage(page);
   };
 
-  const handleRowsPerPageChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setRowsPerPage(Number(event.target.value));
-    setCurrentPage(1); // Reset to the first page when rows per page changes
-  };
-
   return (
-    <div className="pagination-container">
-      <select onChange={handleRowsPerPageChange} value={rowsPerPage}>
-        {[5, 10, 20].map((size) => (
-          <option key={size} value={size}>
-            {size} rows per page
-          </option>
-        ))}
-      </select>
+    <div className="pagination-container flex items-center justify-between p-4">
       <button
+        className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-700"
         onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
       >
@@ -47,6 +34,7 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
       </button>
       <span>{`Page ${currentPage} of ${totalPages}`}</span>
       <button
+        className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-700"
         onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
       >

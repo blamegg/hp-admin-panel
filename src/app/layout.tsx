@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/provider/theme";
-import { DirectionProvider, useDirection } from "@/context/DirectionContext"; // Adjust the path as necessary
+import { DirectionProvider, useDirection } from "@/context/DirectionContext";
 
 export default function RootLayout({
   children,
