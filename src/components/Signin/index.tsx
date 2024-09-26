@@ -44,7 +44,7 @@ export const Signin = () => {
     >
       <div className="absolute inset-0 bg-black opacity-50"></div>
 
-      <div className="relative w-[25%] rounded-xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="relative rounded-xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark xl:w-[25%]">
         <div className="pt-18">
           <div className="w-full rounded-xl border-stroke dark:border-strokedark xl:border-l-2">
             <div className="w-full p-4">
