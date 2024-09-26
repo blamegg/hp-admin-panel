@@ -17,58 +17,6 @@ const generateData = (count: number) => {
   }));
 };
 
-const columns = [
-  {
-    name: "Name",
-    selector: (row: any) => row.name,
-    sortable: true,
-    width: "200px",
-  },
-  {
-    name: "Description",
-    selector: (row: any) => row.description,
-    width: "300px",
-  },
-  {
-    name: "Email",
-    selector: (row: any) => row.email,
-    sortable: true,
-    width: "200px",
-  },
-  {
-    name: "Date Created",
-    selector: (row: any) => row.dateCreated,
-    sortable: true,
-    width: "150px",
-  },
-  {
-    name: "Status",
-    selector: (row: any) => row.status,
-    sortable: true,
-    width: "100px",
-  },
-  {
-    name: "Actions",
-    cell: (row: any) => (
-      <div className="flex space-x-2">
-        <button
-          onClick={() => handleEdit(row.id)}
-          className="text-blue-500 hover:text-blue-700"
-        >
-          <FaEdit />
-        </button>
-        <button
-          onClick={() => handleDelete(row.id)}
-          className="text-red-500 hover:text-red-700"
-        >
-          <FaTrash />
-        </button>
-      </div>
-    ),
-    width: "120px",
-  },
-];
-
 const TableThree = () => {
   const [mockData, setMockData] = useState<any[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -120,6 +68,58 @@ const TableThree = () => {
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
       setIsDrawerOpen(open);
     };
+
+  const columns = [
+    {
+      name: "Name",
+      selector: (row: any) => row.name,
+      sortable: true,
+      width: "200px",
+    },
+    {
+      name: "Description",
+      selector: (row: any) => row.description,
+      width: "300px",
+    },
+    {
+      name: "Email",
+      selector: (row: any) => row.email,
+      sortable: true,
+      width: "200px",
+    },
+    {
+      name: "Date Created",
+      selector: (row: any) => row.dateCreated,
+      sortable: true,
+      width: "150px",
+    },
+    {
+      name: "Status",
+      selector: (row: any) => row.status,
+      sortable: true,
+      width: "100px",
+    },
+    {
+      name: "Actions",
+      cell: (row: any) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleEdit(row.id)}
+            className="text-blue-500 hover:text-blue-700"
+          >
+            <FaEdit />
+          </button>
+          <button
+            onClick={() => handleDelete(row.id)}
+            className="text-red-500 hover:text-red-700"
+          >
+            <FaTrash />
+          </button>
+        </div>
+      ),
+      width: "120px",
+    },
+  ];
 
   return (
     <>
