@@ -162,20 +162,20 @@ const TableThree = () => {
                 style: {
                   fontSize: "12px",
                   minHeight: "30px",
-                  padding: "0 8px",
+                  // padding: "0 8px",
                 },
               },
               headRow: {
                 style: {
                   fontSize: "12px",
                   minHeight: "30px",
-                  padding: "0 8px",
+                  // padding: "0 8px",
                 },
               },
               headCells: {
                 style: {
                   fontWeight: 700,
-                  padding: "0 8px",
+                  // padding: "0 8px",
                 },
               },
               cells: {
@@ -184,7 +184,7 @@ const TableThree = () => {
                   fontWeight: 500,
                   wordBreak: "break-word",
                   overflowWrap: "break-word",
-                  padding: "0 8px",
+                  // padding: "0 8px",
                   height: "27px",
                 },
               },
