@@ -102,7 +102,7 @@ const TableThree = () => {
     {
       name: "Actions",
       cell: (row: any) => (
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           <button
             onClick={() => handleEdit(row.id)}
             className="text-blue-500 hover:text-blue-700"
