@@ -8,6 +8,8 @@ import Loader from "@/components/common/Loader";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/provider/theme";
 import { DirectionProvider, useDirection } from "@/context/DirectionContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RootLayout({
   children,
@@ -47,6 +49,18 @@ const InnerRootLayout = ({
             {loading ? <Loader /> : children}
           </div>
         </ThemeProvider>
+        <ToastContainer
+          position="top-right"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          toastClassName="custom-toast-container"
+        />
       </body>
     </html>
   );
