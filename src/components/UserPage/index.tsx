@@ -1,7 +1,6 @@
 "use client";
-import React, { FormEvent, useState } from "react";
+import React, { useState } from "react";
 import Breadcrumb from "../Breadcrumbs/Breadcrumb";
-import Link from "next/link";
 import Image from "next/image";
 import Input from "../common/Input";
 import { toast } from "react-toastify";
@@ -21,7 +20,7 @@ const UserPage = () => {
     }
   };
 
-  const handleFormSubmit = (event: any) => {
+  const handleFormSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault();
     toast.success("Created user successfully");
   };
