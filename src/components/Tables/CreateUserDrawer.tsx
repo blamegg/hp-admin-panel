@@ -85,7 +85,7 @@ const CreateUserDrawer = ({
       onClose={toggleDrawer(false)}
       PaperProps={{
         sx: {
-          width: "40%",
+          width: "70%",
         },
       }}
     >
