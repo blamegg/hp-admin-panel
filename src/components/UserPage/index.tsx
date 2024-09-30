@@ -4,10 +4,54 @@ import Breadcrumb from "../Breadcrumbs/Breadcrumb";
 import Image from "next/image";
 import Input from "../common/Input";
 import { toast } from "react-toastify";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import FormError from "../common/FormError";
+
+// Define Zod schema
+const userSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
+  language: z.enum(["english", "spanish", "french", "german"], {
+    errorMap: () => ({ message: "Please select a valid language" }),
+  }),
+  direction: z.enum(["ltr", "rtl"], {
+    errorMap: () => ({ message: "Please select a direction" }),
+  }),
+  notifications: z.enum(["email", "sms", "push", "none"], {
+    errorMap: () => ({ message: "Please select a notification preference" }),
+  }),
+});
+
+type UserFormInputs = z.infer<typeof userSchema>;
 
 const UserPage = () => {
   const [profile, setProfile] = useState<string>("/images/user/user-06.png");
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<UserFormInputs>({
+    resolver: zodResolver(userSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      username: "",
+      email: "",
+      password: "",
+      phoneNumber: "",
+      notifications: undefined,
+      direction: undefined,
+      language: undefined,
+    },
+  });
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -20,15 +64,16 @@ const UserPage = () => {
     }
   };
 
-  const handleFormSubmit = (event: React.SyntheticEvent) => {
-    event.preventDefault();
+  const onSubmit = (data: UserFormInputs) => {
+    console.log(data);
     toast.success("Created user successfully");
+    reset();
   };
 
   return (
     <div className="mx-auto max-w-270">
       <Breadcrumb pageName="Create User" />
-      <form onSubmit={handleFormSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="flex items-center justify-between border-b border-stroke px-7 py-4 dark:border-strokedark">
@@ -96,11 +141,23 @@ const UserPage = () => {
             <div className="px-7 pb-7">
               <div className="grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2 md:grid-cols-3">
                 <div className="mb-5.5">
-                  <Input label="First Name" type="text" placeholder="John" />
+                  <Input
+                    label="First Name"
+                    type="text"
+                    placeholder="John"
+                    register={register("firstName")}
+                    error={errors.firstName?.message}
+                  />
                 </div>
 
                 <div className="mb-5.5">
-                  <Input label="Last Name" type="text" placeholder="Doe" />
+                  <Input
+                    label="Last Name"
+                    type="text"
+                    placeholder="Doe"
+                    register={register("lastName")}
+                    error={errors.lastName?.message}
+                  />
                 </div>
 
                 <div className="mb-5.5">
@@ -108,6 +165,8 @@ const UserPage = () => {
                     label="Username"
                     type="text"
                     placeholder="johndoe123"
+                    register={register("username")}
+                    error={errors.username?.message}
                   />
                 </div>
 
@@ -116,6 +175,8 @@ const UserPage = () => {
                     label="Email"
                     type="email"
                     placeholder="example@example.com"
+                    register={register("email")}
+                    error={errors.email?.message}
                   />
                 </div>
 
@@ -124,6 +185,8 @@ const UserPage = () => {
                     label="Password"
                     type="password"
                     placeholder="••••••••"
+                    register={register("password")}
+                    error={errors.password?.message}
                   />
                 </div>
 
@@ -131,7 +194,9 @@ const UserPage = () => {
                   <Input
                     label="Phone Number"
                     type="number"
-                    placeholder="+990 3343 7865"
+                    placeholder="+1234567890"
+                    register={register("phoneNumber")}
+                    error={errors.phoneNumber?.message}
                   />
                 </div>
 
@@ -144,14 +209,19 @@ const UserPage = () => {
                   </label>
                   <select
                     className="w-full rounded border border-stroke bg-gray px-4 py-[6px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
-                    name="language"
                     id="language"
+                    {...register("language")}
+                    defaultValue=""
                   >
+                    <option value="" disabled>
+                      Select Language
+                    </option>
                     <option value="english">English</option>
                     <option value="spanish">Spanish</option>
                     <option value="french">French</option>
                     <option value="german">German</option>
                   </select>
+                  <FormError error={errors?.language?.message} />
                 </div>
 
                 <div className="mb-5.5">
@@ -163,12 +233,17 @@ const UserPage = () => {
                   </label>
                   <select
                     className="w-full rounded border border-stroke bg-gray px-4 py-[6px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
-                    name="direction"
                     id="direction"
+                    {...register("direction")}
+                    defaultValue=""
                   >
+                    <option value="" disabled>
+                      Select Direction
+                    </option>
                     <option value="ltr">Left to Right (LTR)</option>
                     <option value="rtl">Right to Left (RTL)</option>
                   </select>
+                  <FormError error={errors?.direction?.message} />
                 </div>
 
                 <div className="mb-5.5">
@@ -180,14 +255,19 @@ const UserPage = () => {
                   </label>
                   <select
                     className="w-full rounded border border-stroke bg-gray px-4 py-[6px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
-                    name="notifications"
                     id="notifications"
+                    {...register("notifications")}
+                    defaultValue=""
                   >
+                    <option value="" disabled>
+                      Select Notification
+                    </option>
                     <option value="email">Email</option>
                     <option value="sms">SMS</option>
                     <option value="push">Push Notifications</option>
                     <option value="none">No Notifications</option>
                   </select>
+                  <FormError error={errors?.notifications?.message} />
                 </div>
               </div>
             </div>
