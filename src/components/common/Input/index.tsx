@@ -23,7 +23,7 @@ const Input = ({
         {label}
       </label>
       <input
-        className={`w-full rounded border bg-gray px-4 py-[6px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${
+        className={`w-full rounded border bg-gray px-2 py-[2px] text-[13px] font-medium text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${
           error ? "border-red" : "border-stroke"
         }`}
         type={type}

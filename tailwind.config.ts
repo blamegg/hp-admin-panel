@@ -57,6 +57,7 @@ const config: Config = {
         success: "#219653",
         danger: "#D34053",
         warning: "#FFA70B",
+        companyRed: "#FF505D",
       },
       fontSize: {
         "title-xxl": ["44px", "55px"],

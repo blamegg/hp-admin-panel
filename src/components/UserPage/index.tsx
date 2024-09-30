@@ -86,6 +86,7 @@ const UserPage = () => {
               >
                 Create User
               </button>
+              <Button name="Create User" type="submit" />
             </div>
             <div className="mb-[70px] mt-[100px] px-4 text-center sm:mb-[20px]">
               <div className="relative z-30 mx-auto -mt-22 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
@@ -97,7 +98,7 @@ const UserPage = () => {
                     style={{
                       borderRadius: "100%",
                     }}
-                    className="border-[4px] border-primary"
+                    className="border-companyRed border-[4px]"
                     alt="profile"
                     priority
                   />
