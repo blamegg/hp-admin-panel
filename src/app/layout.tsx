@@ -10,6 +10,9 @@ import theme from "@/provider/theme";
 import { DirectionProvider, useDirection } from "@/context/DirectionContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "react-toastify/dist/ReactToastify.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReduxProvider } from "@/provider/ReduxProvider";
 
 export default function RootLayout({
   children,
@@ -38,30 +41,35 @@ const InnerRootLayout = ({
   children: React.ReactNode;
 }) => {
   const { direction, toggleDirection } = useDirection();
+  const queryClient = new QueryClient();
 
   return (
-    <html lang="en" dir={direction}>
-      <body suppressHydrationWarning={true}>
-        <ThemeProvider theme={{ ...theme, direction }}>
-          <div
-            className={`dark:bg-boxdark-2 dark:text-bodydark ${direction === "rtl" ? "rtl" : "ltr"}`}
-          >
-            {loading ? <Loader /> : children}
-          </div>
-        </ThemeProvider>
-        <ToastContainer
-          position="top-right"
-          autoClose={2000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          toastClassName="custom-toast-container"
-        />
-      </body>
-    </html>
+    <QueryClientProvider client={queryClient}>
+      <ReduxProvider>
+        <html lang="en" dir={direction}>
+          <body suppressHydrationWarning={true}>
+            <ThemeProvider theme={{ ...theme, direction }}>
+              <div
+                className={`dark:bg-boxdark-2 dark:text-bodydark ${direction === "rtl" ? "rtl" : "ltr"}`}
+              >
+                {loading ? <Loader /> : children}
+              </div>
+            </ThemeProvider>
+            <ToastContainer
+              position="top-right"
+              autoClose={2000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              toastClassName="custom-toast-container"
+            />
+          </body>
+        </html>
+      </ReduxProvider>
+    </QueryClientProvider>
   );
 };
