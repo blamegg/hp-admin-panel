@@ -15,7 +15,7 @@ const Button = ({ name, onClick, type, className, ...props }: ButtonProps) => {
       onClick={onClick}
       {...props}
       className={twMerge(
-        `bg-companyRed w-[110px] rounded py-[3px] text-[14px] text-white hover:bg-opacity-80`,
+        `w-max rounded bg-companyRed px-4 py-[3px] text-[14px] text-white hover:bg-opacity-80`,
         className,
       )}
     >

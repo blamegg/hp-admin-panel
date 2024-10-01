@@ -8,6 +8,7 @@ import { useDirection } from "@/context/DirectionContext";
 import CreateUserDrawer from "./CreateUserDrawer";
 import Button from "@/components/common/Button";
 import { useQuery } from "@tanstack/react-query";
+import DeleteDrawer from "./DeleteDrawer";
 
 const generateData = (count: number) => {
   return Array.from({ length: count }, (v, i) => ({
@@ -28,7 +29,9 @@ const TableThree = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [UserDrawer, setUserDrawer] = useState(false);
+  const [deleteDrawer, setDeleteDrawer] = useState(false);
   const { direction, toggleDirection } = useDirection();
+  const [selected, setSelected] = useState({});
 
   useEffect(() => {
     const data = generateData(100);
@@ -72,7 +75,23 @@ const TableThree = () => {
       setUserDrawer(open);
     };
 
+  const handleDeleteClick = (row: any) => {
+    setDeleteDrawer(true); // Directly set the delete drawer to open
+    setSelected(row);
+  };
+
+  const toggleDeleteDrawer =
+    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+      setDeleteDrawer(open);
+    };
+
   const columns = [
+    {
+      name: "S No",
+      selector: (row: any) => `${row.id}.`,
+      sortable: true,
+      width: "80px",
+    },
     {
       name: "Name",
       selector: (row: any) => row.name,
@@ -113,7 +132,9 @@ const TableThree = () => {
             <FaEdit />
           </button>
           <button
-            onClick={() => handleDelete(row.id)}
+            onClick={() => {
+              handleDeleteClick(row);
+            }}
             className="text-red-500 hover:text-red-700"
           >
             <FaTrash />
@@ -208,6 +229,14 @@ const TableThree = () => {
         direction={direction}
         isDrawerOpen={UserDrawer}
         toggleDrawer={toggleUserDrawer}
+      />
+      <DeleteDrawer
+        direction={direction}
+        isDrawerOpen={deleteDrawer}
+        toggleDrawer={toggleDeleteDrawer}
+        setDeleteDrawer={setDeleteDrawer}
+        selected={selected}
+        setSelected={setSelected}
       />
     </>
   );

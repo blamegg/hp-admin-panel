@@ -343,9 +343,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         }`}
       >
         {/* <!-- SIDEBAR HEADER --> */}
-        <div className="grid h-[80px] place-items-center">
+        <div className="grid h-[50px] place-items-center">
           <Link href="/dashboard" className="flex items-center gap-4">
-            <Image width={40} height={40} src={logo.src} alt="Logo" priority />
+            <Image width={35} height={35} src={logo.src} alt="Logo" priority />
             <h5 className="text-[20px] font-semibold text-white">
               Hanging Panda
             </h5>

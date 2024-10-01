@@ -16,21 +16,17 @@ const DropdownUser = () => {
         href="#"
       >
         <span className="hidden text-right lg:block">
-          <span className="block text-sm font-medium text-black dark:text-white">
+          <span className="block text-[11px] font-semibold leading-4 text-black dark:text-white">
             Thomas Anree
           </span>
-          <span className="block text-xs">UX Designer</span>
+          <span className="block text-[11px] leading-4">UX Designer</span>
         </span>
 
-        <span className="h-12 w-12 rounded-full">
+        <span className="h-8 w-8 rounded-full">
           <Image
-            width={112}
-            height={112}
+            width={50}
+            height={50}
             src={"/images/user/user-01.png"}
-            style={{
-              width: "auto",
-              height: "auto",
-            }}
             alt="User"
           />
         </span>

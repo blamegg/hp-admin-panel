@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormError from "../common/FormError";
 import Button from "@/components/common/Button";
+import { RxCrossCircled } from "react-icons/rx";
 
 interface UserDrawerProps {
   direction: string;
@@ -91,8 +92,12 @@ const CreateUserDrawer = ({
     >
       <div role="presentation">
         <form onSubmit={handleSubmit(onSubmit)} className="max-h-[500px]">
-          <div className="bg-companyRed flex items-center justify-between p-4 text-white">
+          <div className="flex items-center justify-between bg-companyRed p-4 text-white">
             <h2 className="text-xl font-bold">Create User</h2>
+            <RxCrossCircled
+              className="cursor-pointer text-[30px] font-bold text-white hover:rounded-full"
+              onClick={toggleDrawer(false)}
+            />
           </div>
           <div className="mb-[70px] mt-[100px] px-4 text-center sm:mb-[20px]">
             <div className="relative z-30 mx-auto -mt-22 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
@@ -146,7 +151,7 @@ const CreateUserDrawer = ({
             </div>
           </div>
           <div className="px-7 pb-7">
-            <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 ">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
               <div>
                 <Input
                   label="First Name"
@@ -253,7 +258,9 @@ const CreateUserDrawer = ({
               </div>
             </div>
           </div>
-          <Button name="Create User" type="submit" className="mx-7" />
+          <div className="grid place-items-center">
+            <Button name="Submit" type="submit" className="mx-7" />
+          </div>
         </form>
       </div>
     </Drawer>
