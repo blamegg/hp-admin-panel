@@ -11,6 +11,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormError from "../common/FormError";
 import Button from "@/components/common/Button";
 import { RxCrossCircled } from "react-icons/rx";
+import { usercover } from "@/assets";
+import Basic from "./UserTab/Basic";
+import Company from "./UserTab/Company";
+import Personalization from "./UserTab/Personalization";
+import { useSelector } from "react-redux";
 
 interface UserDrawerProps {
   direction: string;
@@ -41,6 +46,8 @@ const CreateUserDrawer = ({
   toggleDrawer,
 }: UserDrawerProps) => {
   const [profile, setProfile] = useState<string>("/images/user/user-06.png");
+  const [selectedTab, setSelectedTab] = useState("Basic");
+  const color = useSelector((state) => state?.app?.color);
 
   const {
     register,
@@ -78,6 +85,12 @@ const CreateUserDrawer = ({
     reset();
   };
 
+  const renderTab = {
+    Basic: <Basic />,
+    Company: <Company />,
+    Personalization: <Personalization />,
+  };
+
   return (
     <Drawer
       anchor={direction === "ltr" ? "right" : "left"}
@@ -92,14 +105,28 @@ const CreateUserDrawer = ({
     >
       <div role="presentation">
         <form onSubmit={handleSubmit(onSubmit)} className="max-h-[500px]">
-          <div className="flex items-center justify-between bg-companyRed p-4 text-white">
+          <div
+            className="flex items-center justify-between p-4 text-white"
+            style={{
+              background: color,
+            }}
+          >
             <h2 className="text-xl font-bold">Create User</h2>
             <RxCrossCircled
               className="cursor-pointer text-[30px] font-bold text-white hover:rounded-full"
               onClick={toggleDrawer(false)}
             />
           </div>
-          <div className="mb-[70px] mt-[100px] px-4 text-center sm:mb-[20px]">
+
+          <div
+            className="mb-[70px] mt-[88px] px-4 text-center sm:mb-[20px]"
+            style={{
+              backgroundImage: `url(${usercover.src})`,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
             <div className="relative z-30 mx-auto -mt-22 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
               <div className="relative h-[160px] w-[160px] rounded-full drop-shadow-2">
                 <Image
@@ -150,116 +177,32 @@ const CreateUserDrawer = ({
               </div>
             </div>
           </div>
-          <div className="px-7 pb-7">
-            <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
-              <div>
-                <Input
-                  label="First Name"
-                  type="text"
-                  placeholder="John"
-                  register={register("firstName")}
-                  error={errors.firstName?.message}
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Last Name"
-                  type="text"
-                  placeholder="Doe"
-                  register={register("lastName")}
-                  error={errors.lastName?.message}
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Username"
-                  type="text"
-                  placeholder="johndoe123"
-                  register={register("username")}
-                  error={errors.username?.message}
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Email"
-                  type="email"
-                  placeholder="example@example.com"
-                  register={register("email")}
-                  error={errors.email?.message}
-                />
-              </div>
-              <div>
-                <Input
-                  label="Password"
-                  type="password"
-                  placeholder="••••••••"
-                  register={register("password")}
-                  error={errors.password?.message}
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Phone Number"
-                  type="number"
-                  placeholder="+1234567890"
-                  register={register("phoneNumber")}
-                  error={errors.phoneNumber?.message}
-                />
-              </div>
-
-              <div>
-                <label
-                  className="block text-sm font-medium text-black dark:text-white"
-                  htmlFor="direction"
+          <div className="mb-4 grid place-items-center">
+            <div className="flex">
+              {["Basic", "Company", "Personalization"].map((e, i) => (
+                <div
+                  key={i}
+                  className={`cursor-pointer border-4 border-red px-5 py-1 text-[18px]  ${selectedTab === e ? "bg-companyRed  font-semibold text-white" : "font-medium"}`}
+                  onClick={() => {
+                    setSelectedTab(e);
+                  }}
                 >
-                  Direction Preference
-                </label>
-                <select
-                  className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
-                  id="direction"
-                  {...register("direction")}
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Select Direction
-                  </option>
-                  <option value="ltr">Left to Right (LTR)</option>
-                  <option value="rtl">Right to Left (RTL)</option>
-                </select>
-                <FormError error={errors?.direction?.message} />
-              </div>
-
-              <div>
-                <label
-                  className="block text-sm font-medium text-black dark:text-white"
-                  htmlFor="notifications"
-                >
-                  Notifications
-                </label>
-                <select
-                  className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
-                  id="notifications"
-                  {...register("notifications")}
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Select Notification
-                  </option>
-                  <option value="email">Email</option>
-                  <option value="sms">SMS</option>
-                  <option value="push">Push Notifications</option>
-                  <option value="none">No Notifications</option>
-                </select>
-                <FormError error={errors?.notifications?.message} />
-              </div>
+                  {e}
+                </div>
+              ))}
             </div>
           </div>
-          <div className="grid place-items-center">
-            <Button name="Submit" type="submit" className="mx-7" />
+          <div className="mt-10 px-10">{renderTab[selectedTab]}</div>
+
+          <div className="mt-10 grid place-items-center">
+            <Button
+              name="Submit"
+              type="submit"
+              className="mx-7 px-18 py-2 text-[16px]"
+              onClick={() => {
+                toast.success("Created user successfully");
+              }}
+            />
           </div>
         </form>
       </div>

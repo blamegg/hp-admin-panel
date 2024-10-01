@@ -5,7 +5,7 @@ interface InputProps {
   label: string;
   placeholder: string;
   type: "text" | "email" | "number" | "password";
-  register: any;
+  register?: any;
   error?: string;
 }
 

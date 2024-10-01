@@ -52,17 +52,20 @@ const DeleteDrawer = ({
         </div>
 
         <div className="mt-[50px] flex flex-col items-center justify-center px-7 pb-7">
-          <div className="rounded-full border-[3px] border-red p-2">
-            <AiOutlineDelete className="text-red-600 text-[50px]" />{" "}
+          <div className="rounded-full border-[3px] border-black bg-[#FCFCFC] p-2">
+            <AiOutlineDelete className="text-red-600 text-[50px] text-companyRed" />{" "}
           </div>
           {/* Delete Icon */}
-          <h3 className="mt-4 text-center text-xl font-semibold">
+          <h2 className="mt-2 text-xl font-semibold">
+            You are about to delete a user
+          </h2>
+          <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
             Are you sure you want to delete {selected?.name} user?
           </h3>
-          <div className="mt-6 flex items-center gap-7">
+          <div className="mt-6 flex w-full items-center justify-center gap-7">
             <Button
               type="button"
-              name="Confirm Delete"
+              name="Confirm"
               className="bg-green-500"
               onClick={handleDelete}
             />
