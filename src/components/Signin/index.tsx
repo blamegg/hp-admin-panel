@@ -56,7 +56,7 @@ export const Signin = () => {
                   Hanging Panda
                 </h2>
                 <h2 className="mt-1 text-center text-[18px] font-semibold text-white dark:text-black">
-                  Sign In
+                  Sign In...
                 </h2>
               </div>
               <form onSubmit={handleSubmit}>
