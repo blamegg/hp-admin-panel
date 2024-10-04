@@ -13,6 +13,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "react-toastify/dist/ReactToastify.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReduxProvider } from "@/provider/ReduxProvider";
+import { Toaster } from "sonner";
+import BottomStrip from "@/components/BottomStrip";
 
 export default function RootLayout({
   children,
@@ -67,6 +69,7 @@ const InnerRootLayout = ({
               pauseOnHover
               toastClassName="custom-toast-container"
             />
+            <Toaster position="top-center" richColors />
           </body>
         </html>
       </ReduxProvider>

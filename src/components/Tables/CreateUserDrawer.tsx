@@ -23,6 +23,12 @@ interface UserDrawerProps {
   isDrawerOpen: boolean;
 }
 
+interface RenderTabProps {
+  Basic: React.JSX.Element;
+  Company: React.JSX.Element;
+  Personalization: React.JSX.Element;
+}
+
 const userSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -46,8 +52,8 @@ const CreateUserDrawer = ({
   toggleDrawer,
 }: UserDrawerProps) => {
   const [profile, setProfile] = useState<string>("/images/user/user-06.png");
-  const [selectedTab, setSelectedTab] = useState("Basic");
-  const color = useSelector((state) => state?.app?.color);
+  const [selectedTab, setSelectedTab] = useState<keyof RenderTabProps>("Basic");
+  const color = useSelector((state: any) => state?.app?.color);
 
   const {
     register,
@@ -85,7 +91,7 @@ const CreateUserDrawer = ({
     reset();
   };
 
-  const renderTab = {
+  const renderTab: RenderTabProps = {
     Basic: <Basic />,
     Company: <Company />,
     Personalization: <Personalization />,
@@ -177,12 +183,16 @@ const CreateUserDrawer = ({
               </div>
             </div>
           </div>
-          <div className="mb-4 grid place-items-center">
+          <div className="mb-4 ms-10 flex">
             <div className="flex">
-              {["Basic", "Company", "Personalization"].map((e, i) => (
+              {["Basic", "Company", "Personalization"].map((e: any, i) => (
                 <div
                   key={i}
-                  className={`cursor-pointer border-4 border-red px-5 py-1 text-[18px]  ${selectedTab === e ? "bg-companyRed  font-semibold text-white" : "font-medium"}`}
+                  className={`cursor-pointer border-x-2 border-b-2  px-5 py-1 text-[16px] font-medium transition-all duration-200 ease-in-out ${
+                    selectedTab === e
+                      ? "border-t-2 border-b-white bg-white text-black"
+                      : "border-l-0 border-r-0 border-t-0"
+                  }`}
                   onClick={() => {
                     setSelectedTab(e);
                   }}
@@ -191,7 +201,9 @@ const CreateUserDrawer = ({
                 </div>
               ))}
             </div>
+            <div className="w-full border-b-2 border-black"></div>
           </div>
+
           <div className="mt-10 px-10">{renderTab[selectedTab]}</div>
 
           <div className="mt-10 grid place-items-center">

@@ -1,6 +1,6 @@
+import { RootState } from "@/redux/store";
 import React from "react";
 import { useSelector } from "react-redux";
-// import { RootState } from "@/store"; // Import the root state type
 import { twMerge } from "tailwind-merge";
 
 interface ButtonProps {
@@ -12,7 +12,7 @@ interface ButtonProps {
 
 const Button = ({ name, onClick, type, className, ...props }: ButtonProps) => {
   // Access the color from the Redux state
-  const color = useSelector((state) => state?.app?.color);
+  const color = useSelector((state: RootState) => state?.app?.color);
   console.log(color, "color");
 
   return (

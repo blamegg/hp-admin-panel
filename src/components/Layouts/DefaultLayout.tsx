@@ -3,6 +3,7 @@ import React, { useState, ReactNode } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { useDirection } from "@/context/DirectionContext";
+import BottomStrip from "../BottomStrip";
 
 export default function DefaultLayout({
   children,
@@ -32,6 +33,7 @@ export default function DefaultLayout({
             <div className="mx-auto max-w-screen-2xl px-4 py-2 md:px-6 md:py-3 2xl:px-10 2xl:py-4">
               {children}
             </div>
+            <BottomStrip />
           </main>
           {/* <!-- ===== Main Content End ===== --> */}
         </div>

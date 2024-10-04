@@ -1,14 +1,16 @@
 "use client";
+import { FaRegQuestionCircle } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import CustomPagination from "@/components/CustomPagination";
-import { Drawer } from "@mui/material";
+import { Drawer, Tooltip } from "@mui/material";
 import { useDirection } from "@/context/DirectionContext";
 import CreateUserDrawer from "./CreateUserDrawer";
 import Button from "@/components/common/Button";
 import { useQuery } from "@tanstack/react-query";
 import DeleteDrawer from "./DeleteDrawer";
+import { toast } from "sonner";
 
 const generateData = (count: number) => {
   return Array.from({ length: count }, (v, i) => ({
@@ -30,8 +32,8 @@ const TableThree = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [UserDrawer, setUserDrawer] = useState(false);
   const [deleteDrawer, setDeleteDrawer] = useState(false);
-  const { direction, toggleDirection } = useDirection();
   const [selected, setSelected] = useState({});
+  const { direction, toggleDirection } = useDirection();
 
   useEffect(() => {
     const data = generateData(100);
@@ -88,7 +90,7 @@ const TableThree = () => {
   const columns = [
     {
       name: "S No",
-      selector: (row: any) => `${row.id}.`,
+      selector: (row: any) => `${row.id}`,
       sortable: true,
       width: "80px",
     },
@@ -160,6 +162,47 @@ const TableThree = () => {
             name="Create User"
             type="submit"
             onClick={toggleUserDrawer(true)}
+          />
+
+          <Tooltip
+            title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
+            arrow
+          >
+            <button>
+              <FaRegQuestionCircle />
+            </button>
+          </Tooltip>
+        </div>
+        <h1 className="mb-2 mt-5 block text-sm font-medium text-black dark:text-white">
+          Type of notification
+        </h1>
+        <div className="space-x-4">
+          <Button
+            name="Success Notification"
+            type="submit"
+            onClick={() =>
+              toast.success("new notification", {
+                duration: 2000,
+              })
+            }
+          />
+          <Button
+            name="Error Notification"
+            type="submit"
+            onClick={() =>
+              toast.error("new notification", {
+                duration: 2000,
+              })
+            }
+          />
+          <Button
+            name="Info Notification"
+            type="submit"
+            onClick={() =>
+              toast.info("new notification", {
+                duration: 2000,
+              })
+            }
           />
         </div>
         <div className="mt-5 overflow-x-auto">
