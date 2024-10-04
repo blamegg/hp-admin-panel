@@ -11,9 +11,7 @@ interface ButtonProps {
 }
 
 const Button = ({ name, onClick, type, className, ...props }: ButtonProps) => {
-  // Access the color from the Redux state
   const color = useSelector((state: RootState) => state?.app?.color);
-  console.log(color, "color");
 
   return (
     <button

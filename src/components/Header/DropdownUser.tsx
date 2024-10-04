@@ -5,7 +5,7 @@ import ClickOutside from "@/components/ClickOutside";
 import { useDirection } from "@/context/DirectionContext";
 
 const DropdownUser = () => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const { direction, toggleDirection } = useDirection();
 
   return (
@@ -126,7 +126,10 @@ const DropdownUser = () => {
               </Link>
             </li>
           </ul>
-          <button className="flex items-center gap-3.5 px-3 py-2 text-[14px] font-medium duration-300 ease-in-out hover:text-primary">
+          <Link
+            href="/"
+            className="flex items-center gap-3.5 px-3 py-2 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+          >
             <svg
               className="fill-current"
               width="22"
@@ -145,7 +148,7 @@ const DropdownUser = () => {
               />
             </svg>
             Log Out
-          </button>
+          </Link>
         </div>
       )}
       {/* <!-- Dropdown End --> */}
