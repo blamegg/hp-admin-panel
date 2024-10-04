@@ -11,15 +11,15 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
-export const Signin = () => {
+export const EmailVerify = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
-  const handleTogglePassword = () => {
-    setShowPassword((prev) => !prev);
+  const handleToggleConfirmPassword = () => {
+    setShowConfirmPassword((prev) => !prev);
   };
 
   const handleRememberMeChange = (event: {
@@ -30,12 +30,14 @@ export const Signin = () => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+
+    console.log("Form submitted");
     router.push("/dashboard");
   };
 
   return (
     <div
-      className=" relative flex h-[100vh] flex-col items-center justify-center pb-0 pt-8"
+      className="relative flex h-[100vh] flex-col items-center justify-center pb-0 pt-8"
       style={{
         backgroundImage: `url(${signingBg.src})`,
         backgroundRepeat: "no-repeat",
@@ -46,7 +48,7 @@ export const Signin = () => {
       <div className="absolute inset-0 bg-black opacity-50"></div>
 
       <div className="relative z-10 flex flex-col items-center justify-center rounded-xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark xl:w-[25%]">
-        <div className="w-full px-4  pb-2 pt-4">
+        <div className="w-full px-4 pb-2 pt-4">
           <div className="absolute top-[-59px] w-[90%] rounded-xl bg-[#1976D2] py-3">
             <div className="grid place-items-center">
               <Image src={logo.src} alt="company" width={40} height={40} />
@@ -60,29 +62,10 @@ export const Signin = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="mt-20">
-            <div className="mb-4">
-              <TextField
-                label="Email"
-                type="email"
-                size="small"
-                placeholder="Enter your email"
-                variant="outlined"
-                fullWidth
-                InputProps={{
-                  classes: {
-                    root: "bg-transparent border-stroke dark:border-form-strokedark dark:bg-form-input dark:text-white",
-                    focused: "border-primary",
-                  },
-                }}
-                InputLabelProps={{
-                  className: "font-medium text-black dark:text-white",
-                }}
-              />
-            </div>
             <div className="relative mb-6">
               <TextField
-                label="Password"
-                type={showPassword ? "text" : "password"}
+                label="Email"
+                type={showConfirmPassword ? "text" : "password"}
                 size="small"
                 placeholder="6+ Characters, 1 Capital letter"
                 variant="outlined"
@@ -93,8 +76,11 @@ export const Signin = () => {
                     focused: "border-primary",
                   },
                   endAdornment: (
-                    <IconButton onClick={handleTogglePassword} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    <IconButton
+                      onClick={handleToggleConfirmPassword}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   ),
                 }}
@@ -103,28 +89,19 @@ export const Signin = () => {
                 }}
               />
             </div>
-            <div className="title-sm  flex flex-row items-center justify-center pb-3 pt-0">
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={rememberMe}
-                    onChange={handleRememberMeChange}
-                    color="primary"
-                  />
-                }
-                label="Remember Me"
-                className=""
-              />
 
-              <div>
-                <Link
-                  href="/forgotPassword"
-                  className=" text-sm font-medium   text-blue-500"
-                >
-                  Forgot Password
-                </Link>
-              </div>
-            </div>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={rememberMe}
+                  onChange={handleRememberMeChange}
+                  color="primary"
+                />
+              }
+              label="Remember Me"
+              className="mb-5"
+            />
+
             <div className="mb-5">
               <Button
                 type="submit"
@@ -145,4 +122,4 @@ export const Signin = () => {
   );
 };
 
-export default Signin;
+export default EmailVerify;
