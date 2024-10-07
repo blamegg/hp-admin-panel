@@ -4,11 +4,10 @@ import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import CustomPagination from "@/components/CustomPagination";
-import { Drawer, Tooltip } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import { useDirection } from "@/context/DirectionContext";
 import CreateUserDrawer from "./CreateUserDrawer";
 import Button from "@/components/common/Button";
-import { useQuery } from "@tanstack/react-query";
 import DeleteDrawer from "./DeleteDrawer";
 import { toast } from "sonner";
 
@@ -17,9 +16,9 @@ const generateData = (count: number) => {
     id: i + 1,
     name: `Item ${i + 1}`,
     description: `description of ${i + 1}`,
-    email: `item${i + 1}@example.com`, // Generating email addresses
-    dateCreated: new Date().toLocaleDateString(), // Adding date created
-    status: i % 2 === 0 ? "Active" : "Inactive", // Adding status field
+    email: `item${i + 1}@example.com`,
+    dateCreated: new Date().toLocaleDateString(),
+    status: i % 2 === 0 ? "Active" : "Inactive",
   }));
 };
 
@@ -28,12 +27,12 @@ const TableThree = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchBasis, setSearchBasis] = useState("name");
   const [UserDrawer, setUserDrawer] = useState(false);
   const [deleteDrawer, setDeleteDrawer] = useState(false);
   const [selected, setSelected] = useState({});
-  const { direction, toggleDirection } = useDirection();
+  const { direction } = useDirection();
 
   useEffect(() => {
     const data = generateData(100);
@@ -57,30 +56,19 @@ const TableThree = () => {
     setCurrentPage(1);
   };
 
-  const handleEdit = (id: number) => {
-    console.log(`Edit item with ID: ${id}`);
-    // Add your edit logic here
+  const handleDeleteClick = (row: any) => {
+    setDeleteDrawer(true);
+    setSelected(row);
   };
 
-  const handleDelete = (id: number) => {
-    console.log(`Delete item with ID: ${id}`);
-    // Add your delete logic here
-  };
-
-  // Filter the mockData based on the search query
-  const filteredData = mockData.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredData = mockData.filter((item) => {
+    return item[searchBasis].toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   const toggleUserDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
       setUserDrawer(open);
     };
-
-  const handleDeleteClick = (row: any) => {
-    setDeleteDrawer(true); // Directly set the delete drawer to open
-    setSelected(row);
-  };
 
   const toggleDeleteDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -128,15 +116,13 @@ const TableThree = () => {
       cell: (row: any) => (
         <div className="flex gap-2">
           <button
-            onClick={() => handleEdit(row.id)}
+            onClick={() => console.log(`Edit item with ID: ${row.id}`)}
             className="text-blue-500 hover:text-blue-700"
           >
             <FaEdit />
           </button>
           <button
-            onClick={() => {
-              handleDeleteClick(row);
-            }}
+            onClick={() => handleDeleteClick(row)}
             className="text-red-500 hover:text-red-700"
           >
             <FaTrash />
@@ -151,19 +137,27 @@ const TableThree = () => {
     <>
       <div className="custom_tbl_container h-[90vh] max-w-[800px] md:max-w-full">
         <div className="flex items-center gap-4">
+          <select
+            value={searchBasis}
+            onChange={(e) => setSearchBasis(e.target.value)}
+            className="rounded border px-1 py-2 text-[12px] text-black outline-none"
+          >
+            <option value="name">Name</option>
+            <option value="email">Email</option>
+            {/* <option value="date">Date</option> */}
+          </select>
           <input
             type="text"
-            placeholder="Search by name..."
+            placeholder={`Search by ${searchBasis}...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className=" rounded border p-1 text-[12px] text-black outline-none"
+            className="rounded border p-1 text-[12px] text-black outline-none"
           />
           <Button
             name="Create User"
             type="submit"
             onClick={toggleUserDrawer(true)}
           />
-
           <Tooltip
             title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
             arrow
@@ -181,28 +175,18 @@ const TableThree = () => {
             name="Success Notification"
             type="submit"
             onClick={() =>
-              toast.success("new notification", {
-                duration: 2000,
-              })
+              toast.success("new notification", { duration: 2000 })
             }
           />
           <Button
             name="Error Notification"
             type="submit"
-            onClick={() =>
-              toast.error("new notification", {
-                duration: 2000,
-              })
-            }
+            onClick={() => toast.error("new notification", { duration: 2000 })}
           />
           <Button
             name="Info Notification"
             type="submit"
-            onClick={() =>
-              toast.info("new notification", {
-                duration: 2000,
-              })
-            }
+            onClick={() => toast.info("new notification", { duration: 2000 })}
           />
         </div>
         <div className="mt-5 overflow-x-auto">
@@ -225,7 +209,6 @@ const TableThree = () => {
               />
             )}
             className="custom_tbl"
-            progressPending={isLoading}
             customStyles={{
               header: {
                 style: {
@@ -250,7 +233,6 @@ const TableThree = () => {
                   fontWeight: 500,
                   wordBreak: "break-word",
                   overflowWrap: "break-word",
-
                   height: "27px",
                 },
               },
