@@ -46,6 +46,7 @@ export const Signin = () => {
       <div className="absolute inset-0 bg-black opacity-50"></div>
 
       <div className="relative z-10 flex flex-col items-center justify-center rounded-xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark xl:w-[25%]">
+      
         <div className="w-full px-4  pb-2 pt-4">
           <div className="absolute top-[-59px] w-[90%] rounded-xl bg-[#1976D2] py-3">
             <div className="grid place-items-center">
@@ -103,7 +104,7 @@ export const Signin = () => {
                 }}
               />
             </div>
-            <div className="title-sm  flex flex-row items-center justify-center pb-3 pt-0">
+            <div className="title-sm  flex flex-row items-center justify-between pb-3 pt-0">
               <FormControlLabel
                 control={
                   <Switch
@@ -119,7 +120,7 @@ export const Signin = () => {
               <div>
                 <Link
                   href="/forgotPassword"
-                  className=" text-sm font-medium   text-blue-500"
+                  className=" text-base font-medium   text-blue-500"
                 >
                   Forgot Password
                 </Link>
@@ -138,7 +139,7 @@ export const Signin = () => {
         </div>
       </div>
 
-      <p className="relative z-10 mt-6 text-[14px] font-semibold text-white">
+      <p className="absolute bottom-2 left-0 z-10 w-full text-center text-[14px] font-semibold text-white">
         ©️ 2024, made by Hanging Panda for a better web
       </p>
     </div>
