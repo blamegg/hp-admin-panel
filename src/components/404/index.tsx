@@ -1,8 +1,7 @@
 "use client";
 import { customError, signingBg } from "@/assets";
 import { Button } from "@mui/material";
-// import "../../css/satoshi.css";
-// import Image from "next/image";
+
 
 export const CustomPage = () => {
   return (
@@ -10,7 +9,7 @@ export const CustomPage = () => {
       <div className="relative flex h-[100vh] flex-col items-center justify-center border bg-[#f1f5f9] pb-0 pt-8 ">
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="justify-cente flex flex-col items-center">
-          {/* <Image src={customError.src} alt="company" width={300} height={200} /> */}
+          
           <div className="text-medium  text-base font-medium text-green-950">
             404
           </div>
