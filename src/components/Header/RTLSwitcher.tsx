@@ -1,10 +1,11 @@
 "use client";
 import { useDirection } from "@/context/DirectionContext";
+import { twMerge } from "tailwind-merge";
 import { useState } from "react";
 
 const RTLSwitcher = () => {
   const { direction, toggleDirection } = useDirection();
-  const [isChecked, setIsChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(direction === "rtl");
 
   const handleToggle = () => {
     setIsChecked(!isChecked);
@@ -12,29 +13,33 @@ const RTLSwitcher = () => {
   };
 
   return (
-    <>
-      <label className="custom-switch relative flex w-max cursor-pointer select-none items-center">
+    <li>
+      <label
+        className={`relative m-0 block h-7.5 w-20 rounded-full ${
+          isChecked ? "bg-primary" : "bg-stroke"
+        }`}
+      >
         <input
           type="checkbox"
           checked={isChecked}
           onChange={handleToggle}
-          className="h-7 w-14 cursor-pointer appearance-none rounded-full bg-red transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
+          className="dur absolute top-0 z-50 m-0 h-full w-full cursor-pointer opacity-0"
         />
-        <span className="absolute right-1 text-xs font-medium uppercase text-white">
-          {" "}
-          LTR
-        </span>
-        <span className="absolute right-8 text-xs font-medium uppercase text-white">
-          {" "}
-          RTL
-        </span>
         <span
-          className={`absolute right-7 h-7 w-7 transform rounded-full bg-graydark transition-transform ${
-            isChecked ? "translate-x-7" : "translate-x-0"
-          }`}
-        />
+          className={twMerge(
+            `absolute left-[3px] top-1/2 flex h-6 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-switcher duration-75 ease-linear ${
+              isChecked && "!right-[45px] !translate-x-full"
+            }`,
+          )}
+        >
+          {isChecked ? (
+            <span className="text-xs font-medium text-primary">RTL</span>
+          ) : (
+            <span className="text-xs font-medium text-primary">LTR</span>
+          )}
+        </span>
       </label>
-    </>
+    </li>
   );
 };
 

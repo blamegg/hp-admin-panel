@@ -7,6 +7,10 @@ import Button from "@/components/common/Button"; // Assuming you have a common B
 import { ImSpinner2 } from "react-icons/im"; // Import a spinner icon for loading
 import { FaCheckCircle } from "react-icons/fa";
 import { useDirection } from "@/context/DirectionContext";
+import ModalHeader from "../common/ModalHeader";
+import MessageBox from "../Message/MessageBox";
+import Message from "../Message";
+import WriteMessage from "../Message/WriteMessage";
 
 interface UserDrawerProps {
   toggleDrawer: any;
@@ -32,13 +36,12 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
       }}
     >
       <div role="presentation">
-        {/* Drawer Header */}
-        <div className="flex items-center justify-between bg-companyRed p-4 text-white">
-          <h2 className="text-xl font-bold">Messages</h2>
-          <RxCrossCircled
-            className="cursor-pointer text-[30px] font-bold text-white hover:rounded-full"
-            onClick={handleCloseDrawer}
-          />
+        <div>
+          <ModalHeader text="Messages" toggleDrawer={toggleDrawer} />
+          <div>
+            <Message />
+          </div>
+          <WriteMessage />
         </div>
       </div>
     </Drawer>

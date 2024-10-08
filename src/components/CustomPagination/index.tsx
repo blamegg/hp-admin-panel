@@ -23,6 +23,11 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
     onChangePage(page);
   };
 
+  const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newRowsPerPage = parseInt(e.target.value, 10);
+    onChangeRowsPerPage(newRowsPerPage);
+  };
+
   const renderPaginationItems = () => {
     const items = [];
     const maxVisiblePages = 5;
@@ -95,10 +100,20 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
 
   return (
     <div className="my-4 flex flex-col items-center justify-between text-[12px] font-medium md:flex-row">
-      <div className="text-gray-600 mb-2 text-[12px] font-medium md:mb-0 ">
+      <div className="text-gray-600 mb-2 text-[12px] font-medium md:mb-0">
         {`Showing ${startEntry} to ${endEntry} of ${rowCount} entries`}
       </div>
-      <div className="flex space-x-2">
+      <div className="flex items-center space-x-2">
+        <select
+          value={rowsPerPage}
+          onChange={handleRowsPerPageChange}
+          className="rounded-md border px-2 py-1 text-[12px]"
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+        </select>
         <button
           className={`rounded-md border px-2 py-0 ${
             currentPage === 1 ? "bg-gray-300" : "hover:bg-gray-200"
