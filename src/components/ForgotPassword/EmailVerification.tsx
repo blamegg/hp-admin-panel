@@ -6,7 +6,11 @@ import { TextField, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 import ResetPassword from "./ResetPassword";
 
-export const EmailVerification = ({ email }) => {
+interface EmailVerificationProps {
+  email: string;
+}
+
+export const EmailVerification = ({ email }: EmailVerificationProps) => {
   const [otp, setOtp] = useState<string>("");
   const [error, setError] = useState<string>("");
 
