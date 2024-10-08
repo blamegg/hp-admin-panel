@@ -6,71 +6,85 @@ import { TextField, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 import ResetPassword from "./ResetPassword";
 
-export const OtpVerification = () => {
+export const EmailVerification = ({ email }) => {
   const [otp, setOtp] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
   const [showSignIn, setShowSignIn] = useState(true);
+  const [state, setState] = useState({
+    logoVisible: true,
+    heading: "Hanging Panda",
+    subHeading: "Email Verification",
+  });
   const router = useRouter();
 
   const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOtp(e.target.value);
+    const value = e.target.value.replace(/\D/g, "");
+    setOtp(value.substring(0, 6));
+
+    if (value.length < 6) {
+      setError("OTP must be exactly 6 digits.");
+    } else {
+      setError("");
+    }
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    console.log("OTP submitted:", otp);
 
-    // API call or OTP verification logic
-    router.push("/dashboard");
+    if (otp.length !== 6) {
+      setError("OTP must be exactly 6 digits.");
+    } else {
+      setError("");
+      console.log("OTP submitted:", otp);
+      router.push("/dashboard");
+    }
   };
 
   const handleSignInClick = () => {
     setShowSignIn(false);
   };
+
   return (
     <div className="mb-0 w-full !px-4 !pb-0">
       {showSignIn ? (
         <>
           <div className="absolute top-[-59px] w-[90%] rounded-xl bg-[#1976D2] py-3">
             <div className="grid place-items-center">
-              <Image src={logo.src} alt="company" width={40} height={40} />
+              {state.logoVisible && (
+                <Image src={logo.src} alt="company" width={40} height={40} />
+              )}
             </div>
+
             <h2 className="mt-1 text-center text-[18px] font-semibold text-white dark:text-black">
-              Hanging Panda
+              {state.heading}
             </h2>
+
             <h2 className="mt-1 text-center text-[18px] font-semibold text-white dark:text-black">
-              OTP Verification
+              {state.subHeading}
             </h2>
           </div>
-
           <form onSubmit={handleSubmit} className="mt-20">
             <div className="relative mb-6">
-              <div className="mb-5 flex items-center justify-center">
-                <p className="text-sm font-medium text-black">
-                  We sent a code to{" "}
-                  <span className="font-semibold text-primary">
-                    user@gmail.com
-                  </span>
-                </p>
+              <p className="mb-5 text-sm font-medium text-black">
+                We sent a code to{" "}
+                <span className="font-semibold text-primary">{email}</span>
+              </p>
+
+              <div>
+                <TextField
+                  label="Enter OTP"
+                  value={otp}
+                  onChange={handleOtpChange}
+                  type="text"
+                  size="small"
+                  placeholder="Enter 6-digit OTP"
+                  variant="outlined"
+                  fullWidth
+                  error={!!error}
+                  helperText={error}
+                />
               </div>
-              <TextField
-                label="Enter OTP"
-                value={otp}
-                onChange={handleOtpChange}
-                type="text"
-                size="small"
-                placeholder="Enter 6-digit OTP"
-                variant="outlined"
-                fullWidth
-                InputProps={{
-                  classes: {
-                    root: "bg-transparent border-stroke dark:border-form-strokedark dark:bg-form-input dark:text-white",
-                    focused: "border-primary",
-                  },
-                }}
-                InputLabelProps={{
-                  className: "font-medium text-black dark:text-white",
-                }}
-              />
             </div>
 
             <div className="mb-5">
@@ -92,4 +106,4 @@ export const OtpVerification = () => {
   );
 };
 
-export default OtpVerification;
+export default EmailVerification;
