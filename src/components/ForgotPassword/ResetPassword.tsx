@@ -3,8 +3,9 @@ import { logo } from "@/assets";
 import Image from "next/image";
 import React, { FormEvent, useState } from "react";
 import { TextField, Button, IconButton } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Visibility, VisibilityOff, CheckCircle } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
+import { FaCheck } from "react-icons/fa";
 
 export const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,6 +13,7 @@ export const ResetPassword = () => {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<boolean>(false);
   const [state, setState] = useState({
     logoVisible: true,
     heading: "Hanging Panda",
@@ -31,6 +33,7 @@ export const ResetPassword = () => {
     e.preventDefault();
 
     setError("");
+    setSuccess(false);
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
@@ -42,8 +45,10 @@ export const ResetPassword = () => {
       return;
     }
 
-    console.log("Form submitted with Password:", password);
-    router.push("/dashboard");
+    setSuccess(true);
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 2000);
   };
 
   return (
@@ -63,7 +68,8 @@ export const ResetPassword = () => {
           {state.subHeading}
         </h2>
       </div>
-      <form onSubmit={handleSubmit} className="mt-20 ">
+
+      <form onSubmit={handleSubmit} className="mt-20">
         <div className="relative mb-6">
           <TextField
             label="Password"
@@ -75,18 +81,11 @@ export const ResetPassword = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             InputProps={{
-              classes: {
-                root: "bg-transparent border-stroke dark:border-form-strokedark dark:bg-form-input dark:text-white",
-                focused: "border-primary",
-              },
               endAdornment: (
                 <IconButton onClick={handleTogglePassword} edge="end">
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               ),
-            }}
-            InputLabelProps={{
-              className: "font-medium text-black dark:text-white",
             }}
             error={!!error}
             helperText={error && password !== "" ? error : ""}
@@ -104,18 +103,11 @@ export const ResetPassword = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             InputProps={{
-              classes: {
-                root: "bg-transparent border-stroke dark:border-form-strokedark dark:bg-form-input dark:text-white",
-                focused: "border-primary",
-              },
               endAdornment: (
                 <IconButton onClick={handleToggleConfirmPassword} edge="end">
                   {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               ),
-            }}
-            InputLabelProps={{
-              className: "font-medium text-black dark:text-white",
             }}
             error={!!error && confirmPassword !== ""}
             helperText={error && confirmPassword !== "" ? error : ""}
@@ -131,6 +123,18 @@ export const ResetPassword = () => {
             Confirm Password
           </Button>
         </div>
+
+        {success && (
+          <div className="flex items-center justify-center space-x-2 rounded-lg p-4 shadow-lg">
+            <span className="rounded-full bg-green-500 p-[5px] text-[15px] text-white">
+              <FaCheck />
+            </span>
+
+            <span className="text-lg font-semibold text-green-700">
+              Password changed successfully! Redirecting...
+            </span>
+          </div>
+        )}
       </form>
     </div>
   );

@@ -14,7 +14,7 @@ export const EmailVerification = ({ email }) => {
   const [state, setState] = useState({
     logoVisible: true,
     heading: "Hanging Panda",
-    subHeading: "Email Verification",
+    subHeading: "OTP Verification",
   });
   const router = useRouter();
 
