@@ -144,7 +144,6 @@ const TableThree = () => {
           >
             <option value="name">Name</option>
             <option value="email">Email</option>
-            {/* <option value="date">Date</option> */}
           </select>
           <input
             type="text"
@@ -167,28 +166,7 @@ const TableThree = () => {
             </button>
           </Tooltip>
         </div>
-        <h1 className="mb-2 mt-5 block text-sm font-medium text-black dark:text-white">
-          Type of notification
-        </h1>
-        <div className="space-x-4">
-          <Button
-            name="Success Notification"
-            type="submit"
-            onClick={() =>
-              toast.success("new notification", { duration: 2000 })
-            }
-          />
-          <Button
-            name="Error Notification"
-            type="submit"
-            onClick={() => toast.error("new notification", { duration: 2000 })}
-          />
-          <Button
-            name="Info Notification"
-            type="submit"
-            onClick={() => toast.info("new notification", { duration: 2000 })}
-          />
-        </div>
+
         <div className="mt-5 overflow-x-auto">
           <DataTable
             columns={columns}

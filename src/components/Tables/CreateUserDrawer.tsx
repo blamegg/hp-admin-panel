@@ -16,6 +16,7 @@ import Basic from "./UserTab/Basic";
 import Company from "./UserTab/Company";
 import Personalization from "./UserTab/Personalization";
 import { useSelector } from "react-redux";
+import ModalHeader from "../common/ModalHeader";
 
 interface UserDrawerProps {
   direction: string;
@@ -111,18 +112,7 @@ const CreateUserDrawer = ({
     >
       <div role="presentation">
         <form onSubmit={handleSubmit(onSubmit)} className="max-h-[500px]">
-          <div
-            className="flex items-center justify-between p-4 text-white"
-            style={{
-              background: color,
-            }}
-          >
-            <h2 className="text-xl font-bold">Create User</h2>
-            <RxCrossCircled
-              className="cursor-pointer text-[30px] font-bold text-white hover:rounded-full"
-              onClick={toggleDrawer(false)}
-            />
-          </div>
+          <ModalHeader text={"Create User"} toggleDrawer={toggleDrawer} />
 
           <div
             className="mb-[70px] mt-[88px] px-4 text-center sm:mb-[20px]"
@@ -188,9 +178,9 @@ const CreateUserDrawer = ({
               {["Basic", "Company", "Personalization"].map((e: any, i) => (
                 <div
                   key={i}
-                  className={`cursor-pointer border-x-2 border-b-2  px-5 py-1 text-[16px] font-medium transition-all duration-200 ease-in-out ${
+                  className={`cursor-pointer border border-x-2  px-5 py-1 text-[16px] font-medium transition-all duration-200 ease-in-out ${
                     selectedTab === e
-                      ? "border-t-2 border-b-white bg-white text-black"
+                      ? "border border-b-white bg-white text-black"
                       : "border-l-0 border-r-0 border-t-0"
                   }`}
                   onClick={() => {
@@ -201,7 +191,7 @@ const CreateUserDrawer = ({
                 </div>
               ))}
             </div>
-            <div className="w-full border-b-2 border-black"></div>
+            <div className="w-full border-b border-black"></div>
           </div>
 
           <div className="mt-10 px-10">{renderTab[selectedTab]}</div>

@@ -20,6 +20,7 @@ const config: Config = {
     },
     extend: {
       colors: {
+        companyGreen: "#4FFFB0",
         current: "currentColor",
         transparent: "transparent",
         white: "#FFFFFF",

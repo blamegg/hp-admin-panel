@@ -6,6 +6,7 @@ import { AiOutlineDelete } from "react-icons/ai"; // Import delete icon
 import Button from "@/components/common/Button"; // Assuming you have a common Button component
 import { ImSpinner2 } from "react-icons/im"; // Import a spinner icon for loading
 import { FaCheckCircle } from "react-icons/fa";
+import ModalHeader from "../common/ModalHeader";
 
 interface UserDrawerProps {
   direction: string;
@@ -62,14 +63,7 @@ const DeleteDrawer = ({
       }}
     >
       <div role="presentation">
-        {/* Drawer Header */}
-        <div className="flex items-center justify-between bg-companyRed p-4 text-white">
-          <h2 className="text-xl font-bold">Delete Confirmation</h2>
-          <RxCrossCircled
-            className="cursor-pointer text-[30px] font-bold text-white hover:rounded-full"
-            onClick={handleCloseDrawer}
-          />
-        </div>
+        <ModalHeader text="Delete Confirmation" toggleDrawer={toggleDrawer} />
 
         {/* Loading and Success State Handling */}
         <div className="relative mt-[50px] flex flex-col items-center justify-center px-7 pb-7">
