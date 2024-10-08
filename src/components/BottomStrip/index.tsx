@@ -10,6 +10,8 @@ const BottomStrip = () => {
     setDeleteDrawer(value);
   };
 
+  // message component
+
   return (
     <>
       <div className="fixed bottom-0 z-[2] w-full bg-white px-4 py-[6px] lg:w-[81%]">
