@@ -1,12 +1,11 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import MessageBox, { MessageBoxProps } from "./MessageBox";
-import { RootState } from "@/redux/store";
 
 const Message = () => {
   // Get the messages from the Redux store
   const initialMessage = useSelector(
-    (state: RootState) => state?.message?.initialMessage,
+    (state: any) => state?.message?.initialMessage,
   );
 
   return (
