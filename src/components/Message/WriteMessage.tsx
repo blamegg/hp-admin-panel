@@ -1,6 +1,9 @@
 import React, { useState, ChangeEvent } from "react";
 import { useDispatch } from "react-redux";
 import { addMessage } from "@/redux/slice/MessageSlice";
+import EmojiPicker from "emoji-picker-react";
+import { VscSmiley } from "react-icons/vsc";
+import { twMerge } from "tailwind-merge";
 
 interface WriteMessageProps {
   selectedUser: any;
@@ -9,6 +12,7 @@ interface WriteMessageProps {
 const WriteMessage = ({ selectedUser }: WriteMessageProps) => {
   const dispatch = useDispatch();
   const [message, setMessage] = useState<string>("");
+  const [showEmoji, setShowEmoji] = useState<boolean>(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
@@ -31,6 +35,7 @@ const WriteMessage = ({ selectedUser }: WriteMessageProps) => {
           },
         }),
       );
+      setShowEmoji(false);
       setMessage("");
     }
   };
@@ -39,6 +44,10 @@ const WriteMessage = ({ selectedUser }: WriteMessageProps) => {
     if (e.key === "Enter") {
       handleSendMessage();
     }
+  };
+
+  const onEmojiClick = (emojiObject: any) => {
+    setMessage((prevMessage) => prevMessage + emojiObject.emoji);
   };
 
   return (
@@ -50,6 +59,14 @@ const WriteMessage = ({ selectedUser }: WriteMessageProps) => {
         value={message}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+      />
+      <VscSmiley
+        onClick={() => setShowEmoji((prev) => !prev)}
+        className={twMerge(
+          "ms-2 cursor-pointer",
+          showEmoji ? "text-red" : "text-blue-900",
+        )}
+        size={25}
       />
       <button
         className="ml-2 rounded-lg bg-blue-500 p-2 text-white"
@@ -70,6 +87,11 @@ const WriteMessage = ({ selectedUser }: WriteMessageProps) => {
           />
         </svg>
       </button>
+      {showEmoji && (
+        <div className="absolute bottom-15 left-2 z-10">
+          <EmojiPicker onEmojiClick={onEmojiClick} />
+        </div>
+      )}
     </div>
   );
 };

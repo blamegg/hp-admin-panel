@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { FaComments } from "react-icons/fa";
@@ -29,7 +29,7 @@ const MessageList = ({
         <FaComments className="mr-2 text-blue-500" /> All Messages (
         {users.length})
       </h1>
-      <div className="user-list mx-4 mt-6 space-y-4">
+      <div className="user-list mt-6 max-h-[calc(100vh-150px)] space-y-4 overflow-y-scroll px-5 pb-5">
         {users.map((user) => (
           <div
             className="to-gray-50 hover:border-gradient-to-r flex cursor-pointer justify-between rounded-xl border border-transparent bg-gradient-to-r from-white px-5 py-4 shadow-md transition duration-500 ease-in-out hover:from-blue-50 hover:from-purple-500 hover:to-blue-500 hover:text-white hover:shadow-lg hover:transition-all"
@@ -55,8 +55,10 @@ const MessageList = ({
                   {user?.userName}
                 </p>
                 <p className="text-gray-600 line-clamp-1 text-[14px]">
-                  {user?.messages[user?.messages?.length - 1]?.message ||
-                    "No messages yet"}
+                  {user?.messages[user?.messages?.length - 1]?.message?.slice(
+                    0,
+                    25,
+                  ) || "No messages yet"}
                 </p>
               </div>
             </div>

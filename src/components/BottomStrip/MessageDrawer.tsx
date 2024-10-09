@@ -1,6 +1,6 @@
 "use client";
 import { Drawer } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDirection } from "@/context/DirectionContext";
 import ModalHeader from "../common/ModalHeader";
 import WriteMessage from "../Message/WriteMessage";
@@ -19,6 +19,17 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
   const { direction } = useDirection();
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
+  useEffect(() => {
+    if (!!!isDrawerOpen) {
+      const drawerTimer = setTimeout(() => {
+        setSelectedUser(null);
+      }, 100);
+      return () => {
+        clearTimeout(drawerTimer);
+      };
+    }
+  });
+
   const handleCloseDrawer = () => {
     toggleDrawer(false);
   };
@@ -33,8 +44,6 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
         ?.messages || [],
   );
 
-  console.log(userMessages, "userMessages");
-
   return (
     <Drawer
       anchor={direction === "ltr" ? "right" : "left"}
@@ -48,7 +57,7 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
       }}
     >
       <div role="presentation">
-        <div className="relative h-[100vh] overflow-hidden border border-black">
+        <div className="relative h-[100vh] overflow-hidden">
           <ModalHeader text="Messages" toggleDrawer={toggleDrawer} />
 
           {!!!selectedUser && <MessageList onSelectUser={handleSelectUser} />}
@@ -60,7 +69,7 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
             />
           )}
 
-          <div className="mt-5 max-h-[calc(100vh-108px)] overflow-y-scroll px-2">
+          <div className="mt-5 max-h-[calc(100vh-220px)] overflow-y-scroll px-2">
             {selectedUser &&
               userMessages.map((msg, index) => (
                 <MessageBox key={index} role={msg.role} time={msg.time}>
