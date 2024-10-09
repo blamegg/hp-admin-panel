@@ -5,7 +5,6 @@ import React, { FormEvent, useState } from "react";
 import { TextField, Button, IconButton } from "@mui/material";
 import { Visibility, VisibilityOff, CheckCircle } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-// import { FaCheck } from "react-icons/fa";
 import Success from "./Successfull";
 
 export const ResetPassword = () => {
