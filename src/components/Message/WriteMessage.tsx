@@ -3,10 +3,10 @@ import { useDispatch } from "react-redux";
 import { addMessage } from "@/redux/slice/MessageSlice";
 
 interface WriteMessageProps {
-  selectedUserId: string; // Assuming userId is passed as a prop
+  selectedUser: any;
 }
 
-const WriteMessage = ({ selectedUserId }: WriteMessageProps) => {
+const WriteMessage = ({ selectedUser }: WriteMessageProps) => {
   const dispatch = useDispatch();
   const [message, setMessage] = useState<string>("");
 
@@ -14,19 +14,19 @@ const WriteMessage = ({ selectedUserId }: WriteMessageProps) => {
     setMessage(e.target.value);
   };
 
-  console.log(selectedUserId, "selectedUserId");
+  console.log(selectedUser, "selectedUserId");
 
   const handleSendMessage = () => {
     if (message.trim() !== "") {
       dispatch(
         addMessage({
-          userId: selectedUserId, // Include the userId here
+          userId: selectedUser?.userId,
           message: {
             role: "sender",
             time: new Date().toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
-            }), // Use current time
+            }),
             message: message,
           },
         }),

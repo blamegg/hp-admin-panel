@@ -17,19 +17,19 @@ interface UserDrawerProps {
 
 const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
   const { direction } = useDirection();
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
   const handleCloseDrawer = () => {
     toggleDrawer(false);
   };
 
-  const handleSelectUser = (userId: string) => {
-    setSelectedUserId(userId);
+  const handleSelectUser = (user: any) => {
+    setSelectedUser(user);
   };
 
   const userMessages = useSelector(
     (state: RootState) =>
-      state.message.users.find((user) => user.userId === selectedUserId)
+      state.message.users.find((user) => user.userId === selectedUser?.userId)
         ?.messages || [],
   );
 
@@ -51,14 +51,17 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
         <div className="relative h-[100vh] overflow-hidden border border-black">
           <ModalHeader text="Messages" toggleDrawer={toggleDrawer} />
 
-          {!!!selectedUserId && <MessageList onSelectUser={handleSelectUser} />}
+          {!!!selectedUser && <MessageList onSelectUser={handleSelectUser} />}
 
-          {!!selectedUserId && (
-            <MessageHeader setSelectedUserId={setSelectedUserId} />
+          {!!selectedUser && (
+            <MessageHeader
+              setSelectedUser={setSelectedUser}
+              selectedUser={selectedUser}
+            />
           )}
 
           <div className="mt-5 max-h-[calc(100vh-108px)] overflow-y-scroll px-2">
-            {selectedUserId &&
+            {selectedUser &&
               userMessages.map((msg, index) => (
                 <MessageBox key={index} role={msg.role} time={msg.time}>
                   {msg.message}
@@ -66,7 +69,7 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
               ))}
           </div>
 
-          {selectedUserId && <WriteMessage selectedUserId={selectedUserId} />}
+          {selectedUser && <WriteMessage selectedUser={selectedUser} />}
         </div>
       </div>
     </Drawer>

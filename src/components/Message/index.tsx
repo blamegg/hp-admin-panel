@@ -6,7 +6,7 @@ import { RootState } from "@/redux/store";
 const Message = () => {
   // Get the messages from the Redux store
   const initialMessage = useSelector(
-    (state: RootState) => state.message.initialMessage,
+    (state: RootState) => state?.message?.initialMessage,
   );
 
   return (
