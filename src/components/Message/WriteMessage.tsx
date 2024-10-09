@@ -1,24 +1,41 @@
 import React, { useState, ChangeEvent } from "react";
 import { useDispatch } from "react-redux";
 import { addMessage } from "@/redux/slice/MessageSlice";
+import EmojiPicker from "emoji-picker-react";
+import { VscSmiley } from "react-icons/vsc";
+import { twMerge } from "tailwind-merge";
 
-const WriteMessage: React.FC = () => {
+interface WriteMessageProps {
+  selectedUser: any;
+}
+
+const WriteMessage = ({ selectedUser }: WriteMessageProps) => {
   const dispatch = useDispatch();
   const [message, setMessage] = useState<string>("");
+  const [showEmoji, setShowEmoji] = useState<boolean>(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
   };
 
+  console.log(selectedUser, "selectedUserId");
+
   const handleSendMessage = () => {
     if (message.trim() !== "") {
       dispatch(
         addMessage({
-          role: "sender",
-          time: "1:55pm",
-          message: message,
+          userId: selectedUser?.userId,
+          message: {
+            role: "sender",
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            message: message,
+          },
         }),
       );
+      setShowEmoji(false);
       setMessage("");
     }
   };
@@ -29,15 +46,27 @@ const WriteMessage: React.FC = () => {
     }
   };
 
+  const onEmojiClick = (emojiObject: any) => {
+    setMessage((prevMessage) => prevMessage + emojiObject.emoji);
+  };
+
   return (
-    <div className="bg-gray-100 flex items-center rounded-lg p-2">
+    <div className="bg-gray-100 absolute bottom-0 flex w-full items-center rounded-lg bg-white p-2">
       <input
         type="text"
         placeholder="Type something here"
-        className="bg-gray-100 flex-grow rounded-lg border-none px-4 py-2 outline-none"
+        className="flex-grow rounded-lg border-none bg-[#EFF4FB] px-4 py-2 text-[14px] outline-none"
         value={message}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+      />
+      <VscSmiley
+        onClick={() => setShowEmoji((prev) => !prev)}
+        className={twMerge(
+          "ms-2 cursor-pointer",
+          showEmoji ? "text-red" : "text-blue-900",
+        )}
+        size={25}
       />
       <button
         className="ml-2 rounded-lg bg-blue-500 p-2 text-white"
@@ -58,6 +87,11 @@ const WriteMessage: React.FC = () => {
           />
         </svg>
       </button>
+      {showEmoji && (
+        <div className="absolute bottom-15 left-2 z-10">
+          <EmojiPicker onEmojiClick={onEmojiClick} />
+        </div>
+      )}
     </div>
   );
 };

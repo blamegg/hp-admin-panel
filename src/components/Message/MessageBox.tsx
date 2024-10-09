@@ -10,14 +10,14 @@ export interface MessageBoxProps {
 
 const MessageBox = ({ role, children, time }: MessageBoxProps) => {
   const messageBoxClasses = twMerge(
-    "w-fit rounded-lg px-3 py-1 text-[14px] text-white",
+    "w-fit max-w-xs rounded-lg px-4 py-2 text-[14px]",
     role === "sender"
-      ? "bg-companyRed rounded-br-none"
-      : "bg-[#EFF4FB] text-black rounded-tl-none",
+      ? "bg-companyRed text-white rounded-br-none shadow-md"
+      : "bg-[#EFF4FB] text-black rounded-tl-none shadow-md",
   );
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-1">
       <div
         className={twMerge(
           "flex",
@@ -33,7 +33,7 @@ const MessageBox = ({ role, children, time }: MessageBoxProps) => {
           role === "sender" ? "justify-end" : "justify-start",
         )}
       >
-        <p className="ps-2 text-[12px] font-normal">{time}</p>
+        <p className="text-gray-500 ps-2 text-[11px]">{time}</p>
       </div>
     </div>
   );
