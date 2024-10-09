@@ -2,7 +2,11 @@ import React, { useState, ChangeEvent } from "react";
 import { useDispatch } from "react-redux";
 import { addMessage } from "@/redux/slice/MessageSlice";
 
-const WriteMessage: React.FC = () => {
+interface WriteMessageProps {
+  selectedUserId: string; // Assuming userId is passed as a prop
+}
+
+const WriteMessage = ({ selectedUserId }: WriteMessageProps) => {
   const dispatch = useDispatch();
   const [message, setMessage] = useState<string>("");
 
@@ -10,13 +14,21 @@ const WriteMessage: React.FC = () => {
     setMessage(e.target.value);
   };
 
+  console.log(selectedUserId, "selectedUserId");
+
   const handleSendMessage = () => {
     if (message.trim() !== "") {
       dispatch(
         addMessage({
-          role: "sender",
-          time: "1:55pm",
-          message: message,
+          userId: selectedUserId, // Include the userId here
+          message: {
+            role: "sender",
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }), // Use current time
+            message: message,
+          },
         }),
       );
       setMessage("");
@@ -30,11 +42,11 @@ const WriteMessage: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 flex items-center rounded-lg p-2">
+    <div className="bg-gray-100 absolute bottom-0 flex w-full items-center rounded-lg bg-white p-2">
       <input
         type="text"
         placeholder="Type something here"
-        className="bg-gray-100 flex-grow rounded-lg border-none px-4 py-2 outline-none"
+        className="flex-grow rounded-lg border-none bg-[#EFF4FB] px-4 py-2 text-[14px] outline-none"
         value={message}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

@@ -1,51 +1,52 @@
 import { MessageBoxProps } from "../../components/Message/MessageBox";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// Define the initial state type
-interface AppState {
-  initialMessage: MessageBoxProps[];
+interface UserMessages {
+  userId: string;
+  messages: MessageBoxProps[];
+  userName: string;
 }
 
-// Define the initial state
+interface AppState {
+  users: UserMessages[];
+}
+
 const initialState: AppState = {
-  initialMessage: [
+  users: [
     {
-      role: "sender",
-      message: "Hey, how are you?",
-      time: "1:55pm",
+      userId: "1",
+      userName: "John Doe",
+      messages: [
+        { role: "sender", message: "Hey, how are you?", time: "1:55pm" },
+        { role: "receiver", message: "I'm good, thanks!", time: "1:55pm" },
+      ],
     },
     {
-      role: "receiver",
-      message: "I'm good, thanks! How about you?",
-      time: "1:55pm",
-    },
-    {
-      role: "sender",
-      message: "Doing great! Working on some cool projects.",
-      time: "1:55pm",
-    },
-    {
-      role: "receiver",
-      message: "That's awesome! Keep me posted!",
-      time: "1:55pm",
+      userId: "2",
+      userName: "User 2",
+      messages: [
+        { role: "sender", message: "Hello!", time: "2:00pm" },
+        { role: "receiver", message: "Hi there!", time: "2:01pm" },
+      ],
     },
   ],
 };
 
-// Create the message slice
 const messageSlice = createSlice({
   name: "message",
   initialState,
   reducers: {
-    // Reducer to add a new message
-    addMessage: (state, action: PayloadAction<MessageBoxProps>) => {
-      state.initialMessage.push(action.payload);
+    addMessage: (
+      state,
+      action: PayloadAction<{ userId: string; message: MessageBoxProps }>,
+    ) => {
+      const user = state.users.find((u) => u.userId === action.payload.userId);
+      if (user) {
+        user.messages.push(action.payload.message);
+      }
     },
   },
 });
 
-// Export the actions
-export const { addMessage } = messageSlice.actions;
-
-// Export the reducer
 export default messageSlice.reducer;
+export const { addMessage } = messageSlice.actions;

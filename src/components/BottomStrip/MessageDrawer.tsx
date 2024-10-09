@@ -1,16 +1,14 @@
 "use client";
 import { Drawer } from "@mui/material";
 import React, { useState } from "react";
-import { RxCrossCircled } from "react-icons/rx";
-import { AiOutlineDelete } from "react-icons/ai"; // Import delete icon
-import Button from "@/components/common/Button"; // Assuming you have a common Button component
-import { ImSpinner2 } from "react-icons/im"; // Import a spinner icon for loading
-import { FaCheckCircle } from "react-icons/fa";
 import { useDirection } from "@/context/DirectionContext";
 import ModalHeader from "../common/ModalHeader";
-import MessageBox from "../Message/MessageBox";
-import Message from "../Message";
 import WriteMessage from "../Message/WriteMessage";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import MessageList from "../Message/MessageList";
+import MessageBox from "../Message/MessageBox";
+import MessageHeader from "../Message/MessageHeader";
 
 interface UserDrawerProps {
   toggleDrawer: any;
@@ -19,9 +17,23 @@ interface UserDrawerProps {
 
 const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
   const { direction } = useDirection();
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
   const handleCloseDrawer = () => {
     toggleDrawer(false);
   };
+
+  const handleSelectUser = (userId: string) => {
+    setSelectedUserId(userId);
+  };
+
+  const userMessages = useSelector(
+    (state: RootState) =>
+      state.message.users.find((user) => user.userId === selectedUserId)
+        ?.messages || [],
+  );
+
+  console.log(userMessages, "userMessages");
 
   return (
     <Drawer
@@ -36,12 +48,25 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
       }}
     >
       <div role="presentation">
-        <div>
+        <div className="relative h-[100vh] overflow-hidden border border-black">
           <ModalHeader text="Messages" toggleDrawer={toggleDrawer} />
-          <div>
-            <Message />
+
+          {!!!selectedUserId && <MessageList onSelectUser={handleSelectUser} />}
+
+          {!!selectedUserId && (
+            <MessageHeader setSelectedUserId={setSelectedUserId} />
+          )}
+
+          <div className="mt-5 max-h-[calc(100vh-108px)] overflow-y-scroll px-2">
+            {selectedUserId &&
+              userMessages.map((msg, index) => (
+                <MessageBox key={index} role={msg.role} time={msg.time}>
+                  {msg.message}
+                </MessageBox>
+              ))}
           </div>
-          <WriteMessage />
+
+          {selectedUserId && <WriteMessage selectedUserId={selectedUserId} />}
         </div>
       </div>
     </Drawer>
