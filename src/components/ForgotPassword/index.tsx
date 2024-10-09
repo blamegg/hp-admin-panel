@@ -34,12 +34,6 @@ export const ForgotPassword = () => {
       setShowSignIn(false);
     }
   };
-  const updateState = (newState: Partial<typeof state>) => {
-    setState((prevState) => ({
-      ...prevState,
-      ...newState,
-    }));
-  };
 
   return (
     <div
@@ -78,7 +72,6 @@ export const ForgotPassword = () => {
                 <span className="font-semibold text-primary">Email</span>
               </p>
 
-              {/* Email Input */}
               <div className="relative mb-6">
                 <TextField
                   label="Enter Email"
