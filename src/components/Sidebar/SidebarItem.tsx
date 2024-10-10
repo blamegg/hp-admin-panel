@@ -35,7 +35,7 @@ const SidebarItem = ({ item, pageName, setPageName, color }: any) => {
           className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4`}
         >
           {item.icon}
-          {item.label}
+          <p className="text-[14px]">{item.label}</p>
           {item.children && (
             <svg
               className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${

@@ -13,7 +13,7 @@ import {
 import { MessageBoxProps } from "../../components/Message/MessageBox";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface UserMessages {
+export interface UserMessages {
   userId: string;
   messages: MessageBoxProps[];
   userName: string;
@@ -30,7 +30,7 @@ const initialChat: AppState = {
     {
       userId: "1",
       userName: "Sophie Müller",
-      profileImage: user1.src,
+      profileImage: user2.src,
       isActive: true,
       messages: [
         { role: "sender", message: "Hey, how are you?", time: "1:55pm" },

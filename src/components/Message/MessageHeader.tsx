@@ -1,10 +1,11 @@
 import React from "react";
 import { IoChevronBackOutline } from "react-icons/io5";
 import { twMerge } from "tailwind-merge";
+import { SelectedUserProps } from "../BottomStrip/MessageDrawer";
 
 interface MessageHeaderProps {
-  setSelectedUser: any;
-  selectedUser: { profileImage: string; userName: string; isActive: boolean };
+  setSelectedUser: (user: SelectedUserProps | null) => void;
+  selectedUser: SelectedUserProps;
 }
 
 const MessageHeader = ({
