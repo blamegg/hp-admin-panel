@@ -53,16 +53,16 @@ const DropdownUser = () => {
         <div
           className={`absolute right-0 mt-3 flex w-max flex-col rounded-sm border border-stroke bg-white pe-5 shadow-default dark:border-strokedark dark:bg-boxdark`}
         >
-          <ul className="flex flex-col gap-5 border-b border-stroke px-3 py-2 dark:border-strokedark">
+          <ul className="flex flex-col gap-2 border-b border-stroke px-3 py-2 dark:border-strokedark">
             <li>
               <Link
                 href="/profile"
-                className="flex items-center gap-3.5 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+                className="flex items-center gap-3.5 font-medium duration-300 ease-in-out hover:text-primary"
               >
                 <svg
                   className="fill-current"
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 22 22"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -76,7 +76,7 @@ const DropdownUser = () => {
                     fill=""
                   />
                 </svg>
-                My Profile
+                <p className="text-[13px]">My Profile</p>
               </Link>
             </li>
             <li>
@@ -86,8 +86,8 @@ const DropdownUser = () => {
               >
                 <svg
                   className="fill-current"
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 22 22"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -97,7 +97,7 @@ const DropdownUser = () => {
                     fill=""
                   />
                 </svg>
-                My Contacts
+                <p className="text-[13px]">My Contacts</p>
               </Link>
             </li>
             <li>
@@ -107,8 +107,8 @@ const DropdownUser = () => {
               >
                 <svg
                   className="fill-current"
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 22 22"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -122,18 +122,18 @@ const DropdownUser = () => {
                     fill=""
                   />
                 </svg>
-                Account Settings
+                <p className="text-[13px]">Account Settings</p>
               </Link>
             </li>
           </ul>
           <Link
             href="/"
-            className="flex items-center gap-3.5 px-3 py-2 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+            className="flex items-center gap-3.5 px-3 py-1 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
           >
             <svg
               className="fill-current"
-              width="22"
-              height="22"
+              width="20"
+              height="20"
               viewBox="0 0 22 22"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -147,7 +147,7 @@ const DropdownUser = () => {
                 fill=""
               />
             </svg>
-            Log Out
+            <p className="text-[13px]">Log Out</p>
           </Link>
         </div>
       )}

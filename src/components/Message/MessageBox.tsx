@@ -9,6 +9,7 @@ export interface MessageBoxProps {
   time: string;
   children?: React.ReactNode;
   profileImage?: string;
+  image?: string | null;
 }
 
 const MessageBox = ({
@@ -16,6 +17,7 @@ const MessageBox = ({
   children,
   time,
   profileImage,
+  image,
 }: MessageBoxProps) => {
   const messageBoxClasses = twMerge(
     "w-fit max-w-xs rounded-lg px-4 py-2 text-[14px]",
@@ -41,7 +43,12 @@ const MessageBox = ({
             className="rounded-full"
           />
         )}
-        <p className={messageBoxClasses}>{children}</p>
+        {image ? (
+          <Image src={image} alt="message" height={900} width={300} />
+        ) : (
+          <p className={messageBoxClasses}>{children}</p>
+        )}
+
         {role === "sender" && (
           <Image
             alt="logo"

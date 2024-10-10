@@ -52,6 +52,8 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
     }
   }, [isDrawerOpen]);
 
+  console.log(userMessages, "userMessages");
+
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -61,6 +63,8 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
   const handleCloseDrawer = () => {
     toggleDrawer(false);
   };
+
+  console.log(selectedUser, "selectedUser");
 
   const handleSelectUser = (user: SelectedUserProps) => {
     setSelectedUser(user);
@@ -99,6 +103,7 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
                   role={msg.role}
                   time={msg.time}
                   profileImage={selectedUser?.profileImage}
+                  image={msg.image}
                 >
                   {msg.message}
                 </MessageBox>
