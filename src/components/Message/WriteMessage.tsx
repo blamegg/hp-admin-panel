@@ -4,9 +4,10 @@ import { addMessage } from "@/redux/slice/MessageSlice";
 import EmojiPicker from "emoji-picker-react";
 import { VscSmiley } from "react-icons/vsc";
 import { twMerge } from "tailwind-merge";
+import { SelectedUserProps } from "../BottomStrip/MessageDrawer";
 
 interface WriteMessageProps {
-  selectedUser: any;
+  selectedUser: SelectedUserProps;
 }
 
 const WriteMessage = ({ selectedUser }: WriteMessageProps) => {
@@ -17,8 +18,6 @@ const WriteMessage = ({ selectedUser }: WriteMessageProps) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
   };
-
-  console.log(selectedUser, "selectedUserId");
 
   const handleSendMessage = () => {
     if (message.trim() !== "") {
