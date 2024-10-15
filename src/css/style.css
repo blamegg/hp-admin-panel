@@ -273,3 +273,9 @@ input:checked {
 input:checked ~ span:last-child {
   --tw-translate-x: 1.75rem; /* translate-x-7 */
 }
+
+@media print {
+  .print:hidden {
+    display: none; /* Hide elements with the class 'print:hidden' when printing */
+  }
+}
