@@ -8,6 +8,7 @@ import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { logo } from "@/assets";
 import { useDirection } from "@/context/DirectionContext";
+import { TbFileInvoice } from "react-icons/tb";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -161,6 +162,20 @@ const menuGroups = [
         ),
         label: "Tables",
         route: "/tables",
+      },
+      {
+        icon: (
+          <div className="flex items-center ">
+            <div className="">
+              <TbFileInvoice className="h-6 w-6" />
+            </div>
+            <span className="ml-1">
+              Invoice
+            </span>
+          </div>
+        ),
+
+        route: "/Invoice",
       },
       {
         icon: (
@@ -333,13 +348,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
-        className={`fixed ${direction === "ltr" ? "left-0" : "right-0"} top-0 z-9999 flex h-full w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
-          sidebarOpen
-            ? "translate-x-0"
-            : direction === "ltr"
-              ? "-translate-x-full"
-              : "translate-x-full"
-        }`}
+        className={`fixed ${direction === "ltr" ? "left-0" : "right-0"} top-0 z-9999 flex h-full w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${sidebarOpen
+          ? "translate-x-0"
+          : direction === "ltr"
+            ? "-translate-x-full"
+            : "translate-x-full"
+          }`}
       >
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="grid h-[50px] place-items-center">
