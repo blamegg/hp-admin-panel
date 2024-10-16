@@ -35,7 +35,7 @@ const TableThree = () => {
   const { direction } = useDirection();
 
   useEffect(() => {
-    const data = generateData(100);
+    const data = generateData(20);
     setMockData(data);
     setTotalItems(data.length);
   }, []);
