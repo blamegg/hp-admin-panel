@@ -1,65 +1,104 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { SignInFormData } from "@/components/Signin/signIn";
+import { apiClient, ApiEndpoints } from "@/utility/api";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { toast } from "sonner";
 
-// Define the shape of the slice's state
 interface AuthState {
-  isAuthenticated: boolean;
-  user: {
-    id: string | null;
-    name: string | null;
-    email: string | null;
-  };
+  user: any | null;
+  loginStatus: "idle" | "loading" | "success" | "failed";
+  loginError: string | null;
+  registerStatus: "idle" | "loading" | "success" | "failed";
+  registerError: string | null;
 }
 
-// Define the initial state using that type
+export interface UserProps {
+  name: string;
+  email: string;
+  password: string;
+  mobile: string;
+  status?: number;
+}
+
 const initialState: AuthState = {
-  isAuthenticated: false,
-  user: {
-    id: null,
-    name: null,
-    email: null,
-  },
+  user: null,
+  loginStatus: "idle",
+  loginError: null,
+  registerStatus: "idle",
+  registerError: null,
 };
 
-// Create the slice
+export const loginUser = createAsyncThunk(
+  "auth/login",
+  async (payload: SignInFormData, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.post(ApiEndpoints.login, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data.message || "Login failed");
+    }
+  },
+);
+
+export const registerUser = createAsyncThunk(
+  "auth/register",
+  async (payload: UserProps, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.post(ApiEndpoints.register, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data.message || "Register failed");
+    }
+  },
+);
+
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get(ApiEndpoints.logout);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data.message || "Logout failed");
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {
-    login(
-      state,
-      action: PayloadAction<{ id: string; name: string; email: string }>,
-    ) {
-      state.isAuthenticated = true;
-      state.user = {
-        id: action.payload.id,
-        name: action.payload.name,
-        email: action.payload.email,
-      };
-    },
-    logout(state) {
-      state.isAuthenticated = false;
-      state.user = {
-        id: null,
-        name: null,
-        email: null,
-      };
-    },
-    updateUser(
-      state,
-      action: PayloadAction<{ name?: string; email?: string }>,
-    ) {
-      if (action.payload.name) {
-        state.user.name = action.payload.name;
-      }
-      if (action.payload.email) {
-        state.user.email = action.payload.email;
-      }
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.loginStatus = "loading";
+        state.loginError = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loginStatus = "success";
+        state.user = action.payload;
+        localStorage.setItem("token", action.payload.token);
+        toast.success("user logged successfully");
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loginStatus = "failed";
+        state.loginError = action.payload as string;
+        toast.error("failed to login");
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.registerStatus = "loading";
+        state.registerError = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action: PayloadAction<any>) => {
+        state.registerStatus = "success";
+        state.user = action.payload;
+        toast.success("user register successfully");
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.registerStatus = "failed";
+        state.registerError = action.payload as string;
+        toast.error("failed to register user");
+      });
   },
 });
 
-// Export the actions
-export const { login, logout, updateUser } = authSlice.actions;
-
-// Export the reducer
 export default authSlice.reducer;
