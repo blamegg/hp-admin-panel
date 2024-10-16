@@ -1,7 +1,13 @@
+'use client'
+import Button from '@/components/common/Button';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import React from 'react';
 
 const Invoice = () => {
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   const items = [
     { quantity: 100, description: 'Decorative clay pottery (LG)', unitPrice: 13.00, total: 1300.00 },
@@ -27,8 +33,6 @@ const Invoice = () => {
     { quantity: "", description: '', unitPrice: "", total: "" },
     { quantity: "", description: '', unitPrice: "", total: "" },
     { quantity: "", description: '', unitPrice: "", total: "" },
-
-
   ];
   return (
     <>
@@ -43,7 +47,6 @@ const Invoice = () => {
               <div>
                 <h1 className='text-2xl font-medium text-graydark'>INVOICE</h1>
               </div>
-
             </div>
 
             <p className="text-sm mt-2">89 Pacific Ave, San Francisco CA 45321</p>
@@ -152,6 +155,14 @@ const Invoice = () => {
             <p className='font-medium'>If you have any questions concerning this invoice contact: Suman at (123) 456-7890</p>
             <p className="mt-4 font-bold text-center">THANK YOU FOR YOUR BUSINESS!</p>
           </div>
+        </div>
+        <div className='grid place-items-center py-4'>
+          <Button
+            name="Print"
+            type="submit"
+            onClick={handlePrint}
+            className="!bg-blue-500 mb-8 print:hidden"
+          />
         </div>
       </DefaultLayout>
     </>
