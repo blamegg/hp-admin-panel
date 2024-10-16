@@ -339,11 +339,10 @@ const menuGroups = [
 ];
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const pathname = usePathname();
-  const [menuList, setMenuList] = useState(menuGroups);
+  const [menuList] = useState(menuGroups);
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
   const color = "#FF505D";
-  const { direction, toggleDirection } = useDirection();
+  const { direction } = useDirection();
 
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
@@ -355,7 +354,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             : "translate-x-full"
           }`}
       >
-        {/* <!-- SIDEBAR HEADER --> */}
         <div className="grid h-[50px] place-items-center">
           <Link href="/dashboard" className="flex items-center gap-4">
             <Image width={35} height={35} src={logo.src} alt="Logo" priority />
@@ -384,10 +382,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </svg>
           </button>
         </div>
-        {/* <!-- SIDEBAR HEADER --> */}
 
         <div className="no-scrollbar mt-5 flex flex-col overflow-y-auto duration-300 ease-linear">
-          {/* <!-- Sidebar Menu --> */}
           <nav>
             {menuList.map((group, groupIndex) => (
               <div key={groupIndex}>
@@ -409,7 +405,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </div>
             ))}
           </nav>
-          {/* <!-- Sidebar Menu --> */}
         </div>
       </aside>
     </ClickOutside>

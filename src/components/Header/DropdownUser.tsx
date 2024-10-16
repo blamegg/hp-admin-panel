@@ -1,12 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import { useDirection } from "@/context/DirectionContext";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+import { logoutUser } from "@/redux/slice/authSlice";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
-  const { direction, toggleDirection } = useDirection();
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const result = await dispatch(logoutUser());
+
+    if (logoutUser.fulfilled.match(result)) {
+      toast.success("logout successful");
+      router.push("/");
+    } else {
+      toast.error("unable to logout");
+    }
+  };
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -126,9 +143,9 @@ const DropdownUser = () => {
               </Link>
             </li>
           </ul>
-          <Link
-            href="/"
-            className="flex items-center gap-3.5 px-3 py-1 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+          <div
+            onClick={() => handleLogout()}
+            className="flex cursor-pointer items-center gap-3.5 px-3 py-1 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
           >
             <svg
               className="fill-current"
@@ -148,10 +165,9 @@ const DropdownUser = () => {
               />
             </svg>
             <p className="text-[13px]">Log Out</p>
-          </Link>
+          </div>
         </div>
       )}
-      {/* <!-- Dropdown End --> */}
     </ClickOutside>
   );
 };

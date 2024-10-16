@@ -16,11 +16,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "@/redux/slice/authSlice";
+import { loginUser, registerUser } from "@/redux/slice/authSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { toast } from "sonner";
 
 const schema = z.object({
+  name: z.string().nonempty("Name is required."),
   email: z
     .string()
     .nonempty("Email is required.")
@@ -29,16 +30,22 @@ const schema = z.object({
     .string()
     .nonempty("Password is required.")
     .min(8, "Password must be at least 8 characters long."),
+  mobile: z
+    .string()
+    .nonempty("Mobile number is required.")
+    .length(10, "Mobile number must be 10 digits long.")
+    .regex(/^[0-9]+$/, "Mobile number must be numeric."),
 });
+
 export interface SignInFormData {
+  name: string;
   email: string;
   password: string;
+  mobile: string;
 }
 
-export const Signin = () => {
+export const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const router = useRouter();
   const {
     control,
     handleSubmit,
@@ -48,29 +55,14 @@ export const Signin = () => {
     resolver: zodResolver(schema),
   });
   const dispatch = useDispatch<AppDispatch>();
-  const { loginError, loginStatus } = useSelector(
-    (state: RootState) => state.authReducer,
-  );
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const handleRememberMeChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setRememberMe(event.target.checked);
-  };
-
   const onSubmit = async (data: SignInFormData) => {
-    dispatch(loginUser(data));
+    dispatch(registerUser({ ...data, status: 1 }));
   };
-
-  useEffect(() => {
-    if (loginStatus === "success") {
-      router.push("/dashboard");
-    }
-  }, [loginStatus, router]);
 
   return (
     <div
@@ -84,7 +76,7 @@ export const Signin = () => {
     >
       <div className="absolute inset-0 bg-black opacity-50"></div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center rounded-xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark xl:w-[25%]">
+      <div className="relative z-10 flex w-[70%] flex-col items-center justify-center rounded-xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:w-[50%] xl:w-[25%]">
         <div className="w-full px-4 pb-2 pt-4">
           <div className="absolute top-[-59px] w-[90%] rounded-xl bg-[#1976D2] py-3">
             <div className="grid place-items-center">
@@ -94,11 +86,41 @@ export const Signin = () => {
               Hanging Panda
             </h2>
             <h2 className="mt-1 text-center text-[18px] font-semibold text-white dark:text-black">
-              Sign In
+              Sign Up
             </h2>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-20">
+            <div className="mb-4">
+              <Controller
+                name="name"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    label="Name"
+                    type="text"
+                    size="small"
+                    placeholder="Enter your name"
+                    variant="outlined"
+                    fullWidth
+                    {...field}
+                    error={!!errors.name}
+                    helperText={errors.name ? errors.name.message : ""}
+                    InputProps={{
+                      classes: {
+                        root: "bg-transparent border-stroke dark:border-strokedark dark:bg-form-input dark:text-white",
+                        focused: "border-primary",
+                      },
+                    }}
+                    InputLabelProps={{
+                      className: "font-medium text-black dark:text-white",
+                    }}
+                  />
+                )}
+              />
+            </div>
+
             <div className="mb-4">
               <Controller
                 name="email"
@@ -117,7 +139,7 @@ export const Signin = () => {
                     helperText={errors.email ? errors.email.message : ""}
                     InputProps={{
                       classes: {
-                        root: "bg-transparent border-stroke dark:border-form-strokedark dark:bg-form-input dark:text-white",
+                        root: "bg-transparent border-stroke dark:border-strokedark dark:bg-form-input dark:text-white",
                         focused: "border-primary",
                       },
                     }}
@@ -128,6 +150,7 @@ export const Signin = () => {
                 )}
               />
             </div>
+
             <div className="relative mb-6">
               <Controller
                 name="password"
@@ -146,7 +169,7 @@ export const Signin = () => {
                     helperText={errors.password ? errors.password.message : ""}
                     InputProps={{
                       classes: {
-                        root: "bg-transparent border-stroke dark:border-form-strokedark dark:bg-form-input dark:text-white",
+                        root: "bg-transparent border-stroke dark:border-strokedark dark:bg-form-input dark:text-white",
                         focused: "border-primary",
                       },
                       endAdornment: (
@@ -162,43 +185,52 @@ export const Signin = () => {
                 )}
               />
             </div>
-            <div className="title-sm flex flex-row items-center justify-between pb-3 pt-0">
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={rememberMe}
-                    onChange={handleRememberMeChange}
-                    color="primary"
+
+            <div className="mb-4">
+              <Controller
+                name="mobile"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    label="Mobile"
+                    type="tel"
+                    size="small"
+                    placeholder="Enter your mobile number"
+                    variant="outlined"
+                    fullWidth
+                    {...field}
+                    error={!!errors.mobile}
+                    helperText={errors.mobile ? errors.mobile.message : ""}
+                    InputProps={{
+                      classes: {
+                        root: "bg-transparent border-stroke dark:border-strokedark dark:bg-form-input dark:text-white",
+                        focused: "border-primary",
+                      },
+                    }}
+                    InputLabelProps={{
+                      className: "font-medium text-black dark:text-white",
+                    }}
                   />
-                }
-                label="Remember Me"
+                )}
               />
-              <div>
-                <Link
-                  href="/forgotPassword"
-                  className="text-base  font-semibold text-primary"
-                >
-                  Forgot Password
-                </Link>
-              </div>
             </div>
 
             <div className="mb-5">
-              <h5 className="text-gray-600 mb-3 text-sm font-semibold">
-                Don&apos;t have an account?{" "}
-                <Link
-                  className="font-semibold text-primary hover:underline"
-                  href="/register"
-                >
-                  Sign up
-                </Link>
-              </h5>
+              <div className="mb-3 font-semibold">
+                <p>
+                  Already have an account?{" "}
+                  <Link href="/" className="text-primary">
+                    Sign In
+                  </Link>
+                </p>
+              </div>
               <Button
                 type="submit"
                 variant="contained"
                 className="w-full cursor-pointer rounded-lg border-primary bg-primary py-2 text-white transition hover:bg-opacity-90"
               >
-                Sign In
+                Register
               </Button>
             </div>
           </form>
@@ -212,4 +244,4 @@ export const Signin = () => {
   );
 };
 
-export default Signin;
+export default Register;

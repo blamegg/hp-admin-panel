@@ -1,4 +1,4 @@
-import { axiosInstance } from "./api";
+// import { axiosInstance } from "./api";
 
 // example to copy
 // export const deleteProductFn = async (productData: any) => {
