@@ -165,16 +165,10 @@ const menuGroups = [
       },
       {
         icon: (
-          <div className="flex items-center ">
-            <div className="">
-              <TbFileInvoice className="h-6 w-6" />
-            </div>
-            <span className="ml-1">
-              Invoice
-            </span>
-          </div>
-        ),
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24"><path fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 3v4a1 1 0 0 1-1 1H5m8-2h3m-3 3h3m-4 3v6m4-3H8M19 4v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1M8 12v6h8v-6z"/></svg>
 
+        ),
+        label: "Invoice",
         route: "/Invoice",
       },
       {
@@ -337,7 +331,7 @@ const menuGroups = [
     ],
   },
 ];
-
+                    
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
   const [menuList, setMenuList] = useState(menuGroups);
@@ -363,7 +357,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               Hanging Panda
             </h5>
           </Link>
-
+  
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-controls="sidebar"
@@ -403,7 +397,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       pageName={pageName}
                       setPageName={setPageName}
                       color={color}
-                    />
+                    />  
                   ))}
                 </ul>
               </div>
