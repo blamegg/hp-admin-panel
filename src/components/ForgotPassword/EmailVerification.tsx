@@ -40,7 +40,6 @@ export const EmailVerification = ({ email }: EmailVerificationProps) => {
       setError("OTP must be exactly 6 digits.");
     } else {
       setError("");
-      console.log("OTP submitted:", otp);
       router.push("/dashboard");
     }
   };

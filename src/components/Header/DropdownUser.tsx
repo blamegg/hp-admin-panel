@@ -3,25 +3,32 @@ import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import { useDirection } from "@/context/DirectionContext";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
 import { logoutUser } from "@/redux/slice/authSlice";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { removeTokenCookie } from "@/utility/helper";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const { user } = useSelector((state: RootState) => state.authReducer);
+  const userInfo = user?.user;
 
   const handleLogout = async () => {
-    const result = await dispatch(logoutUser());
+    let toastMessage = "";
 
-    if (logoutUser.fulfilled.match(result)) {
-      toast.success("logout successful");
+    try {
+      const result = await dispatch(logoutUser()).unwrap();
+      toastMessage = result.message || "Login successful!";
+      toast.success(toastMessage);
       router.push("/");
-    } else {
-      toast.error("unable to logout");
+      removeTokenCookie();
+    } catch (error: any) {
+      toastMessage = error || "Login failed. Please try again.";
+      toast.error(toastMessage);
     }
   };
 
@@ -34,9 +41,11 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-[11px] font-semibold leading-4 text-black dark:text-white">
-            Thomas Anree
+            {userInfo && userInfo.name}
           </span>
-          <span className="block text-[11px] leading-4">UX Designer</span>
+          <span className="block text-[11px] leading-4">
+            {userInfo && userInfo.email}
+          </span>
         </span>
 
         <span className="h-8 w-8 rounded-full">
@@ -65,7 +74,6 @@ const DropdownUser = () => {
         </svg>
       </Link>
 
-      {/* <!-- Dropdown Start --> */}
       {dropdownOpen && (
         <div
           className={`absolute right-0 mt-3 flex w-max flex-col rounded-sm border border-stroke bg-white pe-5 shadow-default dark:border-strokedark dark:bg-boxdark`}

@@ -31,7 +31,6 @@ export const EmailVerify = () => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    console.log("Form submitted");
     router.push("/dashboard");
   };
 

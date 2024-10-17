@@ -34,7 +34,6 @@ export default function RootLayout({
   );
 }
 
-// Inner component to access the direction context
 const InnerRootLayout = ({
   loading,
   children,

@@ -10,7 +10,6 @@ import {
   IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -61,7 +60,19 @@ export const Register = () => {
   };
 
   const onSubmit = async (data: SignInFormData) => {
-    dispatch(registerUser({ ...data, status: 1 }));
+    let toastMessage = "";
+
+    try {
+      const result = await dispatch(
+        registerUser({ ...data, status: 1 }),
+      ).unwrap();
+      toastMessage = result.message || "Registration successful!";
+      toast.success(toastMessage);
+      reset();
+    } catch (error: any) {
+      toastMessage = error || "Registration failed. Please try again.";
+      toast.error(toastMessage);
+    }
   };
 
   return (
@@ -194,7 +205,7 @@ export const Register = () => {
                 render={({ field }) => (
                   <TextField
                     label="Mobile"
-                    type="tel"
+                    type="number"
                     size="small"
                     placeholder="Enter your mobile number"
                     variant="outlined"
