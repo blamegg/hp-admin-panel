@@ -87,7 +87,6 @@ const CreateUserDrawer = ({
   };
 
   const onSubmit = (data: UserFormInputs) => {
-    console.log(data);
     toast.success("Created user successfully");
     reset();
   };

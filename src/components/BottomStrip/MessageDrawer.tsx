@@ -52,7 +52,7 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
     }
   }, [isDrawerOpen]);
 
-  console.log(userMessages, "userMessages");
+
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -64,7 +64,6 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
     toggleDrawer(false);
   };
 
-  console.log(selectedUser, "selectedUser");
 
   const handleSelectUser = (user: SelectedUserProps) => {
     setSelectedUser(user);

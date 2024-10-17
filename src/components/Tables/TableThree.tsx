@@ -155,7 +155,7 @@ const TableThree = () => {
           <Button
             name="Create User"
             type="submit"
-            onClick={toggleUserDrawer(true)}
+            onClick={() => setUserDrawer(true)}
           />
           <Tooltip
             title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."

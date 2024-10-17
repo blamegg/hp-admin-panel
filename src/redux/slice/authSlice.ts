@@ -1,7 +1,7 @@
 import { SignInFormData } from "@/components/Signin/signIn";
 import { apiClient, ApiEndpoints } from "@/utility/api";
+import { setTokenCookie } from "@/utility/helper";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { toast } from "sonner";
 
 interface AuthState {
   user: any | null;
@@ -76,13 +76,11 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<any>) => {
         state.loginStatus = "success";
         state.user = action.payload;
-        localStorage.setItem("token", action.payload.token);
-        toast.success("user logged successfully");
+        setTokenCookie(action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loginStatus = "failed";
         state.loginError = action.payload as string;
-        toast.error("failed to login");
       })
       .addCase(registerUser.pending, (state) => {
         state.registerStatus = "loading";
@@ -91,12 +89,10 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action: PayloadAction<any>) => {
         state.registerStatus = "success";
         state.user = action.payload;
-        toast.success("user register successfully");
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.registerStatus = "failed";
         state.registerError = action.payload as string;
-        toast.error("failed to register user");
       });
   },
 });

@@ -2,13 +2,7 @@
 import { logo, signingBg } from "@/assets";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import {
-  TextField,
-  Button,
-  FormControlLabel,
-  Switch,
-  IconButton,
-} from "@mui/material";
+import { TextField, FormControlLabel, Switch, IconButton } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "@/redux/slice/authSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { toast } from "sonner";
+import Button from "../common/Button";
 
 const schema = z.object({
   email: z
@@ -48,9 +43,15 @@ export const Signin = () => {
     resolver: zodResolver(schema),
   });
   const dispatch = useDispatch<AppDispatch>();
-  const { loginError, loginStatus } = useSelector(
+  const { loginStatus, user } = useSelector(
     (state: RootState) => state.authReducer,
   );
+
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [router, user]);
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -63,14 +64,19 @@ export const Signin = () => {
   };
 
   const onSubmit = async (data: SignInFormData) => {
-    dispatch(loginUser(data));
-  };
+    let toastMessage = "";
 
-  useEffect(() => {
-    if (loginStatus === "success") {
+    try {
+      const result = await dispatch(loginUser(data)).unwrap();
+      toastMessage = result.message || "Login successful!";
+      toast.success(toastMessage);
       router.push("/dashboard");
+      reset();
+    } catch (error: any) {
+      toastMessage = error || "Login failed. Please try again.";
+      toast.error(toastMessage);
     }
-  }, [loginStatus, router]);
+  };
 
   return (
     <div
@@ -176,7 +182,7 @@ export const Signin = () => {
               <div>
                 <Link
                   href="/forgotPassword"
-                  className="text-base  font-semibold text-primary"
+                  className="text-sm font-semibold text-primary hover:underline"
                 >
                   Forgot Password
                 </Link>
@@ -194,12 +200,11 @@ export const Signin = () => {
                 </Link>
               </h5>
               <Button
+                name="Sign In"
                 type="submit"
-                variant="contained"
-                className="w-full cursor-pointer rounded-lg border-primary bg-primary py-2 text-white transition hover:bg-opacity-90"
-              >
-                Sign In
-              </Button>
+                loading={loginStatus === "loading" && true}
+                className="h-[35px] w-full py-1.5 text-[16px] font-medium"
+              />
             </div>
           </form>
         </div>

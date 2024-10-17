@@ -1,0 +1,49 @@
+/* Add this to your global CSS or a custom CSS file */
+@keyframes ring {
+  from {
+    stroke-dasharray: 0 257 0 0 1 0 0 258;
+  }
+  25% {
+    stroke-dasharray: 0 0 0 0 257 0 258 0;
+  }
+  50%,
+  to {
+    stroke-dasharray: 0 0 0 0 0 515 0 0;
+  }
+}
+
+@keyframes ball {
+  from,
+  50% {
+    animation-timing-function: ease-in;
+    stroke-dashoffset: 1;
+  }
+  64% {
+    animation-timing-function: ease-in;
+    stroke-dashoffset: -109;
+  }
+  78% {
+    animation-timing-function: ease-in;
+    stroke-dashoffset: -145;
+  }
+  92% {
+    animation-timing-function: ease-in;
+    stroke-dashoffset: -157;
+  }
+  57%,
+  71%,
+  85%,
+  99%,
+  to {
+    animation-timing-function: ease-out;
+    stroke-dashoffset: -163;
+  }
+}
+
+.pl__ring {
+  @apply animate-[ring_2s_ease-out_infinite];
+}
+
+.pl__ball {
+  @apply animate-[ball_2s_ease-out_infinite];
+}
