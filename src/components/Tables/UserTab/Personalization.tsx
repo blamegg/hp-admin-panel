@@ -1,60 +1,42 @@
-import Input from "@/components/common/Input";
-import { changeColor } from "@/redux/slice/appSlice";
 import React from "react";
+import Input from "@/components/common/Input";
 import { useDispatch } from "react-redux";
+import { changeColor } from "@/redux/slice/appSlice";
+import Select from "@/components/common/Select";
 
-const Personalization = () => {
+const Personalization = ({ register, errors }: any) => {
   const dispatch = useDispatch();
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(changeColor(e.target.value));
-    console.log(e.target.value);
   };
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <div>
-        <label
-          className="block text-sm font-medium text-black dark:text-white"
-          htmlFor="notifications"
-        >
-          Notifications
-        </label>
-        <select
-          className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
-          id="notifications"
-          defaultValue=""
-        >
-          <option value="" disabled>
-            Select Notification
-          </option>
-          <option value="email">Email</option>
-          <option value="sms">SMS</option>
-          <option value="push">Push Notifications</option>
-          <option value="none">No Notifications</option>
-        </select>
+        <Select
+          label="Notifications"
+          options={[
+            { value: "email", label: "Email" },
+            { value: "sms", label: "SMS" },
+            { value: "push", label: "Push Notifications" },
+            { value: "none", label: "No Notifications" },
+          ]}
+          register={register("notifications")}
+          error={errors.notifications?.message}
+        />
       </div>
-      {/* Direction Preference Select */}
       <div>
-        <label
-          className="block text-sm font-medium text-black dark:text-white"
-          htmlFor="direction"
-        >
-          Direction Preference
-        </label>
-        <select
-          className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
-          id="direction"
-          defaultValue=""
-        >
-          <option value="" disabled>
-            Select Direction
-          </option>
-          <option value="ltr">Left to Right (LTR)</option>
-          <option value="rtl">Right to Left (RTL)</option>
-        </select>
+        <Select
+          label="Direction Preference"
+          options={[
+            { value: "ltr", label: "Left to Right (LTR)" },
+            { value: "rtl", label: "Right to Left (RTL)" },
+          ]}
+          register={register("direction")}
+          error={errors.direction?.message}
+        />
       </div>
-      {/* App Color Input */}
       <div>
         <label
           className="block text-sm font-medium text-black dark:text-white"
@@ -69,53 +51,36 @@ const Personalization = () => {
           onChange={handleColorChange}
         />
       </div>
-      {/* Font Size Select */}
       <div>
-        <label
-          className="block text-sm font-medium text-black dark:text-white"
-          htmlFor="fontSize"
-        >
-          Font Size
-        </label>
-        <select
-          className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
-          id="fontSize"
-          defaultValue=""
-        >
-          <option value="" disabled>
-            Select Font Size
-          </option>
-          <option value="small">Small</option>
-          <option value="medium">Medium</option>
-          <option value="large">Large</option>
-        </select>
+        <Select
+          label="Font Size"
+          options={[
+            { value: "small", label: "Small" },
+            { value: "medium", label: "Medium" },
+            { value: "large", label: "Large" },
+          ]}
+          register={register("fontSize")}
+          error={errors.fontSize?.message}
+        />
       </div>
-      {/* Theme Select */}
       <div>
-        <label
-          className="block text-sm font-medium text-black dark:text-white"
-          htmlFor="theme"
-        >
-          Theme
-        </label>
-        <select
-          className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
-          id="theme"
-          defaultValue=""
-        >
-          <option value="" disabled>
-            Select Theme
-          </option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
+        <Select
+          label="Theme"
+          options={[
+            { value: "light", label: "Light" },
+            { value: "dark", label: "Dark" },
+          ]}
+          register={register("theme")}
+          error={errors.theme?.message}
+        />
       </div>
-      {/* Custom Message Input */}
       <div>
         <Input
           label="Custom Message"
           type="text"
           placeholder="Custom message"
+          register={register("customMessage")}
+          error={errors.customMessage?.message}
         />
       </div>
     </div>

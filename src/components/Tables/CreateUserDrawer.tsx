@@ -1,51 +1,21 @@
 "use client";
 import { Drawer } from "@mui/material";
 import React, { useState } from "react";
-import Breadcrumb from "../Breadcrumbs/Breadcrumb";
 import Image from "next/image";
-import Input from "../common/Input";
 import { toast } from "react-toastify";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormError from "../common/FormError";
 import Button from "@/components/common/Button";
-import { RxCrossCircled } from "react-icons/rx";
 import { usercover } from "@/assets";
 import Basic from "./UserTab/Basic";
 import Company from "./UserTab/Company";
 import Personalization from "./UserTab/Personalization";
-import { useSelector } from "react-redux";
 import ModalHeader from "../common/ModalHeader";
-
-interface UserDrawerProps {
-  direction: string;
-  toggleDrawer: any;
-  isDrawerOpen: boolean;
-}
-
-interface RenderTabProps {
-  Basic: React.JSX.Element;
-  Company: React.JSX.Element;
-  Personalization: React.JSX.Element;
-}
-
-const userSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  username: z.string().min(1, "Username is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
-  direction: z.enum(["ltr", "rtl"], {
-    errorMap: () => ({ message: "Please select a direction" }),
-  }),
-  notifications: z.enum(["email", "sms", "push", "none"], {
-    errorMap: () => ({ message: "Please select a notification preference" }),
-  }),
-});
-
-type UserFormInputs = z.infer<typeof userSchema>;
+import { useMutation } from "@tanstack/react-query";
+import { createUserFn } from "@/utility/queryFetcher";
+import { UserDrawerProps } from "@/types/CreateUser";
+import { UserFormInputs, userSchema } from "@/schema/createUserSchema";
 
 const CreateUserDrawer = ({
   direction,
@@ -53,8 +23,17 @@ const CreateUserDrawer = ({
   toggleDrawer,
 }: UserDrawerProps) => {
   const [profile, setProfile] = useState<string>("/images/user/user-06.png");
-  const [selectedTab, setSelectedTab] = useState<keyof RenderTabProps>("Basic");
-  const color = useSelector((state: any) => state?.app?.color);
+  const [selectedTab, setSelectedTab] = useState<string>("Basic");
+  const createUserMn = useMutation({
+    mutationFn: (payload: any) => createUserFn(payload),
+    onSuccess: (data) => {
+      reset();
+      toast.success("user created successfully");
+    },
+    onError: (error) => {
+      toast.error("failed to create user");
+    },
+  });
 
   const {
     register,
@@ -63,20 +42,10 @@ const CreateUserDrawer = ({
     formState: { errors },
   } = useForm<UserFormInputs>({
     resolver: zodResolver(userSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      username: "",
-      email: "",
-      password: "",
-      phoneNumber: "",
-      notifications: undefined,
-      direction: undefined,
-    },
   });
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -87,14 +56,7 @@ const CreateUserDrawer = ({
   };
 
   const onSubmit = (data: UserFormInputs) => {
-    toast.success("Created user successfully");
-    reset();
-  };
-
-  const renderTab: RenderTabProps = {
-    Basic: <Basic />,
-    Company: <Company />,
-    Personalization: <Personalization />,
+    createUserMn.mutate({ ...data, name: data.firstName + data.lastName });
   };
 
   return (
@@ -174,35 +136,44 @@ const CreateUserDrawer = ({
           </div>
           <div className="mb-4 ms-10 flex">
             <div className="flex">
-              {["Basic", "Company", "Personalization"].map((e: any, i) => (
-                <div
-                  key={i}
-                  className={`cursor-pointer border border-x-2  px-5 py-1 text-[16px] font-medium transition-all duration-200 ease-in-out ${
-                    selectedTab === e
-                      ? "border border-b-white bg-white text-black"
-                      : "border-l-0 border-r-0 border-t-0"
-                  }`}
-                  onClick={() => {
-                    setSelectedTab(e);
-                  }}
-                >
-                  {e}
-                </div>
-              ))}
+              {["Basic", "Company", "Personalization"].map(
+                (e: string, i: number) => (
+                  <div
+                    key={i}
+                    className={`cursor-pointer border border-x-2  px-5 py-1 text-[16px] font-medium transition-all duration-200 ease-in-out ${
+                      selectedTab === e
+                        ? "border border-b-white bg-white text-black"
+                        : "border-l-0 border-r-0 border-t-0"
+                    }`}
+                    onClick={() => {
+                      setSelectedTab(e);
+                    }}
+                  >
+                    {e}
+                  </div>
+                ),
+              )}
             </div>
             <div className="w-full border-b border-black"></div>
           </div>
 
-          <div className="mt-10 px-10">{renderTab[selectedTab]}</div>
+          <div className="mt-10 px-10">
+            {selectedTab === "Basic" && (
+              <Basic register={register} errors={errors} />
+            )}
+            {selectedTab === "Company" && (
+              <Company register={register} errors={errors} />
+            )}
+            {selectedTab === "Personalization" && (
+              <Personalization register={register} errors={errors} />
+            )}
+          </div>
 
           <div className="mt-10 grid place-items-center">
             <Button
               name="Submit"
               type="submit"
               className="mx-7 px-18 py-2 text-[16px]"
-              onClick={() => {
-                toast.success("Created user successfully");
-              }}
             />
           </div>
         </form>
