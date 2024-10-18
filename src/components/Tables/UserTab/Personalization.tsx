@@ -2,26 +2,8 @@ import Input from "@/components/common/Input";
 import { changeColor } from "@/redux/slice/appSlice";
 import React from "react";
 import { useDispatch } from "react-redux";
-import { z } from "zod";
 
-const schema = z.object({
-  notifications: z.enum(["email", "sms", "push", "none"], {
-    required_error: "Notification preference is required",
-  }),
-  direction: z.enum(["ltr", "rtl"], {
-    required_error: "Direction preference is required",
-  }),
-  appColor: z.string().nonempty("App color is required"),
-  fontSize: z.enum(["small", "medium", "large"], {
-    required_error: "Font size is required",
-  }),
-  theme: z.enum(["light", "dark"], {
-    required_error: "Theme selection is required",
-  }),
-  customMessage: z.string().optional(),
-});
-
-const Personalization = ({ control, register,  errors  }: any) => {
+const Personalization = () => {
   const dispatch = useDispatch();
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +21,6 @@ const Personalization = ({ control, register,  errors  }: any) => {
           Notifications
         </label>
         <select
-          {...register("notifications")}
           className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
           id="notifications"
           defaultValue=""
@@ -52,10 +33,8 @@ const Personalization = ({ control, register,  errors  }: any) => {
           <option value="push">Push Notifications</option>
           <option value="none">No Notifications</option>
         </select>
-        {errors.notifications && (
-          <p className="text-red-600">{errors.notifications.message}</p>
-        )}
       </div>
+      {/* Direction Preference Select */}
       <div>
         <label
           className="block text-sm font-medium text-black dark:text-white"
@@ -64,7 +43,6 @@ const Personalization = ({ control, register,  errors  }: any) => {
           Direction Preference
         </label>
         <select
-          {...register("direction")}
           className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
           id="direction"
           defaultValue=""
@@ -75,10 +53,8 @@ const Personalization = ({ control, register,  errors  }: any) => {
           <option value="ltr">Left to Right (LTR)</option>
           <option value="rtl">Right to Left (RTL)</option>
         </select>
-        {errors.direction && (
-          <p className="text-red-600">{errors.direction.message}</p>
-        )}
       </div>
+      {/* App Color Input */}
       <div>
         <label
           className="block text-sm font-medium text-black dark:text-white"
@@ -87,16 +63,13 @@ const Personalization = ({ control, register,  errors  }: any) => {
           App Color
         </label>
         <input
-          {...register("appColor")}
           type="color"
           id="appColor"
           className="w-full rounded border border-stroke bg-gray text-black dark:border-strokedark dark:bg-meta-4 dark:text-white"
           onChange={handleColorChange}
         />
-        {errors.appColor && (
-          <p className="text-red-600">{errors.appColor.message}</p>
-        )}
       </div>
+      {/* Font Size Select */}
       <div>
         <label
           className="block text-sm font-medium text-black dark:text-white"
@@ -105,7 +78,6 @@ const Personalization = ({ control, register,  errors  }: any) => {
           Font Size
         </label>
         <select
-          {...register("fontSize")}
           className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
           id="fontSize"
           defaultValue=""
@@ -117,10 +89,8 @@ const Personalization = ({ control, register,  errors  }: any) => {
           <option value="medium">Medium</option>
           <option value="large">Large</option>
         </select>
-        {errors.fontSize && (
-          <p className="text-red-600">{errors.fontSize.message}</p>
-        )}
       </div>
+      {/* Theme Select */}
       <div>
         <label
           className="block text-sm font-medium text-black dark:text-white"
@@ -129,7 +99,6 @@ const Personalization = ({ control, register,  errors  }: any) => {
           Theme
         </label>
         <select
-          {...register("theme")}
           className="w-full rounded border border-stroke bg-gray px-2 py-[4px] text-[13px] text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
           id="theme"
           defaultValue=""
@@ -140,18 +109,14 @@ const Personalization = ({ control, register,  errors  }: any) => {
           <option value="light">Light</option>
           <option value="dark">Dark</option>
         </select>
-        {errors.theme && <p className="text-red-600">{errors.theme.message}</p>}
       </div>
+      {/* Custom Message Input */}
       <div>
         <Input
-          {...register("customMessage")}
           label="Custom Message"
           type="text"
           placeholder="Custom message"
         />
-        {errors.customMessage && (
-          <p className="text-red-600">{errors.customMessage.message}</p>
-        )}
       </div>
     </div>
   );

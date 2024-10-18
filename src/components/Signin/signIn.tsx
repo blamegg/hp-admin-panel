@@ -71,17 +71,13 @@ export const Signin = () => {
     try {
       const result = await dispatch(loginUser(data)).unwrap();
       toastMessage = result.message || "Login successful!";
-      if (typeof toastMessage !== "string") {
-        toastMessage = "unknown error";
-      }
+      if (typeof toastMessage !== "string") toastMessage = "unknown error";
       toast.success(toastMessage);
       router.push("/dashboard");
       reset();
     } catch (error: any) {
       toastMessage = error || "Login failed. Please try again.";
-      if (typeof toastMessage !== "string") {
-        toastMessage = "unknown error";
-      }
+      if (typeof toastMessage !== "string") toastMessage = "unknown error";
       toast.error(toastMessage);
     }
   };
