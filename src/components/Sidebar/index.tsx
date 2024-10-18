@@ -13,6 +13,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { getMenuList } from "@/redux/slice/menuList";
 import { defaultSvg, menuItems } from "@/utility/sidebar";
+import { useQuery } from "@tanstack/react-query";
+import { menuListFn } from "@/utility/queryFetcher";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -24,11 +26,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
   const color = "#FF505D";
   const { direction } = useDirection();
-  const { menu } = useSelector((state: RootState) => state.menu);
+  const { data: menu } = useQuery({
+    queryKey: ["menuList"],
+    queryFn: menuListFn,
+  });
+
   const menuList = [
     {
       name: "MENU LIST",
-      menuItems: menu?.map((e: any) => {
+      menuItems: menu?.data?.map((e: any) => {
         return {
           label: e.name,
           route: `/${e.slug.toLowerCase()}`,

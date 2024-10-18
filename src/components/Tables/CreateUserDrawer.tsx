@@ -102,7 +102,7 @@ const CreateUserDrawer = ({
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
       disableEnforceFocus
-      onClose={toggleDrawer(false)}
+      onClose={() => toggleDrawer(false)}
       PaperProps={{
         sx: {
           width: "70%",

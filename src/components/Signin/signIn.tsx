@@ -14,6 +14,7 @@ import { loginUser } from "@/redux/slice/authSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { toast } from "sonner";
 import Button from "../common/Button";
+import { useMutation } from "@tanstack/react-query";
 
 const schema = z.object({
   email: z
@@ -43,6 +44,7 @@ export const Signin = () => {
     resolver: zodResolver(schema),
   });
   const dispatch = useDispatch<AppDispatch>();
+
   const { loginStatus, user } = useSelector(
     (state: RootState) => state.authReducer,
   );
@@ -69,11 +71,17 @@ export const Signin = () => {
     try {
       const result = await dispatch(loginUser(data)).unwrap();
       toastMessage = result.message || "Login successful!";
+      if (typeof toastMessage !== "string") {
+        toastMessage = "unknown error";
+      }
       toast.success(toastMessage);
       router.push("/dashboard");
       reset();
     } catch (error: any) {
       toastMessage = error || "Login failed. Please try again.";
+      if (typeof toastMessage !== "string") {
+        toastMessage = "unknown error";
+      }
       toast.error(toastMessage);
     }
   };

@@ -9,7 +9,8 @@ import { useDirection } from "@/context/DirectionContext";
 import CreateUserDrawer from "./CreateUserDrawer";
 import Button from "@/components/common/Button";
 import DeleteDrawer from "./DeleteDrawer";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { usersFn } from "@/utility/queryFetcher";
 
 const generateData = (count: number) => {
   return Array.from({ length: count }, (v, i) => ({
@@ -33,6 +34,10 @@ const TableThree = () => {
   const [deleteDrawer, setDeleteDrawer] = useState(false);
   const [selected, setSelected] = useState({});
   const { direction } = useDirection();
+  const { data: userList } = useQuery({
+    queryKey: ["menu-list"],
+    queryFn: usersFn,
+  });
 
   useEffect(() => {
     const data = generateData(20);
@@ -65,10 +70,9 @@ const TableThree = () => {
     return item[searchBasis].toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const toggleUserDrawer =
-    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
-      setUserDrawer(open);
-    };
+  const toggleUserDrawer = (value: boolean) => {
+    setUserDrawer(value);
+  };
 
   const toggleDeleteDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -155,7 +159,7 @@ const TableThree = () => {
           <Button
             name="Create User"
             type="submit"
-            onClick={() => setUserDrawer(true)}
+            onClick={() => toggleUserDrawer(true)}
           />
           <Tooltip
             title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."

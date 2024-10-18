@@ -11,6 +11,7 @@ export const ApiEndpoints = {
   register: "/api/v1/signup",
   logout: "/api/v1/logout",
   menu: "/api/v1/menus",
+  users: "/api/v1/users",
 };
 
 apiClient.interceptors.request.use(
