@@ -3,32 +3,14 @@ import Input from "@/components/common/Input";
 
 const Basic = ({ register, errors }: any) => {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2">
       <div>
         <Input
-          label="First Name"
+          label="Name"
           type="text"
-          placeholder="John"
-          register={register("firstName")}
-          error={errors.firstName?.message}
-        />
-      </div>
-      <div>
-        <Input
-          label="Last Name"
-          type="text"
-          placeholder="Doe"
-          register={register("lastName")}
-          error={errors.lastName?.message}
-        />
-      </div>
-      <div>
-        <Input
-          label="Username"
-          type="text"
-          placeholder="johndoe123"
-          register={register("username")}
-          error={errors.username?.message}
+          placeholder="John Doe"
+          register={register("name")}
+          error={errors.name?.message}
         />
       </div>
       <div>
@@ -52,7 +34,7 @@ const Basic = ({ register, errors }: any) => {
       <div>
         <Input
           label="Phone Number"
-          type="number"
+          type="text"
           placeholder="+1234567890"
           register={register("mobile")}
           error={errors.mobile?.message}

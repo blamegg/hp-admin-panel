@@ -2,7 +2,6 @@
 import { Drawer } from "@mui/material";
 import React, { useState } from "react";
 import Image from "next/image";
-import { toast } from "react-toastify";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +15,7 @@ import { useMutation } from "@tanstack/react-query";
 import { createUserFn } from "@/utility/queryFetcher";
 import { UserDrawerProps } from "@/types/CreateUser";
 import { UserFormInputs, userSchema } from "@/schema/createUserSchema";
+import { toast } from "sonner";
 
 const CreateUserDrawer = ({
   direction,
@@ -56,7 +56,8 @@ const CreateUserDrawer = ({
   };
 
   const onSubmit = (data: UserFormInputs) => {
-    createUserMn.mutate({ ...data, name: data.firstName + data.lastName });
+    console.log(data);
+    createUserMn.mutate({ ...data });
   };
 
   return (
@@ -64,7 +65,10 @@ const CreateUserDrawer = ({
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
       disableEnforceFocus
-      onClose={() => toggleDrawer(false)}
+      onClose={() => {
+        toggleDrawer(false);
+        reset();
+      }}
       PaperProps={{
         sx: {
           width: "70%",

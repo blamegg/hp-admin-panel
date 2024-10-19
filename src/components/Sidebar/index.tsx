@@ -12,7 +12,7 @@ import { TbFileInvoice } from "react-icons/tb";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { getMenuList } from "@/redux/slice/menuList";
-import { defaultSvg, menuItems } from "@/utility/sidebar";
+import { defaultSvg, menuItems, staticMenu } from "@/utility/sidebar";
 import { useQuery } from "@tanstack/react-query";
 import { menuListFn } from "@/utility/queryFetcher";
 
@@ -48,11 +48,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     },
   ];
 
-  useEffect(() => {
-    if (!menu) {
-      dispatch(getMenuList());
-    }
-  }, [menu, dispatch]);
+  // useEffect(() => {
+  //   if (!menu) {
+  //     dispatch(getMenuList());
+  //   }
+  // }, [menu, dispatch]);
 
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
@@ -96,8 +96,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
         <div className="no-scrollbar mt-5 flex flex-col overflow-y-auto duration-300 ease-linear">
           <nav>
-            {menuList?.length === 0 && <h6 className="text-[16px]">No Menu</h6>}
-            {menuList.map((group, groupIndex) => (
+            {staticMenu.map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
                   {group.name}

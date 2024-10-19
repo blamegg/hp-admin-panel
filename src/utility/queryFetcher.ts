@@ -18,6 +18,18 @@ export const createUserFn = async (payload: any) => {
   return response.data;
 };
 
+// view user
+export const viewUserFn = async (userId: string) => {
+  const response = await apiClient.get(`${ApiEndpoints.users}/${userId}`);
+  return response.data;
+};
+
+// update user
+export const updateUserFn = async (payload: any) => {
+  const response = await apiClient.put(ApiEndpoints.users, payload);
+  return response.data;
+};
+
 // delete user
 export const deleteUserFn = async (id: string) => {
   const response = await apiClient.delete(`${ApiEndpoints.users}/id`);

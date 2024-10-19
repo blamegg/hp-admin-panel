@@ -11,20 +11,10 @@ import Button from "@/components/common/Button";
 import DeleteDrawer from "./DeleteDrawer";
 import { useQuery } from "@tanstack/react-query";
 import { usersFn } from "@/utility/queryFetcher";
+import { formatTime } from "@/utility/helper";
+import EditDrawer from "./EditDrawer";
 
-const generateData = (count: number) => {
-  return Array.from({ length: count }, (v, i) => ({
-    id: i + 1,
-    name: `Item ${i + 1}`,
-    description: `description of ${i + 1}`,
-    email: `item${i + 1}@example.com`,
-    dateCreated: new Date().toLocaleDateString(),
-    status: i % 2 === 0 ? "Active" : "Inactive",
-  }));
-};
-
-const TableThree = () => {
-  const [mockData, setMockData] = useState<any[]>([]);
+const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,18 +22,13 @@ const TableThree = () => {
   const [searchBasis, setSearchBasis] = useState("name");
   const [UserDrawer, setUserDrawer] = useState(false);
   const [deleteDrawer, setDeleteDrawer] = useState(false);
-  const [selected, setSelected] = useState({});
+  const [editDrawer, setEditDrawer] = useState(false);
+  const [selected, setSelected] = useState(null);
   const { direction } = useDirection();
   const { data: userList } = useQuery({
     queryKey: ["menu-list"],
     queryFn: usersFn,
   });
-
-  useEffect(() => {
-    const data = generateData(20);
-    setMockData(data);
-    setTotalItems(data.length);
-  }, []);
 
   useEffect(() => {
     const totalPages = Math.ceil(totalItems / rowsPerPage);
@@ -66,52 +51,46 @@ const TableThree = () => {
     setSelected(row);
   };
 
-  const filteredData = mockData.filter((item) => {
-    return item[searchBasis].toLowerCase().includes(searchQuery.toLowerCase());
-  });
-
   const toggleUserDrawer = (value: boolean) => {
     setUserDrawer(value);
   };
 
-  const toggleDeleteDrawer =
-    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
-      setDeleteDrawer(open);
-    };
+  const toggleDeleteDrawer = (value: boolean) => {
+    setDeleteDrawer(value);
+  };
+
+  const toggleEditDrawer = (value: boolean) => {
+    setEditDrawer(value);
+  };
 
   const columns = [
     {
       name: "S No",
-      selector: (row: any) => `${row.id}`,
+      selector: (row: any, index: number) => index + 1,
       sortable: true,
       width: "80px",
     },
     {
       name: "Name",
-      selector: (row: any) => row.name,
+      selector: (row: any) => row.name || "",
       sortable: true,
       width: "200px",
     },
     {
-      name: "Description",
-      selector: (row: any) => row.description,
-      width: "300px",
-    },
-    {
       name: "Email",
-      selector: (row: any) => row.email,
+      selector: (row: any) => row.email || "",
       sortable: true,
       width: "200px",
     },
     {
       name: "Date Created",
-      selector: (row: any) => row.dateCreated,
+      selector: (row: any) => row.createdAt,
       sortable: true,
       width: "150px",
     },
     {
       name: "Status",
-      selector: (row: any) => row.status,
+      selector: (row: any) => (row.status === true ? "Active" : "Inactive"),
       sortable: true,
       width: "100px",
     },
@@ -159,7 +138,7 @@ const TableThree = () => {
           <Button
             name="Create User"
             type="submit"
-            onClick={() => toggleUserDrawer(true)}
+            onClick={() => toggleEditDrawer(true)}
           />
           <Tooltip
             title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
@@ -173,19 +152,16 @@ const TableThree = () => {
 
         <div className="mt-5 overflow-x-auto">
           <DataTable
-            columns={columns}
-            data={filteredData.slice(
-              (currentPage - 1) * rowsPerPage,
-              currentPage * rowsPerPage,
-            )}
+            columns={[]}
+            data={userList?.data}
             pagination
             paginationPerPage={rowsPerPage}
-            paginationTotalRows={filteredData.length}
+            paginationTotalRows={userList?.data?.length}
             paginationComponent={() => (
               <CustomPagination
                 rowsPerPage={rowsPerPage}
                 currentPage={currentPage}
-                rowCount={filteredData.length}
+                rowCount={userList?.data?.length}
                 onChangePage={handlePageChange}
                 onChangeRowsPerPage={handleRowsPerPageChange}
               />
@@ -237,6 +213,11 @@ const TableThree = () => {
         isDrawerOpen={UserDrawer}
         toggleDrawer={toggleUserDrawer}
       />
+      <EditDrawer
+        direction={direction}
+        isDrawerOpen={editDrawer}
+        toggleDrawer={toggleEditDrawer}
+      />
       <DeleteDrawer
         direction={direction}
         isDrawerOpen={deleteDrawer}
@@ -249,4 +230,4 @@ const TableThree = () => {
   );
 };
 
-export default TableThree;
+export default UserTable;

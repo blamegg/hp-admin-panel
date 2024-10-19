@@ -16,7 +16,7 @@ export const menuItems = [
     icon: <TbHome size={18} />,
   },
   {
-    name: "Profile",
+    name: "Users",
     icon: <TbUser size={18} />,
   },
   {
@@ -26,5 +26,16 @@ export const menuItems = [
   {
     name: "Messages",
     icon: <TbMessageCircle size={18} />,
+  },
+];
+
+export const staticMenu = [
+  {
+    name: "MENU LIST",
+    menuItems: menuItems.map((menuItem) => ({
+      label: menuItem.name,
+      route: `/${menuItem.name.toLowerCase()}`,
+      icon: menuItem.icon || defaultSvg,
+    })),
   },
 ];
