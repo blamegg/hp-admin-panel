@@ -30,19 +30,26 @@ const Button = ({
       {...props}
       disabled={loading}
       className={twMerge(
-        `flex w-max items-center justify-center rounded px-4 py-[3px] text-[14px] text-white outline-none hover:bg-opacity-80`,
+        `relative flex w-max items-center justify-center rounded px-4 py-[3px] text-[14px] text-white outline-none transition-all duration-200 ease-in-out hover:bg-opacity-80`,
         loading && "cursor-not-allowed opacity-70",
         className,
       )}
       style={{ backgroundColor: color }}
     >
       {loading ? (
-        <span
-          className={twMerge(
-            "loader mr-2 h-4 w-4 animate-spin rounded-full border-2 border-t-2 border-white",
-            loadingSpinnerClassName,
-          )}
-        ></span>
+        <>
+          <span
+            className={twMerge(
+              "absolute left-0 right-0 mx-auto h-5 w-5 animate-spin rounded-full border-2 border-t-2 border-white",
+              loadingSpinnerClassName,
+            )}
+            style={{
+              borderColor: "rgba(255, 255, 255, 0.4)",
+              borderTopColor: "#fff",
+            }}
+          ></span>
+          <span className="opacity-0">{name}</span>
+        </>
       ) : (
         name
       )}

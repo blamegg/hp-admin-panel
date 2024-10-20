@@ -82,6 +82,8 @@ export const Signin = () => {
     }
   };
 
+  console.log(loginStatus, "loginStatus");
+
   return (
     <div
       className="relative flex h-[100vh] flex-col items-center justify-center pb-0 pt-8"
@@ -206,7 +208,7 @@ export const Signin = () => {
               <Button
                 name="Sign In"
                 type="submit"
-                loading={loginStatus === "loading" && true}
+                loading={loginStatus === "loading"}
                 className="h-[35px] w-full py-1.5 text-[16px] font-medium"
               />
             </div>
