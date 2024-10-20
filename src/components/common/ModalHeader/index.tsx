@@ -1,6 +1,6 @@
 "use client";
 import { RootState } from "@/redux/store";
-import React from "react";
+import React, { memo } from "react";
 import { RxCrossCircled } from "react-icons/rx";
 import { useSelector } from "react-redux";
 
@@ -28,4 +28,4 @@ const ModalHeader = ({ toggleDrawer, text }: ModalHeaderProps) => {
   );
 };
 
-export default ModalHeader;
+export default memo(ModalHeader);

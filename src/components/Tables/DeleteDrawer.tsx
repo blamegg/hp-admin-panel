@@ -7,6 +7,8 @@ import Button from "@/components/common/Button"; // Assuming you have a common B
 import { ImSpinner2 } from "react-icons/im"; // Import a spinner icon for loading
 import { FaCheckCircle } from "react-icons/fa";
 import ModalHeader from "../common/ModalHeader";
+import { useMutation } from "@tanstack/react-query";
+import { deleteUserFn } from "@/utility/queryFetcher";
 
 interface UserDrawerProps {
   direction: string;
@@ -27,21 +29,29 @@ const DeleteDrawer = ({
 }: UserDrawerProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+  const deleteUserMn = useMutation({
+    mutationFn: (userId: string) => deleteUserFn(userId),
+    // onSuccess: (data) => {
+    //   reset();
+    //   toast.success("user created successfully");
+    // },
+    // onError: (error) => {
+    //   toast.error("failed to create user");
+    // },
+  });
 
   const handleDelete = () => {
-    setIsLoading(true);
-    // Simulate an API call or delay
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsDeleted(true);
-      // Optionally reset selected user here or after success
-      // setSelected(null);
-    }, 2000); // Simulate a 2 second delay
+    deleteUserMn.mutate("23");
+    // setIsLoading(true);
+    // setTimeout(() => {
+    //   setIsLoading(false);
+    //   setIsDeleted(true);
+    // }, 2000);
   };
 
   const resetState = () => {
-    setIsLoading(false);
-    setIsDeleted(false);
+    // setIsLoading(false);
+    // setIsDeleted(false);
     setSelected(null);
   };
 
@@ -54,7 +64,7 @@ const DeleteDrawer = ({
     <Drawer
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
-      onClose={handleCloseDrawer}
+      onClose={() => {}}
       disableEnforceFocus
       PaperProps={{
         sx: {
@@ -65,9 +75,8 @@ const DeleteDrawer = ({
       <div role="presentation">
         <ModalHeader text="Delete Confirmation" toggleDrawer={toggleDrawer} />
 
-        {/* Loading and Success State Handling */}
         <div className="relative mt-[50px] flex flex-col items-center justify-center px-7 pb-7">
-          {isLoading && (
+          {deleteUserMn.isPending && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-75">
               <ImSpinner2 className="animate-spin text-5xl text-companyRed" />
               <h3 className="mt-3 text-lg font-semibold text-companyRed">
@@ -76,7 +85,7 @@ const DeleteDrawer = ({
             </div>
           )}
 
-          {isDeleted ? (
+          {deleteUserMn.isSuccess ? (
             <>
               <div className="rounded-full bg-[#FCFCFC] p-2">
                 <FaCheckCircle className="text-[50px] text-green-600" />{" "}
@@ -107,7 +116,7 @@ const DeleteDrawer = ({
                 <Button
                   type="button"
                   name="Cancel"
-                  onClick={toggleDrawer(false)}
+                  onClick={() => toggleDrawer(false)}
                 />
               </div>
             </>

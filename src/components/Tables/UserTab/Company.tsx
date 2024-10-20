@@ -1,60 +1,72 @@
 import Input from "@/components/common/Input";
 import React from "react";
+import { UseFormRegister } from "react-hook-form";
 
-const Company = () => {
+export interface TabProps {
+  register: UseFormRegister<any>;
+  errors: any;
+}
+
+const Company = ({ register, errors }: TabProps) => {
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      {/* Company Name Input */}
       <div>
         <Input
           label="Company Name"
           type="text"
           placeholder="Enter company name"
+          register={register("companyName")}
+          error={errors.companyName?.message}
         />
       </div>
 
-      {/* Company Email Input */}
       <div>
         <Input
           label="Company Email"
           type="email"
           placeholder="Enter company email"
+          register={register("companyEmail")}
+          error={errors.companyEmail?.message}
         />
       </div>
 
-      {/* Company Phone Input */}
       <div>
         <Input
           label="Company Phone"
-          type="number"
+          type="text"
           placeholder="Enter company phone number"
+          register={register("companyPhone")}
+          error={errors.companyPhone?.message}
         />
       </div>
 
-      {/* Company Address Input */}
       <div>
         <Input
           label="Company Address"
           type="text"
           placeholder="Enter company address"
+          register={register("companyAddress")}
+          error={errors.companyAddress?.message}
         />
       </div>
 
-      {/* Company Website Input */}
       <div>
         <Input
           label="Company Website"
           type="text"
           placeholder="Enter company website"
+          register={register("companyWebsite")}
+          error={errors.companyWebsite?.message}
         />
       </div>
 
-      {/* Company Description Input */}
       <div>
         <Input
           label="Company Description"
           type="text"
           placeholder="Enter company description"
+          register={register("companyDescription")}
+          error={errors.companyDescription?.message}
         />
       </div>
     </div>

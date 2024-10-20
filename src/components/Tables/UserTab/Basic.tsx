@@ -1,34 +1,46 @@
 import React from "react";
 import Input from "@/components/common/Input";
 
-const Basic = () => {
+const Basic = ({ register, errors }: any) => {
   return (
-    <>
-      <div className="grid gap-4 md:grid-cols-3 ">
-        <div>
-          <Input label="First Name" type="text" placeholder="John" />
-        </div>
-
-        <div>
-          <Input label="Last Name" type="text" placeholder="Doe" />
-        </div>
-
-        <div>
-          <Input label="Username" type="text" placeholder="johndoe123" />
-        </div>
-
-        <div>
-          <Input label="Email" type="email" placeholder="example@example.com" />
-        </div>
-        <div>
-          <Input label="Password" type="password" placeholder="••••••••" />
-        </div>
-
-        <div>
-          <Input label="Phone Number" type="number" placeholder="+1234567890" />
-        </div>
+    <div className="grid gap-4 md:grid-cols-2">
+      <div>
+        <Input
+          label="Name"
+          type="text"
+          placeholder="John Doe"
+          register={register("name")}
+          error={errors.name?.message}
+        />
       </div>
-    </>
+      <div>
+        <Input
+          label="Email"
+          type="email"
+          placeholder="example@example.com"
+          register={register("email")}
+          error={errors.email?.message}
+        />
+      </div>
+      <div>
+        <Input
+          label="Password"
+          type="password"
+          placeholder="••••••••"
+          register={register("password")}
+          error={errors.password?.message}
+        />
+      </div>
+      <div>
+        <Input
+          label="Phone Number"
+          type="text"
+          placeholder="+1234567890"
+          register={register("mobile")}
+          error={errors.mobile?.message}
+        />
+      </div>
+    </div>
   );
 };
 
