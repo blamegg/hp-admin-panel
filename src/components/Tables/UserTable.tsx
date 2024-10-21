@@ -66,7 +66,9 @@ const UserTable = () => {
   const columns = [
     {
       name: "S No",
-      selector: (row: any, index: number) => index + 1,
+      // Use a function to calculate the S No based on current page and rows per page
+      selector: (row: any) =>
+        (currentPage - 1) * rowsPerPage + (userList?.data.indexOf(row) + 1),
       sortable: true,
       width: "80px",
     },
