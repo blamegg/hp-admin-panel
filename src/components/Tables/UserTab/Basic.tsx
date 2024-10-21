@@ -25,7 +25,7 @@ const Basic = ({ register, errors }: any) => {
       <div>
         <Input
           label="Password"
-          type="password"
+          type="text"
           placeholder="••••••••"
           register={register("password")}
           error={errors.password?.message}

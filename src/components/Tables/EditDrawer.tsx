@@ -1,31 +1,68 @@
 "use client";
 import { Drawer } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import Button from "@/components/common/Button";
 import ModalHeader from "../common/ModalHeader";
 import { UserDrawerProps } from "@/types/CreateUser";
 import Input from "../common/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserFormInputs, userSchema } from "@/schema/createUserSchema";
+import {
+  EditUserFormInputs,
+  editUserSchema,
+  UserFormInputs,
+  userSchema,
+} from "@/schema/createUserSchema";
 import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateUserFn } from "@/utility/queryFetcher";
+import { toast } from "sonner";
 
 const EditDrawer = ({
   direction,
   isDrawerOpen,
   toggleDrawer,
-}: UserDrawerProps) => {
+  selected,
+  setSelected,
+}: any) => {
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<UserFormInputs>({
-    resolver: zodResolver(userSchema),
+  } = useForm<EditUserFormInputs>({
+    resolver: zodResolver(editUserSchema),
+  });
+  const updateUserMn = useMutation({
+    mutationFn: (payload: any) => updateUserFn(payload, payload.userId),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["menu-list"] });
+      toast.success("User is updated successfully");
+      toggleDrawer(false);
+    },
+    onError: (error: any) => {
+      let errorMessage = error?.response?.data?.message;
+      if (typeof errorMessage !== "string") {
+        errorMessage = "unknown error";
+      }
+      toast.error(errorMessage);
+    },
   });
 
-  const onSubmit = (data: UserFormInputs) => {
-    console.log(data);
-    // createUserMn.mutate({ ...data });
+  useEffect(() => {
+    if (selected) {
+      reset({
+        name: selected.name || "",
+        email: selected.email || "",
+        mobile: String(selected.mobile) || "",
+        password: "",
+      });
+    }
+  }, [selected, reset]);
+
+  const onSubmit = (data: EditUserFormInputs) => {
+    console.log(data, "password");
+    updateUserMn.mutate({ ...data, userId: selected._id });
   };
 
   return (
@@ -35,6 +72,7 @@ const EditDrawer = ({
       disableEnforceFocus
       onClose={() => {
         toggleDrawer(false);
+        setSelected(null);
       }}
       PaperProps={{
         sx: {
@@ -49,29 +87,21 @@ const EditDrawer = ({
             <div className="grid gap-4 md:grid-cols-1">
               <div>
                 <Input
-                  label="Name"
-                  type="text"
-                  placeholder="John Doe"
-                  register={register("name")}
-                  error={errors.name?.message}
-                />
-              </div>
-              <div>
-                <Input
                   label="Email"
                   type="email"
                   placeholder="example@example.com"
                   register={register("email")}
                   error={errors.email?.message}
+                  disabled={true}
                 />
               </div>
               <div>
                 <Input
-                  label="Password"
-                  type="password"
-                  placeholder="••••••••"
-                  register={register("password")}
-                  error={errors.password?.message}
+                  label="Name"
+                  type="text"
+                  placeholder="John Doe"
+                  register={register("name")}
+                  error={errors.name?.message}
                 />
               </div>
               <div>
@@ -83,13 +113,23 @@ const EditDrawer = ({
                   error={errors.mobile?.message}
                 />
               </div>
+              <div>
+                <Input
+                  label="Password"
+                  type="password"
+                  placeholder="••••••••"
+                  register={register("password")}
+                  error={errors.password?.message}
+                />
+              </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-6">
               <Button
-                name="Confirm Edit"
+                name="Submit"
                 type="submit"
-                className="bg-red-600 px-4  py-1.5 text-[16px] text-white"
+                loading={updateUserMn.isPending}
+                className="bg-red-600 h-[30px] w-[100px] text-[16px] text-white"
               />
             </div>
           </form>

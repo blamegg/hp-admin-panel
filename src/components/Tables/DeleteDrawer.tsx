@@ -2,12 +2,12 @@
 import { Drawer } from "@mui/material";
 import React, { useState } from "react";
 import { RxCrossCircled } from "react-icons/rx";
-import { AiOutlineDelete } from "react-icons/ai"; // Import delete icon
-import Button from "@/components/common/Button"; // Assuming you have a common Button component
-import { ImSpinner2 } from "react-icons/im"; // Import a spinner icon for loading
+import { AiOutlineDelete } from "react-icons/ai";
+import Button from "@/components/common/Button";
+import { ImSpinner2 } from "react-icons/im";
 import { FaCheckCircle } from "react-icons/fa";
 import ModalHeader from "../common/ModalHeader";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteUserFn } from "@/utility/queryFetcher";
 
 interface UserDrawerProps {
@@ -27,44 +27,27 @@ const DeleteDrawer = ({
   setSelected,
   selected,
 }: UserDrawerProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false);
+  const queryClient = useQueryClient();
   const deleteUserMn = useMutation({
     mutationFn: (userId: string) => deleteUserFn(userId),
-    // onSuccess: (data) => {
-    //   reset();
-    //   toast.success("user created successfully");
-    // },
-    // onError: (error) => {
-    //   toast.error("failed to create user");
-    // },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["menu-list"] });
+    },
   });
 
   const handleDelete = () => {
-    deleteUserMn.mutate("23");
-    // setIsLoading(true);
-    // setTimeout(() => {
-    //   setIsLoading(false);
-    //   setIsDeleted(true);
-    // }, 2000);
-  };
-
-  const resetState = () => {
-    // setIsLoading(false);
-    // setIsDeleted(false);
-    setSelected(null);
-  };
-
-  const handleCloseDrawer = () => {
-    setDeleteDrawer(false);
-    setTimeout(resetState, 1000);
+    deleteUserMn.mutate(selected._id);
   };
 
   return (
     <Drawer
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
-      onClose={() => {}}
+      onClose={() => {
+        setDeleteDrawer(false);
+        setSelected(null);
+        deleteUserMn.reset();
+      }}
       disableEnforceFocus
       PaperProps={{
         sx: {

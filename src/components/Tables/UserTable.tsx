@@ -11,7 +11,7 @@ import Button from "@/components/common/Button";
 import DeleteDrawer from "./DeleteDrawer";
 import { useQuery } from "@tanstack/react-query";
 import { usersFn } from "@/utility/queryFetcher";
-import { formatTime } from "@/utility/helper";
+import { formatTime, formatTimestamp } from "@/utility/helper";
 import EditDrawer from "./EditDrawer";
 
 const UserTable = () => {
@@ -71,22 +71,22 @@ const UserTable = () => {
       width: "80px",
     },
     {
-      name: "Name",
-      selector: (row: any) => row.name || "",
-      sortable: true,
-      width: "200px",
-    },
-    {
       name: "Email",
       selector: (row: any) => row.email || "",
       sortable: true,
       width: "200px",
     },
     {
-      name: "Date Created",
-      selector: (row: any) => row.createdAt,
+      name: "Name",
+      selector: (row: any) => row.name || "",
       sortable: true,
-      width: "150px",
+      width: "200px",
+    },
+    {
+      name: "Mobile",
+      selector: (row: any) => row.mobile || "",
+      sortable: true,
+      width: "200px",
     },
     {
       name: "Status",
@@ -95,11 +95,20 @@ const UserTable = () => {
       width: "100px",
     },
     {
+      name: "Date Created",
+      selector: (row: any) => formatTimestamp(row.createdAt),
+      sortable: true,
+      width: "150px",
+    },
+    {
       name: "Actions",
       cell: (row: any) => (
         <div className="flex gap-2">
           <button
-            onClick={() => console.log(`Edit item with ID: ${row.id}`)}
+            onClick={() => {
+              setSelected(row);
+              toggleEditDrawer(true);
+            }}
             className="text-blue-500 hover:text-blue-700"
           >
             <FaEdit />
@@ -138,7 +147,7 @@ const UserTable = () => {
           <Button
             name="Create User"
             type="submit"
-            onClick={() => toggleEditDrawer(true)}
+            onClick={() => toggleUserDrawer(true)}
           />
           <Tooltip
             title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
@@ -152,7 +161,7 @@ const UserTable = () => {
 
         <div className="mt-5 overflow-x-auto">
           <DataTable
-            columns={[]}
+            columns={columns}
             data={userList?.data}
             pagination
             paginationPerPage={rowsPerPage}
@@ -217,6 +226,8 @@ const UserTable = () => {
         direction={direction}
         isDrawerOpen={editDrawer}
         toggleDrawer={toggleEditDrawer}
+        selected={selected}
+        setSelected={setSelected}
       />
       <DeleteDrawer
         direction={direction}

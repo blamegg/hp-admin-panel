@@ -7,6 +7,7 @@ interface InputProps {
   type: "text" | "email" | "number" | "password";
   register?: any;
   error?: string;
+  disabled?: boolean;
 }
 
 const Input = ({
