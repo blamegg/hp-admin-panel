@@ -11,7 +11,7 @@ import Basic from "./UserTab/Basic";
 import Company from "./UserTab/Company";
 import Personalization from "./UserTab/Personalization";
 import ModalHeader from "../common/ModalHeader";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createUserFn } from "@/utility/queryFetcher";
 import { UserDrawerProps } from "@/types/CreateUser";
 import { UserFormInputs, userSchema } from "@/schema/createUserSchema";
@@ -24,17 +24,6 @@ const CreateUserDrawer = ({
 }: UserDrawerProps) => {
   const [profile, setProfile] = useState<string>("/images/user/user-06.png");
   const [selectedTab, setSelectedTab] = useState<string>("Basic");
-  const createUserMn = useMutation({
-    mutationFn: (payload: any) => createUserFn(payload),
-    onSuccess: (data) => {
-      reset();
-      toast.success("user created successfully");
-    },
-    onError: (error) => {
-      toast.error("failed to create user");
-    },
-  });
-
   const {
     register,
     handleSubmit,
@@ -42,6 +31,24 @@ const CreateUserDrawer = ({
     formState: { errors },
   } = useForm<UserFormInputs>({
     resolver: zodResolver(userSchema),
+  });
+  const queryClient = useQueryClient();
+
+  const createUserMn = useMutation({
+    mutationFn: (payload: any) => createUserFn(payload),
+    onSuccess: () => {
+      reset();
+      toast.success("Users is successfully created");
+      queryClient.refetchQueries({ queryKey: ["menu-list"] });
+      toggleDrawer(false);
+    },
+    onError: (error: any) => {
+      let errorMessage = error?.response?.data?.message;
+      if (typeof errorMessage !== "string") {
+        errorMessage = "unknown error";
+      }
+      toast.error(errorMessage);
+    },
   });
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +63,6 @@ const CreateUserDrawer = ({
   };
 
   const onSubmit = (data: UserFormInputs) => {
-    console.log(data);
     createUserMn.mutate({ ...data });
   };
 
@@ -173,11 +179,11 @@ const CreateUserDrawer = ({
             )}
           </div>
 
-          <div className="mt-10 grid place-items-center">
+          <div className="mx-10 mt-6">
             <Button
               name="Submit"
               type="submit"
-              className="mx-7 px-18 py-2 text-[16px]"
+              className="h-[30px] w-[100px] text-[16px]"
             />
           </div>
         </form>
