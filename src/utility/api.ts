@@ -2,8 +2,7 @@ import api from "axios";
 import { getTokenCookie } from "./helper";
 
 export const apiClient = api.create({
-  baseURL: "http://server1.apinext.in:3002",
-  // withCredentials: true,
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
 });
 
 export const ApiEndpoints = {
