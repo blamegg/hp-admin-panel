@@ -3,6 +3,7 @@ import { getTokenCookie } from "./helper";
 
 export const apiClient = api.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+  withCredentials: true,
 });
 
 export const ApiEndpoints = {
