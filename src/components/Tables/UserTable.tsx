@@ -1,5 +1,5 @@
 "use client";
-import { FaRegQuestionCircle } from "react-icons/fa";
+import { FaEye, FaRegQuestionCircle } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash } from "react-icons/fa";
@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usersFn } from "@/utility/queryFetcher";
 import { formatTime, formatTimestamp } from "@/utility/helper";
 import EditDrawer from "./EditDrawer";
+import ViewDrawer from "./UserTab/ViewDrawer";
 
 const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
@@ -23,6 +24,7 @@ const UserTable = () => {
   const [UserDrawer, setUserDrawer] = useState(false);
   const [deleteDrawer, setDeleteDrawer] = useState(false);
   const [editDrawer, setEditDrawer] = useState(false);
+  const [viewDrawer, setViewDrawer] = useState(false);
   const [selected, setSelected] = useState(null);
   const { direction } = useDirection();
   const { data: userList } = useQuery({
@@ -50,6 +52,9 @@ const UserTable = () => {
     setDeleteDrawer(true);
     setSelected(row);
   };
+  const handleViewClick = (row: any) => {
+    setViewDrawer(true);
+  };
 
   const toggleUserDrawer = (value: boolean) => {
     setUserDrawer(value);
@@ -61,6 +66,9 @@ const UserTable = () => {
 
   const toggleEditDrawer = (value: boolean) => {
     setEditDrawer(value);
+  };
+  const toggleViewDrawer = (value: boolean) => {
+    setViewDrawer(value);
   };
 
   const columns = [
@@ -120,6 +128,14 @@ const UserTable = () => {
             className="text-red-500 hover:text-red-700"
           >
             <FaTrash />
+          </button>
+          <button
+            onClick={() => {
+              handleViewClick(row);
+              toggleViewDrawer(true);
+            }}
+          >
+            <FaEye className="w-3 h-3" />
           </button>
         </div>
       ),
@@ -236,6 +252,13 @@ const UserTable = () => {
         isDrawerOpen={deleteDrawer}
         toggleDrawer={toggleDeleteDrawer}
         setDeleteDrawer={setDeleteDrawer}
+        selected={selected}
+        setSelected={setSelected}
+      />
+       <ViewDrawer
+        direction={direction}
+        isDrawerOpen={viewDrawer}
+        toggleDrawer={toggleViewDrawer}
         selected={selected}
         setSelected={setSelected}
       />
