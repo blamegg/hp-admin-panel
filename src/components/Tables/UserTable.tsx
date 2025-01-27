@@ -14,6 +14,7 @@ import { usersFn } from "@/utility/queryFetcher";
 import { formatTime, formatTimestamp } from "@/utility/helper";
 import EditDrawer from "./EditDrawer";
 import ViewDrawer from "./UserTab/ViewDrawer";
+import { usePathname } from "next/navigation";
 
 const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
@@ -26,6 +27,14 @@ const UserTable = () => {
   const [editDrawer, setEditDrawer] = useState(false);
   const [viewDrawer, setViewDrawer] = useState(false);
   const [selected, setSelected] = useState(null);
+  const pathname = usePathname();
+  const [showSearchBar, setShowSearchBar] = useState(false);
+
+  useEffect(() => {
+    const path = pathname.toLowerCase();
+    setShowSearchBar(path.includes('/users') );
+  }, [pathname]);
+
   const { direction } = useDirection();
   const { data: userList } = useQuery({
     queryKey: ["menu-list"],
@@ -146,36 +155,41 @@ const UserTable = () => {
   return (
     <>
       <div className="custom_tbl_container h-[90vh] max-w-[800px] md:max-w-full">
-        <div className="flex items-center gap-4">
-          <select
-            value={searchBasis}
-            onChange={(e) => setSearchBasis(e.target.value)}
-            className="rounded border px-1 py-2 text-[12px] text-black outline-none"
-          >
-            <option value="name">Name</option>
-            <option value="email">Email</option>
-          </select>
-          <input
-            type="text"
-            placeholder={`Search by ${searchBasis}...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded border p-1 text-[12px] text-black outline-none"
-          />
-          <Button
-            name="Create User"
-            type="submit"
-            onClick={() => toggleUserDrawer(true)}
-          />
-          <Tooltip
-            title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
-            arrow
-          >
-            <button>
-              <FaRegQuestionCircle />
-            </button>
-          </Tooltip>
-        </div>
+        {
+          showSearchBar && (
+            <div className="flex items-center gap-4">
+            <select
+              value={searchBasis}
+              onChange={(e) => setSearchBasis(e.target.value)}
+              className="rounded border px-1 py-2 text-[12px] text-black outline-none"
+            >
+              <option value="name">Name</option>
+              <option value="email">Email</option>
+            </select>
+            <input
+              type="text"
+              placeholder={`Search by ${searchBasis}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded border p-1 text-[12px] text-black outline-none"
+            />
+            <Button
+              name="Create User"
+              type="submit"
+              onClick={() => toggleUserDrawer(true)}
+            />
+            <Tooltip
+              title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
+              arrow
+            >
+              <button>
+                <FaRegQuestionCircle />
+              </button>
+            </Tooltip>
+          </div>
+          )
+        }
+       
 
         <div className="mt-5 overflow-x-auto">
           <DataTable

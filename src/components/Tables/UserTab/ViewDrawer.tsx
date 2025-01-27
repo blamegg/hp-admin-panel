@@ -1,7 +1,6 @@
 "use client";
 import { Drawer } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import Button from "@/components/common/Button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import ModalHeader from "@/components/common/ModalHeader";
@@ -11,6 +10,7 @@ import { user3 } from "@/assets";
 import { Calendar, dayjsLocalizer, Views } from 'react-big-calendar'
 import dayjs from 'dayjs'
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import BasicTabs from "@/components/tabs";
 
 const ViewDrawer = ({
     direction,
@@ -75,7 +75,7 @@ const ViewDrawer = ({
                 <div className="flex justify-between px-8">
                     <div className="mt-6 px-6 w-4/6">
                         <form onSubmit={handleSubmit(onSubmit)}>
-                            <div className="grid gap-4 md:grid-cols-1">
+                            <div className="flex justify-between">
                                 <div>
                                     <Input
                                         label="Email"
@@ -104,81 +104,27 @@ const ViewDrawer = ({
                                         error={errors.mobile?.message}
                                     />
                                 </div>
+                                    </div>
                                 <div>
-                                    <h1 className="text-black font-semibold">Address</h1>
+                                    <h1 className="text-black font-semibold mt-3">Address</h1>
                                     <textarea
-                                        rows={4}
+                                        rows={3}
                                         name=""
                                         id=""
                                         className="border w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     ></textarea>
                                 </div>
-
-                                <div>
-                                    <Calendar
-                                        localizer={localizer}
-                                        // events={myEventsList}
-                                        startAccessor="start"
-                                        endAccessor="end"
-                                        views={[Views.MONTH, Views.WEEK, Views.DAY]}  
-                                        style={{ height: 500,width: 980    }}
-                                        onSelectSlot={handleDateSelect}
-                                        selectable 
-                                        selected={selectedDate}     
-                                    />
-                                </div>
-
-                                <div  className="mt-4">
-                                <h1 className="text-black font-semibold mb-2">
-                                        Leave Information
-                                    </h1>
-
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <p className="text-gray-600 font-semibold">
-                                                Total Leave
-                                            </p>
-                                            <p className="text-black">{leaveData.totalLeave}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-600 font-semibold">
-                                                Taking Leave
-                                            </p>
-                                            <p className="text-black">{leaveData.takingLeave}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-600 font-semibold">
-                                                Remaining Leave
-                                            </p>
-                                            <p className="text-black">
-                                                {leaveData.remainingLeave}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-
-
-                            <div className="py-6">
-                                <Button
-                                    name="Close"
-                                    type="button"
-                                    onClick={() => {
-                                        toggleDrawer(false);
-                                        setSelected(null);
-                                    }}
-                                    className="bg-gray-500 h-[30px] w-[100px] text-[16px] text-white"
-                                />
-                            </div>
                         </form>
 
                     </div>
                     <div className="w-1/4 mt-6">
-                        <img src={user3.src} alt="abc" className="rounded-2xl" />
+                        <img src={user3.src} alt="abc" className="rounded-2xl w-[180px]" />
                     </div>
                 </div>
+                <div>
+                    <BasicTabs />
+                </div>
+
             </div>
         </Drawer>
     );

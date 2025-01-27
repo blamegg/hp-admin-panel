@@ -1,3 +1,4 @@
+import { FaUsersGear } from "react-icons/fa6";
 import {
   TbHome,
   TbUser,
@@ -6,10 +7,10 @@ import {
   TbFileInvoice,
 } from "react-icons/tb";
 
-// default icon
+// Default icon
 export const defaultSvg = <TbFileInvoice size={18} />;
 
-// sidebar icons list
+// Sidebar icons list
 export const menuItems = [
   {
     name: "Home",
@@ -27,6 +28,10 @@ export const menuItems = [
     name: "Messages",
     icon: <TbMessageCircle size={18} />,
   },
+  {
+    name: "Role and Responsibility",
+    icon: <FaUsersGear size={18} />,
+  },
 ];
 
 export const staticMenu = [
@@ -34,7 +39,7 @@ export const staticMenu = [
     name: "MENU LIST",
     menuItems: menuItems.map((menuItem) => ({
       label: menuItem.name,
-      route: `/${menuItem.name.toLowerCase()}`,
+      route: `/${menuItem.name.replace(/\s+/g, "").toLowerCase()}`, 
       icon: menuItem.icon || defaultSvg,
     })),
   },

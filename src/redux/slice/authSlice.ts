@@ -93,7 +93,20 @@ const authSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.registerStatus = "failed";
         state.registerError = action.payload as string;
+      })
+      .addCase(logoutUser.pending, (state) => {
+        state.loginStatus = "loading"; // Optionally set status if needed
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null; // Clear user data
+        state.loginStatus = "idle"; // Reset login status
+        state.loginError = null; // Clear errors
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.loginStatus = "failed";
+        state.loginError = action.payload as string;
       });
+
   },
 });
 
