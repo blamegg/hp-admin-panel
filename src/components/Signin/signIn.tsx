@@ -1,7 +1,7 @@
 "use client";
 import { logo, signingBg } from "@/assets";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { TextField, FormControlLabel, Switch, IconButton } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
@@ -48,12 +48,6 @@ export const Signin = () => {
   const { loginStatus, user } = useSelector(
     (state: RootState) => state.authReducer,
   );
-
-  useEffect(() => {
-    if (user) {
-      router.push("/dashboard");
-    }
-  }, [router, user]);
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
