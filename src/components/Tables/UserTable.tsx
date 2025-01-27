@@ -1,5 +1,5 @@
 "use client";
-import { FaRegQuestionCircle } from "react-icons/fa";
+import { FaEye, FaRegQuestionCircle } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash } from "react-icons/fa";
@@ -13,6 +13,8 @@ import { useQuery } from "@tanstack/react-query";
 import { usersFn } from "@/utility/queryFetcher";
 import { formatTime, formatTimestamp } from "@/utility/helper";
 import EditDrawer from "./EditDrawer";
+import ViewDrawer from "./UserTab/ViewDrawer";
+import { usePathname } from "next/navigation";
 
 const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
@@ -23,7 +25,16 @@ const UserTable = () => {
   const [UserDrawer, setUserDrawer] = useState(false);
   const [deleteDrawer, setDeleteDrawer] = useState(false);
   const [editDrawer, setEditDrawer] = useState(false);
+  const [viewDrawer, setViewDrawer] = useState(false);
   const [selected, setSelected] = useState(null);
+  const pathname = usePathname();
+  const [showSearchBar, setShowSearchBar] = useState(false);
+
+  useEffect(() => {
+    const path = pathname.toLowerCase();
+    setShowSearchBar(path.includes('/users') );
+  }, [pathname]);
+
   const { direction } = useDirection();
   const { data: userList } = useQuery({
     queryKey: ["menu-list"],
@@ -50,6 +61,9 @@ const UserTable = () => {
     setDeleteDrawer(true);
     setSelected(row);
   };
+  const handleViewClick = (row: any) => {
+    setViewDrawer(true);
+  };
 
   const toggleUserDrawer = (value: boolean) => {
     setUserDrawer(value);
@@ -61,6 +75,9 @@ const UserTable = () => {
 
   const toggleEditDrawer = (value: boolean) => {
     setEditDrawer(value);
+  };
+  const toggleViewDrawer = (value: boolean) => {
+    setViewDrawer(value);
   };
 
   const columns = [
@@ -121,6 +138,14 @@ const UserTable = () => {
           >
             <FaTrash />
           </button>
+          <button
+            onClick={() => {
+              handleViewClick(row);
+              toggleViewDrawer(true);
+            }}
+          >
+            <FaEye className="w-3 h-3" />
+          </button>
         </div>
       ),
       width: "120px",
@@ -130,36 +155,41 @@ const UserTable = () => {
   return (
     <>
       <div className="custom_tbl_container h-[90vh] max-w-[800px] md:max-w-full">
-        <div className="flex items-center gap-4">
-          <select
-            value={searchBasis}
-            onChange={(e) => setSearchBasis(e.target.value)}
-            className="rounded border px-1 py-2 text-[12px] text-black outline-none"
-          >
-            <option value="name">Name</option>
-            <option value="email">Email</option>
-          </select>
-          <input
-            type="text"
-            placeholder={`Search by ${searchBasis}...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded border p-1 text-[12px] text-black outline-none"
-          />
-          <Button
-            name="Create User"
-            type="submit"
-            onClick={() => toggleUserDrawer(true)}
-          />
-          <Tooltip
-            title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
-            arrow
-          >
-            <button>
-              <FaRegQuestionCircle />
-            </button>
-          </Tooltip>
-        </div>
+        {
+          showSearchBar && (
+            <div className="flex items-center gap-4">
+            <select
+              value={searchBasis}
+              onChange={(e) => setSearchBasis(e.target.value)}
+              className="rounded border px-1 py-2 text-[12px] text-black outline-none"
+            >
+              <option value="name">Name</option>
+              <option value="email">Email</option>
+            </select>
+            <input
+              type="text"
+              placeholder={`Search by ${searchBasis}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded border p-1 text-[12px] text-black outline-none"
+            />
+            <Button
+              name="Create User"
+              type="submit"
+              onClick={() => toggleUserDrawer(true)}
+            />
+            <Tooltip
+              title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
+              arrow
+            >
+              <button>
+                <FaRegQuestionCircle />
+              </button>
+            </Tooltip>
+          </div>
+          )
+        }
+       
 
         <div className="mt-5 overflow-x-auto">
           <DataTable
@@ -236,6 +266,13 @@ const UserTable = () => {
         isDrawerOpen={deleteDrawer}
         toggleDrawer={toggleDeleteDrawer}
         setDeleteDrawer={setDeleteDrawer}
+        selected={selected}
+        setSelected={setSelected}
+      />
+       <ViewDrawer
+        direction={direction}
+        isDrawerOpen={viewDrawer}
+        toggleDrawer={toggleViewDrawer}
         selected={selected}
         setSelected={setSelected}
       />
