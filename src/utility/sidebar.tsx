@@ -32,6 +32,10 @@ export const menuItems = [
     name: "Role and Responsibility",
     icon: <FaUsersGear size={18} />,
   },
+  {
+    name: "Projects",
+    icon: <FaUsersGear size={18} />,
+  },
 ];
 
 export const staticMenu = [

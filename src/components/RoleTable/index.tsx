@@ -1,4 +1,4 @@
-'use client';
+'use client'
 import * as React from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -8,12 +8,14 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import Button from '@/components/common/Button';
 import TextField from '@mui/material/TextField';
-import Modal from '@mui/material/Modal';
+import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import { MdDeleteOutline } from 'react-icons/md';
 import { CiEdit } from 'react-icons/ci';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Button from '@mui/material/Button';
 
 interface Column {
   id: 'Role' | 'Permission' | 'Actions';
@@ -31,27 +33,26 @@ const columns: readonly Column[] = [
 interface Data {
   id: number;
   role: string;
-  Permission: string;
+  Permission: string[];
 }
 
 export default function RoleResponsibility() {
   const [rows, setRows] = React.useState<Data[]>([
-    { id: 1, role: 'Admin', Permission: 'Manage all users and settings' },
-    { id: 2, role: 'Manager', Permission: 'Oversee team projects and tasks' },
-    { id: 3, role: 'Developer', Permission: 'Develop and maintain software applications' },
-    { id: 4, role: 'Designer', Permission: 'Create user interface designs' },
-    { id: 5, role: 'QA Engineer', Permission: 'Test software applications' },
+    { id: 1, role: 'Admin', Permission: ['Create', 'Read', 'Update', 'Delete'] },
+    { id: 2, role: 'Manager', Permission: ['Read', 'Update'] },
+    { id: 3, role: 'HR', Permission: ['Read', 'Update'] },
+    { id: 4, role: 'Developer', Permission: ['Read', 'Update'] },
+    { id: 5, role: 'Marketing', Permission: ['Read', 'Update'] },
   ]);
-
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const [open, setOpen] = React.useState(false);
-  const [editMode, setEditMode] = React.useState(false);
+  const [openDrawer, setOpenDrawer] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<Data | null>(null);
-
   const [newRole, setNewRole] = React.useState('');
-  const [newPermission, setNewPermission] = React.useState('');
+  const [permissions, setPermissions] = React.useState<string[]>([]);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const permissionOptions = ['Create', 'Read', 'Update', 'Delete'];
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -66,144 +67,141 @@ export default function RoleResponsibility() {
     setRows((prevRows) => prevRows.filter((row) => row.id !== id));
   };
 
-  const handleAdd = () => {
-    if (newRole.trim() && newPermission.trim()) {
-      if (editMode && selectedRow) {
-        setRows((prevRows) =>
-          prevRows.map((row) =>
-            row.id === selectedRow.id ? { ...row, role: newRole, Permission: newPermission } : row
-          )
-        );
-      } else {
-        const newRow = {
-          id: rows.length + 1,
-          role: newRole,
-          Permission: newPermission,
-        };
-        setRows((prevRows) => [...prevRows, newRow]);
-      }
-
-      setNewRole('');
-      setNewPermission('');
-      setOpen(false);
-      setEditMode(false);
-      setSelectedRow(null);
-    }
-  };
-
-  const handleOpen = () => {
-    setOpen(true);
-    setEditMode(false);
-    setNewRole('');
-    setNewPermission('');
-  };
-
   const handleEdit = (row: Data) => {
     setSelectedRow(row);
     setNewRole(row.role);
-    setNewPermission(row.Permission);
-    setEditMode(true);
-    setOpen(true);
+    setPermissions(row.Permission);
+    setIsEditing(true);
+    setOpenDrawer(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setEditMode(false);
+  const handleCloseDrawer = () => {
+    setOpenDrawer(false);
     setSelectedRow(null);
     setNewRole('');
-    setNewPermission('');
+    setPermissions([]);
+    setIsEditing(false);
   };
+
+  const handleUpdate = () => {
+    if (selectedRow) {
+      setRows((prevRows) =>
+        prevRows.map((row) =>
+          row.id === selectedRow.id ? { ...row, role: newRole, Permission: permissions } : row
+        )
+      );
+    }
+    handleCloseDrawer();
+  };
+
+  const handleAddRole = () => {
+    setOpenDrawer(true);
+    if (newRole.trim() !== '') {
+      setRows(prevRows => [
+        ...prevRows,
+        { id: prevRows.length + 1, role: newRole, Permission: permissions }
+      ]);
+      setNewRole('');
+      setPermissions([]);
+      setOpenDrawer(false);
+      setIsEditing(false);
+    }
+  };
+
+
+  const togglePermission = (permission: string) => {
+    setPermissions((prev) =>
+      prev.includes(permission) ? prev.filter((p) => p !== permission) : [...prev, permission]
+    );
+  };
+
+  const filteredRows = rows.filter(row => row.role.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <div className="flex justify-end">
-        <button
-          onClick={handleOpen}
-          className="m-4 text-end text-white font-medium bg-red rounded-xl p-2"
-        >
-          Add Role
-        </button>
-      </div>
-      <Modal open={open} onClose={handleClose}>
-
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 400,
-            bgcolor: 'background.paper',
-            border: '2px solid #000',
-            boxShadow: 24,
-            p: 4,
+      <h1 className='text-center py-4 text-3xl font-medium text-graydark'>Role and Responsibility</h1>
+      <div className='px-4 mb-4 flex justify-between'>
+        <TextField
+          InputProps={{
+            style: { height: '40px' }
           }}
-        >
-          <h2 className="text-xl font-bold text-center mb-4">Manage Role and Permissions</h2>
-          <TextField
-            fullWidth
-            label="Role"
-            value={newRole}
-            onChange={(e) => setNewRole(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Permission"
-            value={newPermission}
-            onChange={(e) => setNewPermission(e.target.value)}
-            margin="normal"
-          />
-          <button onClick={handleAdd} className="mt-4 text-white bg-blue-500 rounded p-2">
-            {editMode ? 'Update' : 'Add'}
-          </button>
-        </Box>
-      </Modal>
+          label='Search Role' variant='outlined' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+        <Button variant='contained' color='primary' onClick={handleAddRole}>Add Role</Button>
+      </div>
       <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label="sticky table" className='p-4'>
-          <TableHead >
+        <Table stickyHeader className='px-4'>
+          <TableHead>
             <TableRow>
               {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  style={{ minWidth: column.minWidth }}
-                  sx={{ fontWeight: 'bold', color: '#333', backgroundColor: '#f8f2f1' }}
-                  align={column.align}
-                >
+                <TableCell key={column.id} sx={{ fontWeight: 'bold', backgroundColor: '#f8f2f1' }}>
                   {column.label}
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                  <TableCell>{row.role}</TableCell>
-                  <TableCell>{row.Permission}</TableCell>
-                  <TableCell>
-                    <button onClick={() => handleEdit(row)}>
-                      <CiEdit className="w-5 h-5" />
-                    </button>
-                    <button onClick={() => handleDelete(row.id)}>
-                      <MdDeleteOutline className="w-5 h-5 ml-2" />
-                    </button>
-                  </TableCell>
-                </TableRow>
-              ))}
+            {filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              <TableRow hover key={row.id}>
+                <TableCell>{row.role}</TableCell>
+                <TableCell>
+                  {permissionOptions.map((permission) => (
+                    <span key={permission} className={`inline-block px-2 py-1 mx-1 rounded-3xl ${row.Permission.includes(permission) ? 'bg-green-200' : 'bg-gray-200'}`}>
+                      {permission}: {row.Permission.includes(permission) ? '✓ ' : '✗ '}
+                    </span>
+                  ))}
+                </TableCell>
+                <TableCell>
+                  <button onClick={() => handleEdit(row)}><CiEdit className='w-5 h-5' /></button>
+                  <button onClick={() => handleDelete(row.id)}><MdDeleteOutline className='w-5 h-5 ml-2' /></button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={rows.length}
+        component='div'
+        count={filteredRows.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
+      <Drawer anchor="right" open={openDrawer} onClose={handleCloseDrawer}>
+        <Box sx={{ width: 400, padding: 2 }}>
+          <h2 className='py-4 text-lg font-medium'>{isEditing ? 'Edit Role' : 'Add Role'}</h2>
+          <TextField
+            label="Role"
+            variant="outlined"
+            fullWidth
+            value={newRole}
+            onChange={(e) => setNewRole(e.target.value)}
+            sx={{ marginBottom: 2 }}
+          />
+          <div>
+            {permissionOptions.map((permission) => (
+              <FormControlLabel
+                key={permission}
+                control={
+                  <Checkbox
+                    checked={permissions.includes(permission)}
+                    onChange={() => togglePermission(permission)}
+                    name={permission}
+                  />
+                }
+                label={permission}
+              />
+            ))}
+          </div>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+            <Button variant="outlined" onClick={handleCloseDrawer}>Cancel</Button>
+            <Button variant="contained" onClick={isEditing ? handleUpdate : handleAddRole}>
+              {isEditing ? 'Update' : 'Add'}
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
     </Paper>
   );
 }

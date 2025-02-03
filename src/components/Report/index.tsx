@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { GoCommentDiscussion } from "react-icons/go";
-import { Card, CardContent, Typography, Grid, Button } from "@mui/material";
+import { Card, CardContent, Typography, Grid, Button, TextField } from "@mui/material";
 import CommentDrawer from "../Tables/UserTab/CommentDrawer";
+import { Box } from "@mui/system";
 
 const Report = () => {
-    // Example array of objects with standup and report tasks
     const data = [
         {
-            date: "2025-01-22", // Today's date
+            date: "2025-01-22",
             standup: {
                 yesterdayTask: "Completed feature X implementation.",
                 todayTask: "Work on bug fixing for feature Y.",
@@ -19,7 +19,7 @@ const Report = () => {
             },
         },
         {
-            date: "2025-01-21", // Previous day's date
+            date: "2025-02-21",
             standup: {
                 yesterdayTask: "Refactored the authentication module.",
                 todayTask: "Add new validation checks to the login process.",
@@ -31,7 +31,7 @@ const Report = () => {
             },
         },
         {
-            date: "2025-01-21", // Previous day's date
+            date: "2025-01-01",
             standup: {
                 yesterdayTask: "Refactored the authentication module.",
                 todayTask: "Add new validation checks to the login process.",
@@ -46,14 +46,17 @@ const Report = () => {
 
     const [isDrawerOpen, setDrawerOpen] = useState(false);
     const [currentTask, setCurrentTask] = useState<any>(null);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+
 
     const toggleDrawer = (open: boolean) => {
         setDrawerOpen(open);
     };
 
     const handleCommentIconClick = (task: any) => {
-        setCurrentTask(task); // Set current task to the one clicked
-        toggleDrawer(true); // Open the drawer
+        setCurrentTask(task);
+        toggleDrawer(true);
     };
 
     const handleAddComment = (comment: string) => {
@@ -98,6 +101,19 @@ const Report = () => {
         }
     }
 
+    const getFilteredData = () => {
+        if (!startDate && !endDate) {
+            return data;
+        }
+        return data.filter(item =>
+            (!startDate || (item.date >= startDate)) &&
+            (!endDate || (item.date <= endDate))
+        );
+    };
+
+    const filteredData = getFilteredData();
+
+
     return (
         <div className="min-h-screen bg-gradient-to-r from-purple-100 to-indigo-100 ">
             <div className="max-w-7xl mx-auto px-4">
@@ -105,7 +121,40 @@ const Report = () => {
                     Task Reports & Comments
                 </Typography>
 
-                {data.map((item, index) => (
+                <div className="flex gap-4 " >
+                    <Grid item xs={12} sm={12}>
+                        <Box sx={{ py: 1 }}>
+                            <TextField
+                                label="Start Date"
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                InputLabelProps={{
+                                    shrink: true,
+                                    style: { fontSize: 12, lineHeight: 1.5 },
+                                }}
+                                variant="filled"
+                            />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={12}>
+                        <Box sx={{ py: 1 }}>
+                            <TextField
+                                label="End Date"
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                InputLabelProps={{
+                                    shrink: true,
+                                    style: { fontSize: 12, lineHeight: 1.5 },
+                                }}
+                                variant="filled"
+                            />
+                        </Box>
+                    </Grid>
+                </div>
+
+                {filteredData.map((item, index) => (
                     <Card key={index} className="mb-6 bg-white shadow-lg rounded-lg p-6">
                         <div className="flex justify-between items-center">
                             <div className="w-3/4">
@@ -140,7 +189,6 @@ const Report = () => {
                     </Card>
                 ))}
 
-                {/* Comment Drawer */}
                 <CommentDrawer
                     isOpen={isDrawerOpen}
                     onClose={() => toggleDrawer(false)}

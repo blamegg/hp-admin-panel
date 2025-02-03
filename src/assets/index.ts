@@ -12,8 +12,13 @@ import user7 from "./user7.jpg";
 import user8 from "./user8.jpg";
 import user9 from "./user9.jpeg";
 import user10 from "./user10.jpeg";
+import AadharCard from "./adharcard.jpg";
+import Pancard from "./pancard.webp";
+
 
 export {
+  AadharCard,
+  Pancard,
   logo,
   signingBg,
   usercover,

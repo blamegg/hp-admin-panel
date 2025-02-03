@@ -11,11 +11,10 @@ const authPersistConfig = {
   storage,
 };
 
-const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 
 const store = configureStore({
   reducer: {
-    authReducer: persistedAuthReducer,
+    authReducer: authReducer,
     app: appReducer,
     message: messageReducer,
     menu: menuReducer,
