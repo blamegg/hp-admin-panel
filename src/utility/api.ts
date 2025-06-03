@@ -12,6 +12,11 @@ export const ApiEndpoints = {
   logout: "/api/v1/logout",
   menu: "/api/v1/menus",
   users: "/api/v1/users",
+  roles: "/api/v1/roles",
+  permissions: "/api/v1/permissions",
+  rolesPaginated: "/api/v1/roles?page=1&limit=4",
+  deleteRole: (id: string) => `/api/v1/roles/${id}`,
+  updateRole: (id: string) => `/api/v1/roles/${id}`,
 };
 
 apiClient.interceptors.request.use(
