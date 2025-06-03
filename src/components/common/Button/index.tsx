@@ -10,7 +10,6 @@ interface ButtonProps {
   className?: string;
   loading?: boolean;
   loadingSpinnerClassName?: string;
-  disableDefaultBg?: boolean;
 }
 
 const Button = ({
@@ -20,13 +19,9 @@ const Button = ({
   className,
   loading = false,
   loadingSpinnerClassName,
-  disableDefaultBg = false,
   ...props
 }: ButtonProps) => {
   const color = useSelector((state: RootState) => state?.app?.color);
-
-  // Check if a background color class is present in the className prop
-  const hasBgClass = className && className.split(' ').some(cls => cls.startsWith('bg-'));
 
   return (
     <button
@@ -39,7 +34,7 @@ const Button = ({
         loading && "cursor-not-allowed opacity-70",
         className,
       )}
-      style={{ backgroundColor: disableDefaultBg ? undefined : color }}
+      style={{ backgroundColor: color }}
     >
       {loading ? (
         <>
