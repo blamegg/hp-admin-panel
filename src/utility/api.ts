@@ -12,6 +12,9 @@ export const ApiEndpoints = {
   logout: "/api/v1/logout",
   menu: "/api/v1/menus",
   users: "/api/v1/users",
+  roles: "/api/v1/roles",
+  permissions: "/api/v1/permissions",
+  
 };
 
 apiClient.interceptors.request.use(

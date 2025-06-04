@@ -1,4 +1,5 @@
 import { FaUsersGear } from "react-icons/fa6";
+import { MdLockOutline } from "react-icons/md";
 import {
   TbHome,
   TbUser,
@@ -31,6 +32,10 @@ export const menuItems = [
   {
     name: "Role and Responsibility",
     icon: <FaUsersGear size={18} />,
+  },
+  {
+    name: "Permissions",
+    icon: <MdLockOutline size={18} />,
   },
 ];
 
