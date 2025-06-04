@@ -67,6 +67,8 @@ export default function RoleResponsibility() {
   const [permissionsList, setPermissionsList] = React.useState<{ _id: string; name: string }[]>([]);
   const [totalDocument, setTotalDocument] = React.useState(0);
   
+
+
   const fetchRoles = async () => {
     setLoading(true);
     setError(null);

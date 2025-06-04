@@ -2,7 +2,7 @@ import { apiClient, ApiEndpoints } from "./api";
 
 // fetch menu list
 export const menuListFn = async () => {
-  const response = await apiClient.get(ApiEndpoints.menu);
+  const response = await apiClient.get(ApiEndpoints.menus);
   return response.data.data;
 };
 

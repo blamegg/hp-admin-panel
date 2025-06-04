@@ -14,7 +14,8 @@ export const ApiEndpoints = {
   users: "/api/v1/users",
   roles: "/api/v1/roles",
   permissions: "/api/v1/permissions",
-  
+  menus:"/api/v1/menus",
+  sub_menus:"/api/v1/sub_menus",
 };
 
 apiClient.interceptors.request.use(
