@@ -105,7 +105,7 @@ const UserTable = () => {
       name: "Mobile",
       selector: (row: any) => row.mobile || "",
       sortable: true,
-      width: "200px",
+      width: "160px",
     },
     {
       name: "Status",
@@ -122,7 +122,7 @@ const UserTable = () => {
     {
       name: "Actions",
       cell: (row: any) => (
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <button
             onClick={() => {
               setSelected(row);
@@ -154,7 +154,7 @@ const UserTable = () => {
 
   return (
     <>
-      <div className="custom_tbl_container h-[90vh] max-w-[800px] md:max-w-full">
+      <div className="custom_tbl_container h-[90vh]">
         {
           showSearchBar && (
             <div className="flex items-center gap-4">
@@ -191,7 +191,7 @@ const UserTable = () => {
         }
        
 
-        <div className="mt-5 overflow-x-auto">
+        <div className="mt-5 overflow-x-auto ">
           <DataTable
             columns={columns}
             data={userList?.data}

@@ -3,7 +3,7 @@ import { apiClient, ApiEndpoints } from "./api";
 // fetch menu list
 export const menuListFn = async () => {
   const response = await apiClient.get(ApiEndpoints.menus);
-  return response.data.data;
+  return response.data;
 };
 
 // fetch user list
@@ -45,10 +45,31 @@ export const rolesFn = async (page: number, limit: number) => {
   return response.data;
 };
 
+// create role
+export const createRoleFn = async (payload: { name: string }) => {
+  const response = await apiClient.post(ApiEndpoints.roles, payload);
+  return response.data;
+};
+
+// update role
+export const updateRoleFn = async (payload: { name: string}, roleId: string) => {
+  const response = await apiClient.put(
+    `${ApiEndpoints.roles}/${roleId}`,
+    payload,
+  );
+  return response.data;
+};
+
+// delete role
+export const deleteRoleFn = async (roleId: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.roles}/${roleId}`);
+  return response.data;
+};
+
 // fetch permissions
 export const permissionsFn = async (page: number, limit: number) => {
   const response = await apiClient.get(`${ApiEndpoints.permissions}?page=${page}&limit=${limit}`);
-  return response.data.data;
+  return response.data;
 };
 
 // create permission
@@ -72,23 +93,4 @@ export const deletePermissionFn = async (permissionId: string) => {
   return response.data;
 };
 
-// create role
-export const createRoleFn = async (payload: { name: string; permissions: { _id: string; name: string }[] }) => {
-  const response = await apiClient.post(ApiEndpoints.roles, payload);
-  return response.data;
-};
 
-// update role
-export const updateRoleFn = async (payload: { name: string; permissions: { _id: string; name: string }[] }, roleId: string) => {
-  const response = await apiClient.put(
-    `${ApiEndpoints.roles}/${roleId}`,
-    payload,
-  );
-  return response.data;
-};
-
-// delete role
-export const deleteRoleFn = async (roleId: string) => {
-  const response = await apiClient.delete(`${ApiEndpoints.roles}/${roleId}`);
-  return response.data;
-};

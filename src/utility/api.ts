@@ -7,15 +7,14 @@ export const apiClient = api.create({
 });
 
 export const ApiEndpoints = {
+  menus:"/api/v1/menus",
+  // sub_menus:"/api/v1/sub_menus",
   login: "/api/v1/login",
   register: "/api/v1/signup",
   logout: "/api/v1/logout",
-  menu: "/api/v1/menus",
   users: "/api/v1/users",
   roles: "/api/v1/roles",
   permissions: "/api/v1/permissions",
-  menus:"/api/v1/menus",
-  sub_menus:"/api/v1/sub_menus",
 };
 
 apiClient.interceptors.request.use(

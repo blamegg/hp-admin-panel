@@ -37,7 +37,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       menuItems: menu?.data?.map((e: any) => {
         return {
           label: e.name,
-          route: `/${e.slug.toLowerCase()}`,
+          route: e.slug ? `/${e.slug.toLowerCase()}` : `/${e.name.toLowerCase()}`,
           icon:
             menuItems.find(
               (menuIcon) =>
@@ -57,7 +57,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
-        className={`fixed ${direction === "ltr" ? "left-0" : "right-0"} top-0 z-9999 flex h-full w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
+        className={`fixed ${direction === "ltr" ? "left-0" : "right-0"} top-0 z-9999 flex h-full w-52.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
           sidebarOpen
             ? "translate-x-0"
             : direction === "ltr"
@@ -66,9 +66,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         }`}
       >
         <div className="grid h-[50px] place-items-center">
-          <Link href="/dashboard" className="flex items-center gap-4">
-            <Image width={35} height={35} src={logo.src} alt="Logo" priority />
-            <h5 className="text-[20px] font-semibold text-white">
+          <Link href="/dashboard" className="flex items-center justify-start gap-2 ">
+            <Image width={30} height={30} src={logo.src} alt="Logo" priority />
+            <h5 className="text-[17px] font-semibold text-white">
               Hanging Panda
             </h5>
           </Link>
@@ -98,7 +98,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           <nav>
             {staticMenu.map((group, groupIndex) => (
               <div key={groupIndex}>
-                <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+                <h3 className="mb-4 ml-4 mr-4 text-sm text-[13px] font-semibold text-bodydark2">
                   {group.name}
                 </h3>
 

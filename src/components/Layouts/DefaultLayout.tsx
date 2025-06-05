@@ -22,7 +22,7 @@ export default function DefaultLayout({
 
         {/* <!-- ===== Content Area Start ===== --> */}
         <div
-          className={`relative flex flex-1 flex-col ${direction === "ltr" ? "lg:ml-72.5" : "lg:mr-72.5"}`}
+          className={`relative flex flex-1 flex-col ${direction === "ltr" ? "lg:ml-52.5" : "lg:mr-52.5"}`}
         >
           {/* <!-- ===== Header Start ===== --> */}
           <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -30,7 +30,7 @@ export default function DefaultLayout({
 
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>
-            <div className="mx-auto max-w-screen-2xl px-4 py-2 md:px-6 md:py-3 2xl:px-10 2xl:py-4">
+            <div className="mx-auto max-w-screen-2xl  px-4 py-2 md:px-6 md:py-3 2xl:px-10 2xl:py-4 ">
               {children}
             </div>
             <BottomStrip />

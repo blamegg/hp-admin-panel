@@ -123,7 +123,7 @@ const PermissionsPage = () => {
           <button onClick={() => setIsAddModalOpen(true)} className='bg-[#7747ff] text-white px-2 py-[2px] rounded-md'>Add Permission</button>
         </div>
         <TableContainer sx={{ maxHeight: 440 }}>
-          <Table sx={{paddingX:"20px", paddingTop:"10px"}} stickyHeader aria-label="sticky table">
+          <Table sx={{paddingX:"20px", paddingTop:"10px"}} sticky aria-label="sticky table">
             <TableHead>
               <TableRow>
                 <TableCell style={{ minWidth: 170 }} sx={{ fontWeight: 'bold', color: '#333', backgroundColor: '#f8f2f1' }}>Permission Name</TableCell>

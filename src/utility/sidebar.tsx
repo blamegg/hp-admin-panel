@@ -30,13 +30,14 @@ export const menuItems = [
     icon: <TbMessageCircle size={18} />,
   },
   {
-    name: "Role and Responsibility",
+    name: "Roles",
     icon: <FaUsersGear size={18} />,
+    route: '/roles'
   },
-  {
-    name: "Permissions",
-    icon: <MdLockOutline size={18} />,
-  },
+  // {
+  //   name: "Permissions",
+  //   icon: <MdLockOutline size={18} />,
+  // },
 ];
 
 export const staticMenu = [
