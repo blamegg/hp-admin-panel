@@ -20,6 +20,7 @@ import {
   updateRoleFn,
   deleteRoleFn,
   menuListFn,
+  RoleInterFace,
 } from '@/utility/queryFetcher';
 import { useDirection } from '@/context/DirectionContext';
 import AddRoleDrawer from './AddRoleDrawer';
@@ -38,8 +39,8 @@ interface Column {
 }
 
 const columns: readonly Column[] = [
-  { id: 'Role', label: 'Role', minWidth: 170 },
-  { id: 'Actions', label: 'Actions', minWidth: 100 },
+  { id: 'Role', label: 'Role' },
+  { id: 'Actions', label: 'Actions' },
 ];
 
 export interface Data {
@@ -74,9 +75,10 @@ export default function Roles() {
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = React.useState(false);
   const [isViewDrawerOpen, setIsViewDrawerOpen] = React.useState(false);
   const [isPermissiondrawerOpen, setIsPermissionDrawerOpen] = React.useState(false);
-  const [permissionDrawerRole, setPermissionDrawerRole] = React.useState<string | null>(null);
+  const [permissionDrawerRole, setPermissionDrawerRole] = React.useState<RoleInterFace | null>(null);
 
   const { direction } = useDirection();
+
 
   const fetchRoles = async () => {
     setLoading(true);
@@ -84,13 +86,14 @@ export default function Roles() {
     try {
       const response = await rolesFn(pageNumber, limit);
       setRoles(response);
-      setTotalDocument(response.totalDocument);
+      setTotalDocument(response.pagination.total);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
+
 
   const fetchPermissionMenus = async () => {
     setError(null);
@@ -102,7 +105,6 @@ export default function Roles() {
     }
   };
 
-  console.log(permissionsMenuList)
 
   React.useEffect(() => {
     fetchRoles();
@@ -120,10 +122,10 @@ export default function Roles() {
 
   const handleCreateRole = async (role: string): Promise<boolean> => {
     try {
-      await createRoleFn({name: role});
+      const currentRoleData = await createRoleFn({ name: role });
       fetchRoles();
       toast.success("New Role created successfully");
-      togglePermissionDrawer(true, role);
+      togglePermissionDrawer(true, currentRoleData);
       return true;
     } catch (err: any) {
       console.error('Failed to add role:', err);
@@ -138,7 +140,7 @@ export default function Roles() {
       return false;
     }
     try {
-      await updateRoleFn({name: role},currentRole._id);
+      await updateRoleFn({ name: role }, currentRole._id);
       fetchRoles();
       toast.success("Role updated successfully")
       return true;
@@ -148,6 +150,7 @@ export default function Roles() {
       return false;
     }
   };
+
 
   const handleDeleteRole = async (id: string) => {
     try {
@@ -177,10 +180,11 @@ export default function Roles() {
     setIsViewDrawerOpen(value);
   };
 
-  const togglePermissionDrawer = (value:boolean, role: string)=>{
+  const togglePermissionDrawer = (value: boolean, role: RoleInterFace) => {
     setIsPermissionDrawerOpen(value);
-    if(role) setPermissionDrawerRole(role)
+    if (role) setPermissionDrawerRole(role)
   }
+console.log(roles)
 
   if (loading) return <Typography>Loading roles...</Typography>;
   if (error) return <Typography color="error">Error: {error}</Typography>;
@@ -192,21 +196,20 @@ export default function Roles() {
           onClick={() => togglePermissionDrawer(true)}
           // onClick={() => toggleAddDrawer(true)}
           className='px-2 py-1 rounded-md'
-          style={{ backgroundColor: '#3b82f6', color: 'white' }}
+          style={{ backgroundColor: '#ff505d', color: 'white' }}
         >Create Role</button>
       </div>
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-        <TableContainer sx={{ maxHeight: 440 }}>
-          <Table sx={{ paddingX: "20px", paddingTop:"5px" }} stickyHeader aria-label="sticky table">
+        <TableContainer sx={{ maxHeight: 380 }}>
+          <Table sx={{ paddingTop: "5px" }} stickyHeader aria-label="sticky table">
             <TableHead >
               <TableRow>
                 {columns.map((column) => (
                   <TableCell
                     key={column.id}
                     style={{ minWidth: column.minWidth }}
-                    sx={{ fontWeight: 'bold', color: '#333', fontSize: "12px" }}
+                    sx={{ fontWeight: 'bold', color: '#333', fontSize: "12px", padding: "0 0 0 20px" }}
                     align={column.align}
-                    className='font-[12px]'
                   >
                     {column.label}
                   </TableCell>
@@ -217,15 +220,16 @@ export default function Roles() {
               {(roles?.data || []).map((row: Data) => {
                 return (
                   <TableRow hover role="checkbox" tabIndex={-1} key={row._id} sx={{ fontSize: "5px" }}>
-                    <TableCell sx={{ fontSize: "10px" }}>{row.name}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ fontSize: "10px", padding:"0 0 0 20px" }}>{row.name}</TableCell>
+
+                    <TableCell sx={{padding:0}}>
                       <button
                         onClick={() => {
                           console.log('Edit button clicked. Row ID:', row._id);
                           setCurrentRole(row);
                           toggleEditDrawer(true);
                         }}
-                        className='text-[#7747ff] p-1 rounded-md hover:bg-gray-100'
+                        className='text-[#7747ff]  rounded-md hover:bg-gray-100'
                       >
                         <CiEdit className='w-4 h-4' />
                       </button>
@@ -289,13 +293,16 @@ export default function Roles() {
           direction={direction}
           isDrawerOpen={isViewDrawerOpen}
           toggleDrawer={toggleViewDrawer}
-          selected={currentRole}
+          selectedRole={currentRole}
+          togglePermissionDrawer={togglePermissionDrawer}
+          fetchRoles={fetchRoles}
         />
         <PermissionDrawer
           isDrawerOpen={isPermissiondrawerOpen}
           toggleDrawer={togglePermissionDrawer}
           permissionsMenuList={permissionsMenuList}
           role={permissionDrawerRole}
+          fetchRoles={fetchRoles}
         />
       </Paper>
     </div>

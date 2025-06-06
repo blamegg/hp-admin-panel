@@ -245,7 +245,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .MuiTableCell-root {
-  padding: 4px !important;
+  padding: 4px;
 }
 
 ::-webkit-scrollbar {

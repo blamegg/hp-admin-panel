@@ -1,5 +1,59 @@
 import { apiClient, ApiEndpoints } from "./api";
 
+export interface CreatedBy{
+  email:string,
+  name:string,
+  _id:string
+}
+
+export interface CurrentRoleDataInterFace{
+_id:string,
+    createdAt:string,
+    updatedAt:string,
+    updated_by:string,
+    __v:number,
+    created_by: CreatedBy,
+    deleted:boolean,
+    name:string,
+    status:boolean
+}
+export interface RoleInterFace {
+  data: CurrentRoleDataInterFace[],
+  message: string,
+  pagination?: {
+    currentPage: number,
+    hasNext: boolean,
+    limit: number,
+    total: number,
+    totalPages: number
+
+  },
+  success: boolean
+}
+
+export interface UpdatePermissionInterface {
+  role_id: string,
+  menus: [
+    {
+      menu_id: string,
+      is_parent: number,
+      sub_menus: [
+        {
+          menu_id: string
+        },
+        {
+          menu_id: string
+        }
+      ]
+    },
+    {
+      menu_id: string,
+      is_parent: number
+    }
+  ]
+}
+
+
 // fetch menu list
 export const menuListFn = async () => {
   const response = await apiClient.get(ApiEndpoints.menus);
@@ -39,6 +93,7 @@ export const deleteUserFn = async (userId: string) => {
   return response.data;
 };
 
+
 // fetch roles
 export const rolesFn = async (page: number, limit: number) => {
   const response = await apiClient.get(`${ApiEndpoints.roles}?page=${page}&limit=${limit}`);
@@ -52,7 +107,7 @@ export const createRoleFn = async (payload: { name: string }) => {
 };
 
 // update role
-export const updateRoleFn = async (payload: { name: string}, roleId: string) => {
+export const updateRoleFn = async (payload: { name: string }, roleId: string) => {
   const response = await apiClient.put(
     `${ApiEndpoints.roles}/${roleId}`,
     payload,
@@ -72,25 +127,27 @@ export const permissionsFn = async (page: number, limit: number) => {
   return response.data;
 };
 
-// create permission
-export const createPermissionFn = async (payload: { name: string; menuId: string; subMenuId: string | null; isActive: boolean }) => {
-  const response = await apiClient.post(ApiEndpoints.permissions, payload);
-  return response.data;
-};
+// // create permission
+// export const createPermissionFn = async (payload: { name: string; menuId: string; subMenuId: string | null; isActive: boolean }) => {
+//   const response = await apiClient.post(ApiEndpoints.permissions, payload);
+//   return response.data;
+// };
+
+
 
 // update permission
-export const updatePermissionFn = async (payload: { name: string; menuId: string; subMenuId: string | null; isActive: boolean }, permissionId: string) => {
-  const response = await apiClient.put(
-    `${ApiEndpoints.permissions}/${permissionId}`,
+export const updatePermissionFn = async (payload: UpdatePermissionInterface) => {
+  const response = await apiClient.post(
+    `${ApiEndpoints.updatePermissions}`,
     payload,
   );
   return response.data;
 };
 
-// delete permission
-export const deletePermissionFn = async (permissionId: string) => {
-  const response = await apiClient.delete(`${ApiEndpoints.permissions}/${permissionId}`);
-  return response.data;
-};
+// // delete permission
+// export const deletePermissionFn = async (permissionId: string) => {
+//   const response = await apiClient.delete(`${ApiEndpoints.permissions}/${permissionId}`);
+//   return response.data;
+// };
 
 
