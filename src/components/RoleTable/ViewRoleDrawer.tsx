@@ -2,20 +2,23 @@ import React, { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Typography from "@mui/material/Typography";
-import { Data } from "./index";
+import CloseIcon from '@mui/icons-material/Close';
+import { CurrentRoleDataInterFace} from "@/utility/queryFetcher";
+import Button from "../common/Button";
 
 interface ViewRoleDrawerProps {
   direction: "ltr" | "rtl";
   isDrawerOpen: boolean;
   toggleDrawer: (open: boolean) => void;
-  selectedRole: Data;
+  selectedRole: CurrentRoleDataInterFace | null;
+  togglePermissionDrawer:(open:boolean, role:CurrentRoleDataInterFace | null)=> void;
 }
 
 const ViewRoleDrawer: React.FC<ViewRoleDrawerProps> = ({
   direction,
   isDrawerOpen,
   toggleDrawer,
-  selectedRole,
+  selectedRole, 
   togglePermissionDrawer,
 }) => {
 
@@ -31,14 +34,19 @@ const ViewRoleDrawer: React.FC<ViewRoleDrawerProps> = ({
       onClose={() => toggleDrawer(false)}
     >
       <Box sx={{ width: 350, padding: 2 }}>
-        <Typography variant="h6" sx={{ marginBottom: 2 }}>
-          Role Details
-        </Typography>
+        <div className="flex justify-between items-center mb-2">
+          <Typography variant="h5" sx={{fontWeight:600}}>
+            Role Details
+          </Typography>
+          <button className="bg-graydark" onClick={()=> toggleDrawer(false)}>
+            <CloseIcon />
+          </button>
+        </div>
         <Typography variant="subtitle1" gutterBottom>
-          <strong>Role Name:</strong> {selectedRole?.name}
+          <strong>Role Name:</strong> <span className="text-green-500"> {selectedRole?.name}</span>
         </Typography>
         <h1 className="font-bold text-lg">Assigned Permissions</h1>
-        {selectedRole?.menus?.length === 0 || undefined || null ? (
+        {selectedRole?.menus && selectedRole.menus.length > 0 ? (
           <>
             <div>
               {selectedRole?.menus?.map((permission: any) => (
@@ -53,12 +61,13 @@ const ViewRoleDrawer: React.FC<ViewRoleDrawerProps> = ({
               ))}
             </div>
             <div className="text-center my-2">
-              <button className="bg-[#ff505d] px-2 py-1 mr-2 my-2 rounded-md text-white" onClick={handleUpdatePermissions}>Update Permissions</button>
+              <Button type="button" name="Update Permissions" onClick={handleUpdatePermissions}></Button>
             </div>
-          </>)
-          : <div>
+          </>
+              ) 
+           : <div>
             <p className="my-3"> No Permission Assigned</p>
-            <button className="bg-[#ff505d] px-2 py-1 mr-2 my-2 rounded-md text-white" onClick={handleUpdatePermissions}>Provide Permissions</button>
+            <Button type="button" name="Provide Permissions"  onClick={handleUpdatePermissions}></Button>
           </div>
         }
 

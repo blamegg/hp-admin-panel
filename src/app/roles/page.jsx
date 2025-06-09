@@ -8,7 +8,6 @@ const RolesPage = () => {
     <DefaultLayout>
     <Breadcrumb pageName="Roles" />
     <div className="flex flex-col">
-              
       <Roles />
     </div>
   </DefaultLayout>

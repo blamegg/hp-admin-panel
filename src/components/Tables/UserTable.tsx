@@ -83,7 +83,6 @@ const UserTable = () => {
   const columns = [
     {
       name: "S No",
-      // Use a function to calculate the S No based on current page and rows per page
       selector: (row: any) =>
         (currentPage - 1) * rowsPerPage + (userList?.data.indexOf(row) + 1),
       sortable: true,
@@ -249,6 +248,7 @@ const UserTable = () => {
           />
         </div>
       </div>
+      
       <CreateUserDrawer
         direction={direction}
         isDrawerOpen={UserDrawer}

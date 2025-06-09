@@ -1,27 +1,28 @@
 import React from "react";
-import { Box, Button, Typography, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { Data } from "./index";
-import { Delete } from "@mui/icons-material";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { CurrentRoleDataInterFace } from "@/utility/queryFetcher";
+import Button from "../common/Button";
 
 interface DeleteRolePopupProps {
   isDrawerOpen: boolean;
   toggleDrawer: (open: boolean) => void;
   onDelete: (id: string) => void;
-  selected: Data | null;
+  selectedRole: CurrentRoleDataInterFace | null;
 }
 
 const DeleteRolePopup: React.FC<DeleteRolePopupProps> = ({
   isDrawerOpen: isOpen,
   toggleDrawer: toggleOpen,
   onDelete,
-  selected,
+  selectedRole,
 }) => {
   const handleDelete = () => {
-    if (selected) {
-      onDelete(selected._id);
+    if (selectedRole) {
+      onDelete(selectedRole._id);
       toggleOpen(false);
     }
   };
+
 
   return (
     <Dialog
@@ -35,16 +36,13 @@ const DeleteRolePopup: React.FC<DeleteRolePopupProps> = ({
       </DialogTitle>
       <DialogContent>
         <DialogContentText id="delete-dialog-description">
-          Are you sure you want to delete the role "{selected?.name}"?
+          Are you sure you want to delete the role "{selectedRole?.name}"?
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => toggleOpen(false)} sx={{ mr: 1, backgroundColor:"gray", color:"white" }}>
-          Cancel
+        <Button type="button" name="Cancel" onClick={() => toggleOpen(false)}>
         </Button>
-        <Button onClick={handleDelete} variant="contained" color="error">
-          {/* <Delete /> */}
-          Delete
+        <Button type="submit" name="Delete" onClick={handleDelete} >
         </Button>
       </DialogActions>
     </Dialog>

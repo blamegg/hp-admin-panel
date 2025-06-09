@@ -14,7 +14,7 @@ const BottomStrip = () => {
 
   return (
     <>
-      <div className="fixed bottom-0 z-[2] w-full bg-white px-4 py-[6px] lg:w-[81%]">
+      <div className="fixed bottom-0 z-[2] w-full bg-white px-4 py-[6px] lg:w-[83.5%]">
         <div className="flex justify-end gap-3 ">
           <Link
             href="#"

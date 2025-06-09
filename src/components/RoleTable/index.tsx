@@ -1,35 +1,34 @@
 'use client'
 import * as React from 'react';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import Button from '@/components/common/Button';
-import { MdDelete, MdDeleteOutline } from "react-icons/md";
+import DataTable from "react-data-table-component";
+import { MdDeleteOutline } from "react-icons/md";
 import { CiEdit } from "react-icons/ci";
 import { Typography } from '@mui/material';
-import { apiClient, ApiEndpoints } from '@/utility/api';
 import {
   rolesFn,
-  permissionsFn,
   createRoleFn,
   updateRoleFn,
   deleteRoleFn,
   menuListFn,
-  RoleInterFace,
+  mainMenuInterface,
+  RolesInterFace,
+  CurrentRoleDataInterFace,
+  menuDataInterface,
+  RolesInterFace2,
 } from '@/utility/queryFetcher';
 import { useDirection } from '@/context/DirectionContext';
-import AddRoleDrawer from './AddRoleDrawer';
+import AddRoleDrawer from './CreateRole';
 import EditRoleDrawer from './EditRoleDrawer';
 import DeleteRolePopup from './DeleteRolePopup';
 import ViewRoleDrawer from './ViewRoleDrawer';
 import PermissionDrawer from './PermissionDrawer';
-import { FaEye } from 'react-icons/fa';
+import { FaEye, FaEdit, FaTrash, FaRegQuestionCircle } from 'react-icons/fa';
 import { toast } from 'sonner';
+import { Tooltip } from "@mui/material";
+import Button from "@/components/common/Button";
+import CustomPagination from '../CustomPagination';
+import CreateRole from './CreateRole';
+import EditRole from './EditRoleDrawer';
 
 interface Column {
   id: 'Role' | 'Actions';
@@ -38,44 +37,31 @@ interface Column {
   align?: 'right';
 }
 
-const columns: readonly Column[] = [
-  { id: 'Role', label: 'Role' },
-  { id: 'Actions', label: 'Actions' },
-];
+// const columns: readonly Column[] = [
+//   { id: 'Role', label: 'Role' },
+//   { id: 'Actions', label: 'Actions' },
+// ];
 
-export interface Data {
-  _id: string;
-  name: string;
-  permissions: { _id: string; name: string }[];
-}
 
-interface RolesApiResponse {
-  success: boolean;
-  message: string;
-  totalPages: number;
-  totalDocument: number;
-  pageNumber: number;
-  limit: number;
-  hasNext: boolean;
-  data: Data[];
-}
 
 export default function Roles() {
-  const [pageNumber, setPageNumber] = React.useState(1);
-  const [limit, setLimit] = React.useState(10);
-  const [currentRole, setCurrentRole] = React.useState<Data | null>(null);
-  const [roles, setRoles] = React.useState<RolesApiResponse | null>(null);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [selectedRole, setSelectedRole] = React.useState<CurrentRoleDataInterFace | null>(null);
+  const [roles, setRoles] = React.useState<RolesInterFace | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [permissionsMenuList, setPermissionsMenuList] = React.useState<{ _id: string; name: string }[]>([]);
+  const [permissionsMenuList, setPermissionsMenuList] = React.useState<menuDataInterface[]>([]);
   const [totalDocument, setTotalDocument] = React.useState(0);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchBasis, setSearchBasis] = React.useState("name");
 
   const [isAddDrawerOpen, setIsAddDrawerOpen] = React.useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false);
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = React.useState(false);
   const [isViewDrawerOpen, setIsViewDrawerOpen] = React.useState(false);
   const [isPermissiondrawerOpen, setIsPermissionDrawerOpen] = React.useState(false);
-  const [permissionDrawerRole, setPermissionDrawerRole] = React.useState<RoleInterFace | null>(null);
+  const [permissionDrawerRole, setPermissionDrawerRole] = React.useState<CurrentRoleDataInterFace | null>(null);
 
   const { direction } = useDirection();
 
@@ -84,7 +70,7 @@ export default function Roles() {
     setLoading(true);
     setError(null);
     try {
-      const response = await rolesFn(pageNumber, limit);
+      const response = await rolesFn(currentPage, rowsPerPage);
       setRoles(response);
       setTotalDocument(response.pagination.total);
     } catch (err: any) {
@@ -109,15 +95,15 @@ export default function Roles() {
   React.useEffect(() => {
     fetchRoles();
     fetchPermissionMenus();
-  }, [pageNumber, limit]);
+  }, [currentPage, rowsPerPage]);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPageNumber(newPage + 1);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLimit(+event.target.value);
-    setPageNumber(1);
+  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
   };
 
   const handleCreateRole = async (role: string): Promise<boolean> => {
@@ -135,12 +121,12 @@ export default function Roles() {
   };
 
   const handleEditRole = async (role: string): Promise<boolean> => {
-    if (!currentRole) {
-      console.error('currentRole is null or undefined.');
+    if (!selectedRole) {
+      console.error('selectedRole is null or undefined.');
       return false;
     }
     try {
-      await updateRoleFn({ name: role }, currentRole._id);
+      await updateRoleFn({ name: role }, selectedRole._id);
       fetchRoles();
       toast.success("Role updated successfully")
       return true;
@@ -180,131 +166,219 @@ export default function Roles() {
     setIsViewDrawerOpen(value);
   };
 
-  const togglePermissionDrawer = (value: boolean, role: RoleInterFace) => {
+  const togglePermissionDrawer = (value: boolean, role?: CurrentRoleDataInterFace | RolesInterFace2 | null) => {
     setIsPermissionDrawerOpen(value);
     if (role) setPermissionDrawerRole(role)
   }
-console.log(roles)
+
+  const handleDeleteClick = (row: CurrentRoleDataInterFace) => {
+    setIsDeleteDrawerOpen(true);
+    setSelectedRole(row);
+  };
+
+  const handleViewClick = (row: CurrentRoleDataInterFace) => {
+    setIsViewDrawerOpen(true);
+    setSelectedRole(row);
+  };
+
+
+  const columns = [
+    {
+      name: "S No",
+      selector: (row: CurrentRoleDataInterFace) =>
+        (currentPage - 1) * rowsPerPage + (roles?.data.indexOf(row) + 1),
+      sortable: true,
+      width: "80px",
+    },
+    {
+      name: "Role",
+      selector: (row: CurrentRoleDataInterFace) => row.name || "",
+      sortable: true,
+      width: "200px",
+    },
+    {
+      name: "Actions",
+      cell: (row: CurrentRoleDataInterFace) => (
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              setSelectedRole(row);
+              toggleEditDrawer(true);
+            }}
+            className="text-blue-500 hover:text-blue-700"
+          >
+            <FaEdit />
+          </button>
+          <button
+            onClick={() => handleDeleteClick(row)}
+            className="text-red-500 hover:text-red-700"
+          >
+            <FaTrash />
+          </button>
+          <button
+            onClick={() => {
+              handleViewClick(row);
+            }}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <FaEye />
+          </button>
+        </div>
+      ),
+      width: "160px",
+    },
+  ];
+
+
+  console.log(roles)
 
   if (loading) return <Typography>Loading roles...</Typography>;
   if (error) return <Typography color="error">Error: {error}</Typography>;
 
   return (
-    <div className='flex flex-col gap-3'>
-      <div>
-        <button
-          onClick={() => togglePermissionDrawer(true)}
-          // onClick={() => toggleAddDrawer(true)}
-          className='px-2 py-1 rounded-md'
-          style={{ backgroundColor: '#ff505d', color: 'white' }}
-        >Create Role</button>
-      </div>
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-        <TableContainer sx={{ maxHeight: 380 }}>
-          <Table sx={{ paddingTop: "5px" }} stickyHeader aria-label="sticky table">
-            <TableHead >
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    style={{ minWidth: column.minWidth }}
-                    sx={{ fontWeight: 'bold', color: '#333', fontSize: "12px", padding: "0 0 0 20px" }}
-                    align={column.align}
-                  >
-                    {column.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(roles?.data || []).map((row: Data) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row._id} sx={{ fontSize: "5px" }}>
-                    <TableCell sx={{ fontSize: "10px", padding:"0 0 0 20px" }}>{row.name}</TableCell>
+    <div className="custom_tbl_container h-[90vh]">
+        <div className="flex items-center gap-4">
+          <select
+            value={searchBasis}
+            onChange={(e) => setSearchBasis(e.target.value)}
+            className="rounded border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+          >
+            <option value="name">Role Name</option>
+          </select>
+          <input
+            type="text"
+            placeholder={`Search by ${searchBasis}...`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="rounded border p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+          />
+          <Button
+            name="Create Role"
+            type="submit"
+            onClick={() => toggleAddDrawer(true)}
+          />
+          <Tooltip
+            title="Roles define what users can do and see within the system."
+            arrow
+          >
+            <button>
+              <FaRegQuestionCircle />
+            </button>
+          </Tooltip>
+        </div>
 
-                    <TableCell sx={{padding:0}}>
-                      <button
-                        onClick={() => {
-                          console.log('Edit button clicked. Row ID:', row._id);
-                          setCurrentRole(row);
-                          toggleEditDrawer(true);
-                        }}
-                        className='text-[#7747ff]  rounded-md hover:bg-gray-100'
-                      >
-                        <CiEdit className='w-4 h-4' />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setCurrentRole(row);
-                          toggleDeleteDrawer(true);
-                        }}
-                        className='text-red-500 p-1 rounded-md hover:bg-gray-100'
-                      >
-                        <MdDeleteOutline className='w-4 h-4 ml-2' />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setCurrentRole(row);
-                          toggleViewDrawer(true);
-                        }}
-                        className="text-gray-500 p-1 rounded-md hover:bg-gray-100"
-                      >
-                        <FaEye className="w-4 h-4 ml-2" />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
 
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 100]}
-          component="div"
-          count={totalDocument}
-          rowsPerPage={limit}
-          page={pageNumber - 1}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+        <div className="mt-5 overflow-x-auto ">
+          <DataTable
+            columns={columns}
+            data={roles?.data.filter((role: CurrentRoleDataInterFace) =>
+              role.name.toLowerCase().includes(searchQuery.toLowerCase())
+            )}
+            pagination
+            paginationPerPage={rowsPerPage}
+            paginationTotalRows={totalDocument}
+            paginationComponent={() => (
+              <CustomPagination
+                rowsPerPage={rowsPerPage}
+                currentPage={currentPage}
+                rowCount={totalDocument} // totalDocument holds the total count of roles
+                onChangePage={handlePageChange}
+                onChangeRowsPerPage={handleRowsPerPageChange}
+              />
+            )}
+            className="custom_tbl"
+         customStyles={{
+            header: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                backgroundColor: "#F9FAFB", // Light mode header background
+                color: "#1C243F", // Light mode header text
+              },
+            },
+            headRow: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                backgroundColor: "#F9FAFB",
+                borderBottomWidth: "1px",
+                borderBottomColor: "#E2E8F0",
+              },
+            },
+            headCells: {
+              style: {
+                fontWeight: 700,
+                color: "#1C243F",
+                backgroundColor: "#F9FAFB",
+              },
+            },
+            cells: {
+              style: {
+                fontSize: "11px",
+                fontWeight: 500,
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                height: "27px",
+                color: "#1C243F",
+                backgroundColor: "#FFFFFF",
+              },
+            },
+            rows: {
+              style: {
+                fontSize: "11px",
+                minHeight: "27px",
+                "&:not(:last-of-type)": {
+                  borderBottomStyle: "solid",
+                  borderBottomWidth: "1px",
+                  borderBottomColor: "#E2E8F0",
+                },
+                backgroundColor: "#FFFFFF",
+                color: "#1C243F",
+              },
+              highlightOnHoverStyle: {
+                backgroundColor: "#F7F9FC",
+                color: "#1C243F",
+                cursor: "pointer",
+              },
+            },
+          }}
+          />
+        </div>
 
-        <AddRoleDrawer
+        <CreateRole
           direction={direction}
           isDrawerOpen={isAddDrawerOpen}
           toggleDrawer={toggleAddDrawer}
-          onSave={handleCreateRole}
+          handleCreateRole={handleCreateRole}
+          fetchRoles={fetchRoles}
+          togglePermissionDrawer={togglePermissionDrawer}
         />
-        <EditRoleDrawer
+
+        <EditRole
           direction={direction}
           isDrawerOpen={isEditDrawerOpen}
           toggleDrawer={toggleEditDrawer}
-          onSave={handleEditRole}
-          currentRole={currentRole}
-          permissionsList={permissionsMenuList}
+          handleEditRole={handleEditRole}
+          selectedRole={selectedRole}
+          permissionsMenuList={permissionsMenuList}
         />
+
         <DeleteRolePopup
           isDrawerOpen={isDeleteDrawerOpen}
           toggleDrawer={toggleDeleteDrawer}
           onDelete={handleDeleteRole}
-          selected={currentRole}
+          selectedRole={selectedRole}
         />
+
         <ViewRoleDrawer
           direction={direction}
           isDrawerOpen={isViewDrawerOpen}
           toggleDrawer={toggleViewDrawer}
-          selectedRole={currentRole}
-          togglePermissionDrawer={togglePermissionDrawer}
-          fetchRoles={fetchRoles}
-        />
-        <PermissionDrawer
-          isDrawerOpen={isPermissiondrawerOpen}
-          toggleDrawer={togglePermissionDrawer}
-          permissionsMenuList={permissionsMenuList}
-          role={permissionDrawerRole}
-          fetchRoles={fetchRoles}
-        />
-      </Paper>
+          selectedRole={selectedRole}
+          />
+
+       
+
     </div>
   );
 }
