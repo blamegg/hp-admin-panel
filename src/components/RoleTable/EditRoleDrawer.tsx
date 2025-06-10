@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 import { CurrentRoleDataInterFace, RolesInterFace2 } from "@/utility/queryFetcher";
 import ModalHeader from "../common/ModalHeader";
 import Permissions from "./PermissionDrawer";
-import { Typography } from "@mui/material";
+import { Box,} from "@mui/system";
+import Input from "../common/Input";
 
 interface EditRoleDrawerProps {
   direction: "ltr" | "rtl";
@@ -13,7 +12,8 @@ interface EditRoleDrawerProps {
   toggleDrawer: (open: boolean) => void;
   onSave: (role: string) => Promise<boolean>;
   currentRole: CurrentRoleDataInterFace | null;
-  permissionsList: RolesInterFace2 | null;
+  permissionsMenuList: RolesInterFace2 | null;
+  fetchRoles: () => void;
 }
 
 const EditRole: React.FC<EditRoleDrawerProps> = ({
@@ -22,7 +22,8 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
   toggleDrawer,
   onSave,
   currentRole,
-  permissionsMenuList
+  permissionsMenuList,
+  fetchRoles
 }) => {
   const [roleName, setRoleName] = useState<string>("");
 
@@ -48,41 +49,45 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
       onClose={() => toggleDrawer(false)}
-
     >
       <div className="w-[1000px]">
         <ModalHeader text={"Edit Role"} toggleDrawer={toggleDrawer} />
-        <div className="px-3 mt-3 flex justify-between items-center gap-6 w-[40%]">
-          <TextField
+        <Box className="px-3 mt-4 mb-3 flex justify-between items-center gap-6 w-[40%] ">
+          <div>
+          <Input
             autoFocus
-            margin="dense"
             id="role-name"
             label="Role Name"
             type="text"
-            fullWidth
             variant="outlined"
             value={roleName}
             onChange={(e) => setRoleName(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <Button onClick={handleSave} variant="contained">
+            fullWidth
+            className=""
+            />
+            </div>
+          <button
+            type="submit"
+            onClick={handleSave}
+            className="py-2 px-3 text-white rounded bg-[#ff505d]"
+          >
             Save
-          </Button>
-        </div>
-        <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: 600, fontSize: "22px" }}>
+          </button>
+        </Box>
+
+        <p className="text-xl mb-2 ps-5 font-bold" >
           Assign Permissions
-        </Typography>
+        </p>
         <Permissions
           permissionsMenuList={permissionsMenuList}
+          currentRole={currentRole}
+          toggleDrawer={toggleDrawer}
+          fetchRoles={fetchRoles}
         />
-        <div className="flex justify-end items-center gap-3 absolute bottom-0 h-[70px] w-[100%] pr-4 border-t-2 border-gray ">
-          <Button onClick={() => toggleDrawer(false)} sx={{ mr: 1 }}>
-            Cancel
-          </Button>
-        </div>
       </div>
     </Drawer>
   );
 };
 
 export default EditRole; 
+ EditRole; 

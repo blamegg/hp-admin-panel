@@ -19,7 +19,7 @@ import {
 import { useDirection } from '@/context/DirectionContext';
 import AddRoleDrawer from './CreateRole';
 import EditRoleDrawer from './EditRoleDrawer';
-import DeleteRolePopup from './DeleteRolePopup';
+import DeleteRolePopup from './DeleteRole';
 import ViewRoleDrawer from './ViewRoleDrawer';
 import PermissionDrawer from './PermissionDrawer';
 import { FaEye, FaEdit, FaTrash, FaRegQuestionCircle } from 'react-icons/fa';
@@ -29,6 +29,7 @@ import Button from "@/components/common/Button";
 import CustomPagination from '../CustomPagination';
 import CreateRole from './CreateRole';
 import EditRole from './EditRoleDrawer';
+import DeleteRole from './DeleteRole';
 
 interface Column {
   id: 'Role' | 'Actions';
@@ -166,10 +167,10 @@ export default function Roles() {
     setIsViewDrawerOpen(value);
   };
 
-  const togglePermissionDrawer = (value: boolean, role?: CurrentRoleDataInterFace | RolesInterFace2 | null) => {
-    setIsPermissionDrawerOpen(value);
-    if (role) setPermissionDrawerRole(role)
-  }
+  // const togglePermissionDrawer = (value: boolean, role?: CurrentRoleDataInterFace | RolesInterFace2 | null) => {
+  //   setIsPermissionDrawerOpen(value);
+  //   if (role) setPermissionDrawerRole(role)
+  // }
 
   const handleDeleteClick = (row: CurrentRoleDataInterFace) => {
     setIsDeleteDrawerOpen(true);
@@ -193,6 +194,12 @@ export default function Roles() {
     {
       name: "Role",
       selector: (row: CurrentRoleDataInterFace) => row.name || "",
+      sortable: true,
+      width: "200px",
+    },
+    {
+      name: "Rank",
+      selector: (row: CurrentRoleDataInterFace) => row.rank || "",
       sortable: true,
       width: "200px",
     },
@@ -230,64 +237,64 @@ export default function Roles() {
   ];
 
 
-  console.log(roles)
+  console.log("Role list", roles);
 
   if (loading) return <Typography>Loading roles...</Typography>;
   if (error) return <Typography color="error">Error: {error}</Typography>;
 
   return (
     <div className="custom_tbl_container h-[90vh]">
-        <div className="flex items-center gap-4">
-          <select
-            value={searchBasis}
-            onChange={(e) => setSearchBasis(e.target.value)}
-            className="rounded border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
-          >
-            <option value="name">Role Name</option>
-          </select>
-          <input
-            type="text"
-            placeholder={`Search by ${searchBasis}...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded border p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
-          />
-          <Button
-            name="Create Role"
-            type="submit"
-            onClick={() => toggleAddDrawer(true)}
-          />
-          <Tooltip
-            title="Roles define what users can do and see within the system."
-            arrow
-          >
-            <button>
-              <FaRegQuestionCircle />
-            </button>
-          </Tooltip>
-        </div>
+      <div className="flex items-center gap-4">
+        <select
+          value={searchBasis}
+          onChange={(e) => setSearchBasis(e.target.value)}
+          className="rounded border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+        >
+          <option value="name">Role Name</option>
+        </select>
+        <input
+          type="text"
+          placeholder={`Search by ${searchBasis}...`}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="rounded border p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+        />
+        <Button
+          name="Create Role"
+          type="submit"
+          onClick={() => toggleAddDrawer(true)}
+        />
+        <Tooltip
+          title="Roles define what users can do and see within the system."
+          arrow
+        >
+          <button>
+            <FaRegQuestionCircle />
+          </button>
+        </Tooltip>
+      </div>
 
 
-        <div className="mt-5 overflow-x-auto ">
-          <DataTable
-            columns={columns}
-            data={roles?.data.filter((role: CurrentRoleDataInterFace) =>
-              role.name.toLowerCase().includes(searchQuery.toLowerCase())
-            )}
-            pagination
-            paginationPerPage={rowsPerPage}
-            paginationTotalRows={totalDocument}
-            paginationComponent={() => (
-              <CustomPagination
-                rowsPerPage={rowsPerPage}
-                currentPage={currentPage}
-                rowCount={totalDocument} // totalDocument holds the total count of roles
-                onChangePage={handlePageChange}
-                onChangeRowsPerPage={handleRowsPerPageChange}
-              />
-            )}
-            className="custom_tbl"
-         customStyles={{
+      <div className="mt-5 overflow-x-auto ">
+        <DataTable
+          columns={columns}
+          data={roles?.data.filter((role: CurrentRoleDataInterFace) =>
+            role.name.toLowerCase().includes(searchQuery.toLowerCase())
+          )}
+          pagination
+          paginationPerPage={rowsPerPage}
+          paginationTotalRows={totalDocument}
+          paginationComponent={() => (
+            <CustomPagination
+              rowsPerPage={rowsPerPage}
+              currentPage={currentPage}
+              rowCount={totalDocument} // totalDocument holds the total count of roles
+              onChangePage={handlePageChange}
+              onChangeRowsPerPage={handleRowsPerPageChange}
+            />
+          )}
+          className="custom_tbl"
+          customStyles={{
             header: {
               style: {
                 fontSize: "12px",
@@ -342,42 +349,45 @@ export default function Roles() {
               },
             },
           }}
-          />
-        </div>
+        />
+      </div>
 
-        <CreateRole
-          direction={direction}
-          isDrawerOpen={isAddDrawerOpen}
-          toggleDrawer={toggleAddDrawer}
-          handleCreateRole={handleCreateRole}
-          fetchRoles={fetchRoles}
-          togglePermissionDrawer={togglePermissionDrawer}
+      <CreateRole
+        direction={direction}
+        isDrawerOpen={isAddDrawerOpen}
+        toggleDrawer={toggleAddDrawer}
+        handleCreateRole={handleCreateRole}
+        fetchRoles={fetchRoles}
+        // togglePermissionDrawer={togglePermissionDrawer}
         />
 
-        <EditRole
+       <EditRole
           direction={direction}
           isDrawerOpen={isEditDrawerOpen}
           toggleDrawer={toggleEditDrawer}
-          handleEditRole={handleEditRole}
-          selectedRole={selectedRole}
+          onSave={handleEditRole}
+          currentRole={selectedRole}
           permissionsMenuList={permissionsMenuList}
+          fetchRoles={fetchRoles}
         />
 
-        <DeleteRolePopup
-          isDrawerOpen={isDeleteDrawerOpen}
-          toggleDrawer={toggleDeleteDrawer}
-          onDelete={handleDeleteRole}
-          selectedRole={selectedRole}
-        />
+      <DeleteRole
+        isDrawerOpen={isDeleteDrawerOpen}
+        toggleDrawer={toggleDeleteDrawer}
+        onDelete={handleDeleteRole}
+        selectedRole={selectedRole}
+        direction={direction}
+        fetchRoles={fetchRoles}
+      />
 
-        <ViewRoleDrawer
-          direction={direction}
-          isDrawerOpen={isViewDrawerOpen}
-          toggleDrawer={toggleViewDrawer}
-          selectedRole={selectedRole}
-          />
+      <ViewRoleDrawer
+        direction={direction}
+        isDrawerOpen={isViewDrawerOpen}
+        toggleDrawer={toggleViewDrawer}
+        selectedRole={selectedRole}
+      />
 
-       
+
 
     </div>
   );

@@ -33,7 +33,7 @@ export interface RoleDataInterFace2{
 }
 
 export interface subMenuInterFace {
-  menu_id: string,
+  sub_menu_id: string,
   name: string
 }
 
@@ -74,7 +74,7 @@ export interface RolesInterFace {
 }
 
 export interface menuDataInterface {
-  _id:string,
+  menu_id:string,
   name:string,
   sub_menus: subMenuInterFace[]
 }
@@ -133,7 +133,7 @@ export const rolesFn = async (page: number, limit: number) => {
 };
 
 // create role
-export const createRoleFn = async (payload: { name: string }) => {
+export const createRoleFn = async (payload: { name: string, rank: number }) => {
   const response = await apiClient.post(ApiEndpoints.roles, payload);
   return response.data;
 };
@@ -154,8 +154,8 @@ export const deleteRoleFn = async (roleId: string) => {
 };
 
 // fetch permissions
-export const permissionsFn = async (page: number, limit: number) => {
-  const response = await apiClient.get(`${ApiEndpoints.permissions}?page=${page}&limit=${limit}`);
+export const permissionsFn = async (roleId:string) => {
+  const response = await apiClient.get(`${ApiEndpoints.permissions}/${roleId}`);
   return response.data;
 };
 

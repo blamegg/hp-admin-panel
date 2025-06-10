@@ -58,7 +58,7 @@ const DeleteDrawer = ({
       <div role="presentation">
         <ModalHeader text="Delete Confirmation" toggleDrawer={toggleDrawer} />
 
-        <div className="relative mt-[50px] flex flex-col items-center justify-center px-7 pb-7">
+        <div className="relative  flex flex-col items-center justify-center px-7 pb-7 h-[570px]">
           {deleteUserMn.isPending && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-75">
               <ImSpinner2 className="animate-spin text-5xl text-companyRed" />
@@ -89,17 +89,17 @@ const DeleteDrawer = ({
               <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
                 Are you sure you want to delete {selected?.name} user?
               </h3>
-              <div className="mt-6 flex w-full items-center justify-center gap-7">
+              <div className="mt-6 pr-3 flex w-full items-center justify-end gap-7 absolute bottom-0 border-t-2 border-gray h-[50px]">
+                <Button
+                  type="button"
+                  name="Cancel"
+                  onClick={() => toggleDrawer(false)}
+                />
                 <Button
                   type="button"
                   name="Confirm"
                   className="bg-green-500"
                   onClick={handleDelete}
-                />
-                <Button
-                  type="button"
-                  name="Cancel"
-                  onClick={() => toggleDrawer(false)}
                 />
               </div>
             </>

@@ -13,7 +13,7 @@ export const ApiEndpoints = {
   logout: "/api/v1/logout",
   users: "/api/v1/users",
   roles: "/api/v1/roles",
-  permissions: "/api/v1/permissions",
+  permissions: `/api/v1/rolePermissionMenu/get-menu-permission`,
   updatePermissions: "/api/v1/rolePermissionMenu/assign-menu-permission"
 };
 

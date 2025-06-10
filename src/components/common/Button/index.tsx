@@ -10,6 +10,7 @@ interface ButtonProps {
   className?: string;
   loading?: boolean;
   loadingSpinnerClassName?: string;
+  style?: React.CSSProperties;
 }
 
 const Button = ({

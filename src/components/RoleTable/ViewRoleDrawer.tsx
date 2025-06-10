@@ -3,29 +3,23 @@ import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Typography from "@mui/material/Typography";
 import CloseIcon from '@mui/icons-material/Close';
-import { CurrentRoleDataInterFace} from "@/utility/queryFetcher";
+import { CurrentRoleDataInterFace } from "@/utility/queryFetcher";
 import Button from "../common/Button";
+import ModalHeader from "../common/ModalHeader";
 
 interface ViewRoleDrawerProps {
   direction: "ltr" | "rtl";
   isDrawerOpen: boolean;
   toggleDrawer: (open: boolean) => void;
   selectedRole: CurrentRoleDataInterFace | null;
-  togglePermissionDrawer:(open:boolean, role:CurrentRoleDataInterFace | null)=> void;
 }
 
 const ViewRoleDrawer: React.FC<ViewRoleDrawerProps> = ({
   direction,
   isDrawerOpen,
   toggleDrawer,
-  selectedRole, 
-  togglePermissionDrawer,
+  selectedRole,
 }) => {
-
-  const handleUpdatePermissions = () => {
-    togglePermissionDrawer(true, selectedRole)
-    toggleDrawer(false);
-  }
 
   return (
     <Drawer
@@ -33,45 +27,39 @@ const ViewRoleDrawer: React.FC<ViewRoleDrawerProps> = ({
       open={isDrawerOpen}
       onClose={() => toggleDrawer(false)}
     >
-      <Box sx={{ width: 350, padding: 2 }}>
-        <div className="flex justify-between items-center mb-2">
-          <Typography variant="h5" sx={{fontWeight:600}}>
-            Role Details
-          </Typography>
-          <button className="bg-graydark" onClick={()=> toggleDrawer(false)}>
-            <CloseIcon />
-          </button>
-        </div>
-        <Typography variant="subtitle1" gutterBottom>
-          <strong>Role Name:</strong> <span className="text-green-500"> {selectedRole?.name}</span>
-        </Typography>
-        <h1 className="font-bold text-lg">Assigned Permissions</h1>
-        {selectedRole?.menus && selectedRole.menus.length > 0 ? (
-          <>
-            <div>
+      <div role="presentation" className="w-[300px]">
+        <ModalHeader text={"Role details"} toggleDrawer={toggleDrawer} />
+        <div className="pl-4 overflow-auto h-[510px]" >
+          <p className="mt-5 mb-2">
+            <strong className="text-[16px]">Role Name:</strong> <span className="text-green-500 text-[16px]"> {selectedRole?.name}</span>
+          </p>
+          <strong className="text-[16px]">Assigned Permissions</strong>
+          {selectedRole?.menus && selectedRole.menus.length > 0 ? (
+            <div className="ml-2 mt-1">
               {selectedRole?.menus?.map((permission: any) => (
-                <>
-                  <h2 className="font-semibold"> {permission.name}</h2>
-                  <ul>
-                    {permission?.sub_menus?.map((sub_permissions: any, index: string) => (
-                      <li className="ms-2"><span className="me-1">{index + 1}.</span>{sub_permissions.name}</li>
-                    ))}
-                  </ul>
-                </>
+                <ul className="list-disc ml-5">
+                  <li>
+                    <h2 className="font-semibold text-[14px]"> {permission.name}</h2>
+                    <ul>
+                      {permission?.sub_menus?.map((sub_permissions: any, index: string) => (
+                        <li className="ms-2 text-[13px]"><span className="me-1">{index + 1}.</span>{sub_permissions.name}</li>
+                      ))}
+                    </ul>
+                  </li>
+                </ul>
               ))}
             </div>
-            <div className="text-center my-2">
-              <Button type="button" name="Update Permissions" onClick={handleUpdatePermissions}></Button>
+          )
+            : <div>
+              <p className="my-3"> No Permission Assigned</p>
             </div>
-          </>
-              ) 
-           : <div>
-            <p className="my-3"> No Permission Assigned</p>
-            <Button type="button" name="Provide Permissions"  onClick={handleUpdatePermissions}></Button>
-          </div>
-        }
+          }
+        </div>
+        <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-4 border-t-2 border-gray'>
+          <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray", color: "white" }} onClick={() => toggleDrawer(false)} />
+        </div>
+      </div>
 
-      </Box>
     </Drawer>
   );
 };

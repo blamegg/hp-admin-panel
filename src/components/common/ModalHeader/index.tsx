@@ -20,10 +20,7 @@ const ModalHeader = ({ toggleDrawer, text }: ModalHeaderProps) => {
       }}
     >
       <h2 className="text-xl font-bold">{text}</h2>
-      <RxCrossCircled
-        className="cursor-pointer text-[30px] font-bold text-white hover:rounded-full"
-        onClick={() => toggleDrawer(false)}
-      />
+     
     </div>
   );
 };
