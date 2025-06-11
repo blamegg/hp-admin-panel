@@ -51,7 +51,7 @@ const DeleteDrawer = ({
       disableEnforceFocus
       PaperProps={{
         sx: {
-          width: "25%",
+          width: "26%",
         },
       }}
     >

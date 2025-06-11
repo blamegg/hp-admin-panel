@@ -8,14 +8,24 @@ interface InputProps {
   register?: any;
   error?: string;
   disabled?: boolean;
+  autofocus?:boolean;
+  id?:string;
+  value?:string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  className?:string;
 }
 
 const Input = ({
+  onChange,
+  autofocus,
   label,
   placeholder,
   type,
   register,
   error,
+  value,
+  id,
+  className,
   ...props
 }: InputProps) => {
   return (
@@ -31,6 +41,10 @@ const Input = ({
         placeholder={placeholder}
         {...register}
         {...props}
+        value={value}
+        onChange={onChange}
+        id={id}
+        autoFocus={autofocus}
       />
       <FormError error={error} />
     </>

@@ -5,6 +5,7 @@ import ModalHeader from "../common/ModalHeader";
 import Permissions from "./PermissionDrawer";
 import { Box,} from "@mui/system";
 import Input from "../common/Input";
+import Button from "../common/Button";
 
 interface EditRoleDrawerProps {
   direction: "ltr" | "rtl";
@@ -44,6 +45,7 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
     }
   };
 
+
   return (
     <Drawer
       anchor={direction === "ltr" ? "right" : "left"}
@@ -53,26 +55,23 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
       <div className="w-[1000px]">
         <ModalHeader text={"Edit Role"} toggleDrawer={toggleDrawer} />
         <Box className="px-3 mt-4 mb-3 flex justify-between items-center gap-6 w-[40%] ">
-          <div>
           <Input
-            autoFocus
+            autofocus
             id="role-name"
-            label="Role Name"
+            label=""
             type="text"
-            variant="outlined"
             value={roleName}
             onChange={(e) => setRoleName(e.target.value)}
-            fullWidth
-            className=""
+            placeholder="Role Name"
             />
-            </div>
-          <button
+          <Button
             type="submit"
+            name="Save"
             onClick={handleSave}
-            className="py-2 px-3 text-white rounded bg-[#ff505d]"
-          >
-            Save
-          </button>
+            style={{backgroundColor:"#00b300"}}
+            className=" px-3 text-white rounded"
+          />
+        
         </Box>
 
         <p className="text-xl mb-2 ps-5 font-bold" >

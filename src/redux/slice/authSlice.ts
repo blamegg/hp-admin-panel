@@ -9,6 +9,7 @@ interface AuthState {
   loginError: string | null;
   registerStatus: "idle" | "loading" | "success" | "failed";
   registerError: string | null;
+  permissions: string[];
 }
 
 export interface UserProps {
@@ -17,6 +18,7 @@ export interface UserProps {
   password: string;
   mobile: string;
   status?: number;
+  permissions?: string[];
 }
 
 const initialState: AuthState = {
@@ -25,6 +27,7 @@ const initialState: AuthState = {
   loginError: null,
   registerStatus: "idle",
   registerError: null,
+  permissions: [],
 };
 
 export const loginUser = createAsyncThunk(
@@ -66,7 +69,11 @@ export const logoutUser = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    setPermissions: (state, action: PayloadAction<string[]>) => {
+      state.permissions = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(loginUser.pending, (state) => {
@@ -75,7 +82,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<any>) => {
         state.loginStatus = "success";
-        state.user = action.payload;
+        state.user = action.payload.user;
         setTokenCookie(action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -95,19 +102,20 @@ const authSlice = createSlice({
         state.registerError = action.payload as string;
       })
       .addCase(logoutUser.pending, (state) => {
-        state.loginStatus = "loading"; // Optionally set status if needed
+        state.loginStatus = "loading";
       })
       .addCase(logoutUser.fulfilled, (state) => {
-        state.user = null; // Clear user data
-        state.loginStatus = "idle"; // Reset login status
-        state.loginError = null; // Clear errors
+        state.user = null;
+        state.loginStatus = "idle";
+        state.loginError = null;
+        state.permissions = [];
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.loginStatus = "failed";
         state.loginError = action.payload as string;
       });
-
   },
 });
 
+export const { setPermissions } = authSlice.actions;
 export default authSlice.reducer;

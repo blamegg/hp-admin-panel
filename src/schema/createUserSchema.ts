@@ -10,6 +10,7 @@ export const userSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
   mobile: z.string().min(10, "Phone number must be at least 10 digits"),
+  role: z.string().min(1, "Role is required"),
 });
 
 export const editUserSchema = z.object({

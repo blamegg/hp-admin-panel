@@ -17,11 +17,10 @@ const Select = ({ label, options, register, error, ...props }: SelectProps) => {
         className={`w-full rounded border bg-gray px-2 py-[5px] text-[13px] font-medium text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${
           error ? "border-red" : "border-stroke"
         }`}
-        defaultValue=""
         {...register}
         {...props}
       >
-        <option value="" disabled>
+        <option value="">
           Select {label}
         </option>
         {options.map((option) => (

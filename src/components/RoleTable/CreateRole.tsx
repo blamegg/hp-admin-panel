@@ -93,9 +93,8 @@ const CreateRole: React.FC<AddRoleDrawerProps> = ({
 
         </div>
         <div className="flex justify-end items-center gap-3 absolute bottom-0 h-[70px] w-[100%] pr-2 border-t-2 border-gray">
-          <Button type="button" name="Cancel" onClick={() => toggleDrawer(false)} >
-          </Button>
-          <Button type="submit" name=" Create Role" onClick={handleCreateRole}></Button>
+          <Button type="button" name="Cancel" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
+          <Button type="submit" name=" Create Role" style={{backgroundColor:"#00b300"}} onClick={handleCreateRole}></Button>
         </div>
       </div>
     </Drawer>

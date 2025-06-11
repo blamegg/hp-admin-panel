@@ -8,6 +8,7 @@ export const apiClient = api.create({
 
 export const ApiEndpoints = {
   menus:"/api/v1/menus",
+  dynamicMenus:"/api/v1/menus/role",
   login: "/api/v1/login",
   register: "/api/v1/signup",
   logout: "/api/v1/logout",

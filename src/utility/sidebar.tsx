@@ -34,10 +34,6 @@ export const menuItems = [
     icon: <FaUsersGear size={18} />,
     route: '/roles'
   },
-  // {
-  //   name: "Permissions",
-  //   icon: <MdLockOutline size={18} />,
-  // },
 ];
 
 export const staticMenu = [

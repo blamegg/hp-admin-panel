@@ -20,22 +20,28 @@ const Button = ({
   className,
   loading = false,
   loadingSpinnerClassName,
-  ...props
+  style,
+  ...rest
 }: ButtonProps) => {
   const color = useSelector((state: RootState) => state?.app?.color);
+
+  const mergedStyle = {
+    backgroundColor: color,
+    ...style,
+  };
 
   return (
     <button
       type={type}
       onClick={onClick}
-      {...props}
+      {...rest}
       disabled={loading}
       className={twMerge(
         `relative flex w-max items-center justify-center rounded px-4 py-[3px] text-[14px] text-white outline-none transition-all duration-200 ease-in-out hover:bg-opacity-80`,
         loading && "cursor-not-allowed opacity-70",
         className,
       )}
-      style={{ backgroundColor: color }}
+      style={mergedStyle}
     >
       {loading ? (
         <>

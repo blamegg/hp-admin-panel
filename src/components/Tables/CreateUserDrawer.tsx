@@ -16,6 +16,8 @@ import { createUserFn } from "@/utility/queryFetcher";
 import { UserDrawerProps } from "@/types/CreateUser";
 import { UserFormInputs, userSchema } from "@/schema/createUserSchema";
 import { toast } from "sonner";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const CreateUserDrawer = ({
   direction,
@@ -31,7 +33,19 @@ const CreateUserDrawer = ({
     formState: { errors },
   } = useForm<UserFormInputs>({
     resolver: zodResolver(userSchema),
+    mode: "onSubmit",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      mobile: "",
+      role: "",
+    },
   });
+
+  const data = useSelector((state: RootState) => state.role);
+  console.log(data)
+
   const queryClient = useQueryClient();
 
   const createUserMn = useMutation({
@@ -150,11 +164,10 @@ const CreateUserDrawer = ({
                 (e: string, i: number) => (
                   <div
                     key={i}
-                    className={`cursor-pointer border border-x-2  px-5 py-1 text-[16px] font-medium transition-all duration-200 ease-in-out ${
-                      selectedTab === e
-                        ? "border border-b-white bg-white text-black"
-                        : "border-l-0 border-r-0 border-t-0"
-                    }`}
+                    className={`cursor-pointer border border-x-2  px-5 py-1 text-[16px] font-medium transition-all duration-200 ease-in-out ${selectedTab === e
+                      ? "border border-b-white bg-white text-black"
+                      : "border-l-0 border-r-0 border-t-0"
+                      }`}
                     onClick={() => {
                       setSelectedTab(e);
                     }}
@@ -178,13 +191,9 @@ const CreateUserDrawer = ({
               <Personalization register={register} errors={errors} />
             )}
           </div>
-
-          <div className="mx-10 mt-6">
-            <Button
-              name="Submit"
-              type="submit"
-              className="h-[30px] w-[100px] text-[16px]"
-            />
+          <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
+            <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
+            <Button name="Submit" type="submit" />
           </div>
         </form>
       </div>

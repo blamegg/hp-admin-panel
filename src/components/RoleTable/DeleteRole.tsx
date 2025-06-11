@@ -64,7 +64,7 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
       disableEnforceFocus
       PaperProps={{
         sx: {
-          width: "25%",
+          width: "26%",
         },
       }}
     >
@@ -106,13 +106,14 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
                 <Button
                   type="button"
                   name="Confirm"
-                  className="bg-green-500"
                   onClick={handleDelete}
+                  style={{backgroundColor:"#ff505d"}}
                 />
                 <Button
                   type="button"
                   name="Cancel"
                   onClick={() => toggleDrawer(false)}
+                  style={{ backgroundColor: "gray" }}
                 />
               </div>
             </>

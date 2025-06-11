@@ -1,8 +1,10 @@
 'use client'
 import * as React from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/redux/store";
+import { setSelectedRole, clearSelectedRole } from "@/redux/slice/roleSlice";
+
 import DataTable from "react-data-table-component";
-import { MdDeleteOutline } from "react-icons/md";
-import { CiEdit } from "react-icons/ci";
 import { Typography } from '@mui/material';
 import {
   rolesFn,
@@ -10,26 +12,26 @@ import {
   updateRoleFn,
   deleteRoleFn,
   menuListFn,
-  mainMenuInterface,
   RolesInterFace,
   CurrentRoleDataInterFace,
   menuDataInterface,
-  RolesInterFace2,
+  dynamicMenuListFn,
 } from '@/utility/queryFetcher';
 import { useDirection } from '@/context/DirectionContext';
-import AddRoleDrawer from './CreateRole';
 import EditRoleDrawer from './EditRoleDrawer';
-import DeleteRolePopup from './DeleteRole';
 import ViewRoleDrawer from './ViewRoleDrawer';
-import PermissionDrawer from './PermissionDrawer';
 import { FaEye, FaEdit, FaTrash, FaRegQuestionCircle } from 'react-icons/fa';
 import { toast } from 'sonner';
 import { Tooltip } from "@mui/material";
 import Button from "@/components/common/Button";
-import CustomPagination from '../CustomPagination';
 import CreateRole from './CreateRole';
-import EditRole from './EditRoleDrawer';
 import DeleteRole from './DeleteRole';
+import CustomPagination from '../CustomPagination';
+import PermissionDrawer from './PermissionDrawer';
+import { CleaningServices } from '@mui/icons-material';
+import Permissions from './PermissionDrawer';
+import { useQuery } from '@tanstack/react-query';
+import { setPermissions } from '@/redux/slice/authSlice';
 
 interface Column {
   id: 'Role' | 'Actions';
@@ -48,7 +50,8 @@ interface Column {
 export default function Roles() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [selectedRole, setSelectedRole] = React.useState<CurrentRoleDataInterFace | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const selectedRole = useSelector((state: RootState) => state.role.selectedRole);
   const [roles, setRoles] = React.useState<RolesInterFace | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -65,6 +68,30 @@ export default function Roles() {
   const [permissionDrawerRole, setPermissionDrawerRole] = React.useState<CurrentRoleDataInterFace | null>(null);
 
   const { direction } = useDirection();
+  const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
+
+
+
+  const hasPermission = (permissionKey: string): boolean => {
+    return permissions.includes(permissionKey);
+  };
+
+
+  const { data } = useQuery({
+    queryKey: ["menuList"],
+    queryFn: dynamicMenuListFn,
+  });
+
+  React.useEffect(() => {
+    if (data?.data) {
+      const userPermissions = data.data
+        .map((permission: any) => permission.sub_menus)
+        .flat()
+        .map((sub: any) => sub.name);
+
+      dispatch(setPermissions(userPermissions));
+    }
+  }, [data]);
 
 
   const fetchRoles = async () => {
@@ -73,7 +100,7 @@ export default function Roles() {
     try {
       const response = await rolesFn(currentPage, rowsPerPage);
       setRoles(response);
-      setTotalDocument(response.pagination.total);
+      setTotalDocument(response.pagination?.total || 0);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -92,11 +119,19 @@ export default function Roles() {
     }
   };
 
+  console.log(permissionsMenuList)
 
   React.useEffect(() => {
     fetchRoles();
     fetchPermissionMenus();
   }, [currentPage, rowsPerPage]);
+
+  React.useEffect(() => {
+    const totalPages = Math.ceil(totalDocument / rowsPerPage);
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages > 0 ? totalPages : 1);
+    }
+  }, [totalDocument, rowsPerPage, currentPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -105,20 +140,6 @@ export default function Roles() {
   const handleRowsPerPageChange = (newRowsPerPage: number) => {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
-  };
-
-  const handleCreateRole = async (role: string): Promise<boolean> => {
-    try {
-      const currentRoleData = await createRoleFn({ name: role });
-      fetchRoles();
-      toast.success("New Role created successfully");
-      togglePermissionDrawer(true, currentRoleData);
-      return true;
-    } catch (err: any) {
-      console.error('Failed to add role:', err);
-      toast.error(err.response.data.message)
-      return false;
-    }
   };
 
   const handleEditRole = async (role: string): Promise<boolean> => {
@@ -153,33 +174,41 @@ export default function Roles() {
 
   const toggleAddDrawer = (value: boolean) => {
     setIsAddDrawerOpen(value);
+    if (!value) dispatch(clearSelectedRole());
   };
 
   const toggleEditDrawer = (value: boolean) => {
     setIsEditDrawerOpen(value);
+    if (!value) dispatch(clearSelectedRole());
   };
 
   const toggleDeleteDrawer = (value: boolean) => {
     setIsDeleteDrawerOpen(value);
+    if (!value) dispatch(clearSelectedRole());
   };
 
   const toggleViewDrawer = (value: boolean) => {
     setIsViewDrawerOpen(value);
+    if (!value) dispatch(clearSelectedRole());
   };
 
-  // const togglePermissionDrawer = (value: boolean, role?: CurrentRoleDataInterFace | RolesInterFace2 | null) => {
-  //   setIsPermissionDrawerOpen(value);
-  //   if (role) setPermissionDrawerRole(role)
-  // }
+  const togglePermissionDrawer = (value: boolean, role?: CurrentRoleDataInterFace | null) => {
+    setIsPermissionDrawerOpen(value);
+    if (value && role) {
+      dispatch(setSelectedRole(role));
+    } else if (!value) {
+      dispatch(clearSelectedRole());
+    }
+  };
 
   const handleDeleteClick = (row: CurrentRoleDataInterFace) => {
+    dispatch(setSelectedRole(row));
     setIsDeleteDrawerOpen(true);
-    setSelectedRole(row);
   };
 
   const handleViewClick = (row: CurrentRoleDataInterFace) => {
+    dispatch(setSelectedRole(row));
     setIsViewDrawerOpen(true);
-    setSelectedRole(row);
   };
 
 
@@ -187,7 +216,7 @@ export default function Roles() {
     {
       name: "S No",
       selector: (row: CurrentRoleDataInterFace) =>
-        (currentPage - 1) * rowsPerPage + (roles?.data.indexOf(row) + 1),
+        (currentPage - 1) * rowsPerPage + ((roles?.data?.indexOf(row) ?? -1) + 1),
       sortable: true,
       width: "80px",
     },
@@ -207,29 +236,48 @@ export default function Roles() {
       name: "Actions",
       cell: (row: CurrentRoleDataInterFace) => (
         <div className="flex gap-3">
-          <button
-            onClick={() => {
-              setSelectedRole(row);
-              toggleEditDrawer(true);
-            }}
-            className="text-blue-500 hover:text-blue-700"
+          {hasPermission('View All Role') && (
+            <button
+              onClick={() => {
+                dispatch(setSelectedRole(row));
+                toggleEditDrawer(true);
+              }}
+              className="text-blue-500 hover:text-blue-700"
+            >
+              <FaEdit />
+            </button>
+          )}
+          {hasPermission('Delete User') && (
+            <button
+              onClick={() => handleDeleteClick(row)}
+              className="text-red-500 hover:text-red-700"
+            >
+              <FaTrash />
+            </button>
+          )}
+          {hasPermission('View Role Details') && (
+            <button
+              onClick={() => {
+                handleViewClick(row);
+              }}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FaEye />
+            </button>
+          )}
+          <Tooltip
+            title="Assign Permissions"
+            arrow
           >
-            <FaEdit />
-          </button>
-          <button
-            onClick={() => handleDeleteClick(row)}
-            className="text-red-500 hover:text-red-700"
-          >
-            <FaTrash />
-          </button>
-          <button
-            onClick={() => {
-              handleViewClick(row);
-            }}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <FaEye />
-          </button>
+            <button
+              onClick={() => {
+                togglePermissionDrawer(true, row)
+              }}
+              className="text-green-500 hover:text-green-700"
+            >
+              <FaRegQuestionCircle />
+            </button>
+          </Tooltip>
         </div>
       ),
       width: "160px",
@@ -237,7 +285,6 @@ export default function Roles() {
   ];
 
 
-  console.log("Role list", roles);
 
   if (loading) return <Typography>Loading roles...</Typography>;
   if (error) return <Typography color="error">Error: {error}</Typography>;
@@ -248,7 +295,7 @@ export default function Roles() {
         <select
           value={searchBasis}
           onChange={(e) => setSearchBasis(e.target.value)}
-          className="rounded border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+          className="rounded bg-[#eff4fb] border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
         >
           <option value="name">Role Name</option>
         </select>
@@ -257,7 +304,7 @@ export default function Roles() {
           placeholder={`Search by ${searchBasis}...`}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="rounded border p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+          className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
         />
         <Button
           name="Create Role"
@@ -278,9 +325,9 @@ export default function Roles() {
       <div className="mt-5 overflow-x-auto ">
         <DataTable
           columns={columns}
-          data={roles?.data.filter((role: CurrentRoleDataInterFace) =>
+          data={roles?.data?.filter((role: CurrentRoleDataInterFace) =>
             role.name.toLowerCase().includes(searchQuery.toLowerCase())
-          )}
+          ) || []}
           pagination
           paginationPerPage={rowsPerPage}
           paginationTotalRows={totalDocument}
@@ -288,7 +335,7 @@ export default function Roles() {
             <CustomPagination
               rowsPerPage={rowsPerPage}
               currentPage={currentPage}
-              rowCount={totalDocument} // totalDocument holds the total count of roles
+              rowCount={totalDocument}
               onChangePage={handlePageChange}
               onChangeRowsPerPage={handleRowsPerPageChange}
             />
@@ -307,16 +354,16 @@ export default function Roles() {
               style: {
                 fontSize: "12px",
                 minHeight: "30px",
-                backgroundColor: "#F9FAFB",
+                backgroundColor: "#F9FAFB", // Light mode header row background
                 borderBottomWidth: "1px",
-                borderBottomColor: "#E2E8F0",
+                borderBottomColor: "#E2E8F0", // stroke
               },
             },
             headCells: {
               style: {
                 fontWeight: 700,
-                color: "#1C243F",
-                backgroundColor: "#F9FAFB",
+                color: "#1C243F", // Light mode header cells text
+                backgroundColor: "#F9FAFB", // Light mode header cells background
               },
             },
             cells: {
@@ -326,8 +373,8 @@ export default function Roles() {
                 wordBreak: "break-word",
                 overflowWrap: "break-word",
                 height: "27px",
-                color: "#1C243F",
-                backgroundColor: "#FFFFFF",
+                color: "#1C243F", // Light mode cell text
+                backgroundColor: "#FFFFFF", // Light mode cell background
               },
             },
             rows: {
@@ -337,13 +384,13 @@ export default function Roles() {
                 "&:not(:last-of-type)": {
                   borderBottomStyle: "solid",
                   borderBottomWidth: "1px",
-                  borderBottomColor: "#E2E8F0",
+                  borderBottomColor: "#E2E8F0", // stroke
                 },
-                backgroundColor: "#FFFFFF",
-                color: "#1C243F",
+                backgroundColor: "#FFFFFF", // Light mode row background
+                color: "#1C243F", // Light mode row text
               },
               highlightOnHoverStyle: {
-                backgroundColor: "#F7F9FC",
+                backgroundColor: "#F7F9FC", // gray-2
                 color: "#1C243F",
                 cursor: "pointer",
               },
@@ -353,23 +400,23 @@ export default function Roles() {
       </div>
 
       <CreateRole
-        direction={direction}
         isDrawerOpen={isAddDrawerOpen}
         toggleDrawer={toggleAddDrawer}
-        handleCreateRole={handleCreateRole}
         fetchRoles={fetchRoles}
-        // togglePermissionDrawer={togglePermissionDrawer}
-        />
+        togglePermissionDrawer={togglePermissionDrawer}
+        direction={direction}
+      />
 
-       <EditRole
-          direction={direction}
-          isDrawerOpen={isEditDrawerOpen}
-          toggleDrawer={toggleEditDrawer}
-          onSave={handleEditRole}
-          currentRole={selectedRole}
-          permissionsMenuList={permissionsMenuList}
-          fetchRoles={fetchRoles}
-        />
+      <EditRoleDrawer
+        isDrawerOpen={isEditDrawerOpen}
+        toggleDrawer={toggleEditDrawer}
+        onSave={handleEditRole}
+        selectedRole={selectedRole}
+        currentRole={selectedRole}
+        direction={direction}
+        permissionsMenuList={permissionsMenuList}
+        fetchRoles={fetchRoles}
+      />
 
       <DeleteRole
         isDrawerOpen={isDeleteDrawerOpen}
@@ -381,14 +428,19 @@ export default function Roles() {
       />
 
       <ViewRoleDrawer
-        direction={direction}
         isDrawerOpen={isViewDrawerOpen}
         toggleDrawer={toggleViewDrawer}
         selectedRole={selectedRole}
+        direction={direction}
       />
 
-
-
+      <PermissionDrawer
+        isDrawerOpen={isPermissiondrawerOpen}
+        toggleDrawer={togglePermissionDrawer}
+        permissionsMenuList={permissionsMenuList?.data || []}
+        role={permissionDrawerRole}
+        fetchRoles={fetchRoles}
+      />
     </div>
   );
 }

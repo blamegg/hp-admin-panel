@@ -14,7 +14,7 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { getMenuList } from "@/redux/slice/menuList";
 import { defaultSvg, menuItems, staticMenu } from "@/utility/sidebar";
 import { useQuery } from "@tanstack/react-query";
-import { menuListFn } from "@/utility/queryFetcher";
+import { dynamicMenuListFn, menuListFn } from "@/utility/queryFetcher";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -22,48 +22,60 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const dispatch = useDispatch<AppDispatch>();
+
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
   const color = "#FF505D";
   const { direction } = useDirection();
   const { data: menu } = useQuery({
     queryKey: ["menuList"],
-    queryFn: menuListFn,
+    queryFn: dynamicMenuListFn,
   });
+
+  // Get user permissions from Redux store
+  const userPermissions = useSelector((state: RootState) => state.authReducer.user?.permissions || []);
+
+  // Helper function to check if the user has permission for a menu item
+  const hasPermission = (requiredPermissions: string[] | undefined): boolean => {
+    if (!requiredPermissions || requiredPermissions.length === 0) {
+      return true; // No specific permissions required, so accessible by default
+    }
+    return requiredPermissions.some(permission => userPermissions.includes(permission));
+  };
 
   const menuList = [
     {
       name: "MENU LIST",
-      menuItems: menu?.data?.map((e: any) => {
-        return {
-          label: e.name,
-          route: e.slug ? `/${e.slug.toLowerCase()}` : `/${e.name.toLowerCase()}`,
-          icon:
-            menuItems.find(
-              (menuIcon) =>
-                menuIcon.name.toLowerCase() === e.name.toLowerCase(),
-            )?.icon || defaultSvg,
-        };
-      }),
+      menuItems: menu?.data
+        ?.filter((e: any) => hasPermission(e.requiredPermissions)) // Filter top-level menus
+        .map((e: any) => {
+          return {
+            label: e.name,
+            route: e.url, // Use e.url directly for top-level menus
+            icon:
+              menuItems.find(
+                (menuIcon) =>
+                  menuIcon.name.toLowerCase() === e.name.toLowerCase(),
+              )?.icon || defaultSvg,
+            children: e.sub_menus?.filter((sub: any) => hasPermission(sub.requiredPermissions)).map((sub: any) => ({
+              label: sub.name,
+              route: sub.url, // Use sub.url directly for sub-menus
+              icon: defaultSvg,
+            })),
+          };
+        }),
     },
   ];
 
-  // useEffect(() => {
-  //   if (!menu) {
-  //     dispatch(getMenuList());
-  //   }
-  // }, [menu, dispatch]);
 
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
-        className={`fixed ${direction === "ltr" ? "left-0" : "right-0"} top-0 z-9999 flex h-full w-52.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
-          sidebarOpen
+        className={`fixed ${direction === "ltr" ? "left-0" : "right-0"} top-0 z-9999 flex h-full w-52.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${sidebarOpen
             ? "translate-x-0"
             : direction === "ltr"
               ? "-translate-x-full"
               : "translate-x-full"
-        }`}
+          }`}
       >
         <div className="grid h-[50px] place-items-center">
           <Link href="/dashboard" className="flex items-center justify-start gap-2 ">
@@ -96,7 +108,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
         <div className="no-scrollbar mt-5 flex flex-col overflow-y-auto duration-300 ease-linear">
           <nav>
-            {staticMenu.map((group, groupIndex) => (
+            {menuList.map((group: any, groupIndex: number) => (
               <div key={groupIndex}>
                 <h3 className="mb-4 ml-4 mr-4 text-sm text-[13px] font-semibold text-bodydark2">
                   {group.name}
@@ -111,6 +123,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       setPageName={setPageName}
                       color={color}
                     />
+
                   ))}
                 </ul>
               </div>

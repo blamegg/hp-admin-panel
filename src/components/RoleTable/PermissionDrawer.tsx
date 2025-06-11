@@ -37,6 +37,8 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
     setSelectedPermissionsId(combined);
   }, [currentRole]);
 
+
+
   const handleMainMenuChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     permission: menuDataInterface
@@ -154,7 +156,7 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       <FormControl
         fullWidth
         sx={{
-          height: "370px",
+          height: "420px",
           mb: 2,
           display: "grid",
           gridTemplateColumns: "2fr",
@@ -162,8 +164,8 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
           paddingLeft: "25px"
         }}
       >
-        <div className='grid grid-cols-4 gap-2'>
-          {permissionsMenuList?.data.map(permission => (
+        <div className='grid grid-cols-5 gap-2'>
+          {permissionsMenuList?.data?.map(permission => (
             <Box key={permission.menu_id}>
               <input
                 type="checkbox"
@@ -198,8 +200,8 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       </FormControl>
 
       <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-4 border-t-2 border-gray'>
-        <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray", color: "white" }} onClick={()=> toggleDrawer(false)} />
-        <Button type="button" name="Update" className="bg-[#ff505d] text-white" onClick={handleUpdatePermission} />
+        <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={()=> toggleDrawer(false)} />
+        <Button type="button" name="Update" style={{backgroundColor:"#00b300"}}  className="text-white" onClick={handleUpdatePermission} />
       </div>
     </div>
   );

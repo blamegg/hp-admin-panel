@@ -17,7 +17,8 @@ export const getMenuList = createAsyncThunk(
   "menuList/menu",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(ApiEndpoints.menu);
+      const response = await apiClient.get(ApiEndpoints.dynamicMenus);
+      console.log(response.data)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error?.response?.data?.message || "failed");

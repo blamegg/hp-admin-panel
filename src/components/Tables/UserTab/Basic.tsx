@@ -1,5 +1,6 @@
 import React from "react";
 import Input from "@/components/common/Input";
+import Select from "@/components/common/Select";
 
 const Basic = ({ register, errors }: any) => {
   return (
@@ -39,6 +40,19 @@ const Basic = ({ register, errors }: any) => {
           register={register("mobile")}
           error={errors.mobile?.message}
         />
+      </div>
+      <div>
+        <Select
+          label="Role"
+          options={[
+            { value: "HR", label: "HR" },
+            { value: "Manager", label: "Manager" },
+            { value: "Employee", label: "Employee" },
+          ]}
+          register={register("role")}
+          error={errors.role?.message}
+        >
+        </Select>
       </div>
     </div>
   );

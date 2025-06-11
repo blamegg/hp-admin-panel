@@ -18,6 +18,7 @@ export interface CurrentRoleDataInterFace {
   status: boolean,
   menus?: mainMenuInterface[],
   data?:RoleDataInterFace2
+  rank:string;
 }
 
 export interface RoleDataInterFace2{
@@ -76,7 +77,8 @@ export interface RolesInterFace {
 export interface menuDataInterface {
   menu_id:string,
   name:string,
-  sub_menus: subMenuInterFace[]
+  sub_menus: subMenuInterFace[],
+  requiredPermissions?: string[];
 }
 
 export interface RolesInterFace2{
@@ -89,6 +91,11 @@ export interface RolesInterFace2{
 // fetch menu list
 export const menuListFn = async () => {
   const response = await apiClient.get(ApiEndpoints.menus);
+  return response.data;
+};
+// fetch Dynamic menu list
+export const dynamicMenuListFn = async () => {
+  const response = await apiClient.get(ApiEndpoints.dynamicMenus);
   return response.data;
 };
 
