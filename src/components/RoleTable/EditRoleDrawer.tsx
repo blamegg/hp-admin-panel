@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
-import { CurrentRoleDataInterFace, RolesInterFace2 } from "@/utility/queryFetcher";
+import { CurrentRoleDataInterFace, menuDataInterface, RolesInterFace2 } from "@/utility/queryFetcher";
 import ModalHeader from "../common/ModalHeader";
 import Permissions from "./PermissionDrawer";
 import { Box,} from "@mui/system";
@@ -51,10 +51,15 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
       onClose={() => toggleDrawer(false)}
+       PaperProps={{
+                sx: {
+                    width: "70%",
+                },
+            }}
     >
-      <div className="w-[1000px]">
+      <div >
         <ModalHeader text={"Edit Role"} toggleDrawer={toggleDrawer} />
-        <Box className="px-3 mt-4 mb-3 flex justify-between items-center gap-6 w-[40%] ">
+        <Box className="px-3 mt-4 mb-3 flex justify-between items-center gap-3 w-[40%] ">
           <Input
             autofocus
             id="role-name"

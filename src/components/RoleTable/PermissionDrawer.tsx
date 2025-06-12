@@ -4,7 +4,8 @@ import {
   updatePermissionFn,
   subMenuInterFace,
   menuDataInterface,
-  ManusInterface
+  ManusInterface,
+  UpdatePermissionsInterFace
 } from '@/utility/queryFetcher';
 import { Box, FormControl } from '@mui/material';
 import React, { useEffect } from 'react';
@@ -15,7 +16,7 @@ interface PermissionDrawerProps {
   permissionsMenuList: RolesInterFace2 | null;
   fetchRoles: () => void;
   currentRole: CurrentRoleDataInterFace | null;
-  toggleDrawer:(open:boolean)=> void;
+  toggleDrawer: (open: boolean) => void;
 }
 
 const Permissions: React.FC<PermissionDrawerProps> = ({
@@ -103,19 +104,14 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
     setSelectedPermissionsId(newSelected);
   };
 
+
   const handleUpdatePermission = async () => {
-    const formattedPermissions: ManusInterface = {
+    
+    if (!currentRole) return;
+    const formattedPermissions: UpdatePermissionsInterFace = {
       role_id: currentRole._id,
       menus: [],
-      _id: "",
-      __v: 0,
-      createdAt: "",
-      updatedAt: "",
-      updated_by: "",
-      created_by: { email: "", name: "", _id: "" },
-      deleted: false,
-      name: "",
-      status: false,
+      name: currentRole?.name,
     };
 
     if (permissionsMenuList?.data) {
@@ -130,24 +126,27 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
         ) {
           formattedPermissions.menus.push({
             menu_id: permission.menu_id,
-            is_parent: "1",
             name: permission.name,
             sub_menus: selectedSubMenus.map(sub => ({
-              menu_id: sub.sub_menu_id, // use sub_menu_id here as it's your unique submenu identifier
+              sub_menu_id: sub.sub_menu_id,
               name: sub.name,
             })),
           });
         }
       });
     }
-
+    console.log(formattedPermissions)
     try {
       await updatePermissionFn(formattedPermissions);
       toast.success("Permissions updated successfully");
       fetchRoles();
       toggleDrawer(false)
-    } catch (error) {
-      toast.error("Error while updating permissions");
+    } catch (error: any) {
+      let errorMessage = error?.response?.data?.message;
+      if (typeof errorMessage !== "string") {
+        errorMessage = "unknown error";
+      }
+      toast.error(errorMessage);
     }
   };
 
@@ -200,8 +199,8 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       </FormControl>
 
       <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-4 border-t-2 border-gray'>
-        <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={()=> toggleDrawer(false)} />
-        <Button type="button" name="Update" style={{backgroundColor:"#00b300"}}  className="text-white" onClick={handleUpdatePermission} />
+        <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
+        <Button type="button" name="Update" style={{ backgroundColor: "#04aa6d" }} className="text-white" onClick={handleUpdatePermission} />
       </div>
     </div>
   );

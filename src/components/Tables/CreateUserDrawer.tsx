@@ -1,23 +1,21 @@
 "use client";
 import { Drawer } from "@mui/material";
 import React, { useState } from "react";
-import Image from "next/image";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Button from "@/components/common/Button";
 import { usercover } from "@/assets";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createUserFn, } from "@/utility/queryFetcher";
+import { UserDrawerProps } from "@/types/CreateUser";
+import { UserFormInputs, userSchema } from "@/schema/createUserSchema";
+import { toast } from "sonner";
+import Image from "next/image";
+import Button from "@/components/common/Button";
 import Basic from "./UserTab/Basic";
 import Company from "./UserTab/Company";
 import Personalization from "./UserTab/Personalization";
 import ModalHeader from "../common/ModalHeader";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createUserFn } from "@/utility/queryFetcher";
-import { UserDrawerProps } from "@/types/CreateUser";
-import { UserFormInputs, userSchema } from "@/schema/createUserSchema";
-import { toast } from "sonner";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+
 
 const CreateUserDrawer = ({
   direction,
@@ -26,25 +24,18 @@ const CreateUserDrawer = ({
 }: UserDrawerProps) => {
   const [profile, setProfile] = useState<string>("/images/user/user-06.png");
   const [selectedTab, setSelectedTab] = useState<string>("Basic");
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<UserFormInputs>({
-    resolver: zodResolver(userSchema),
-    mode: "onSubmit",
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      mobile: "",
-      role: "",
-    },
-  });
+  const { register, handleSubmit, reset, formState: { errors }, } = useForm<UserFormInputs>(
+    {
+      resolver: zodResolver(userSchema), mode: "onSubmit", defaultValues:
+      {
+        name: "",
+        email: "",
+        password: "",
+        mobile: "",
+        role_id: "",
+      },
+    });
 
-  const data = useSelector((state: RootState) => state.role);
-  console.log(data)
 
   const queryClient = useQueryClient();
 
@@ -53,7 +44,7 @@ const CreateUserDrawer = ({
     onSuccess: () => {
       reset();
       toast.success("Users is successfully created");
-      queryClient.refetchQueries({ queryKey: ["menu-list"] });
+      queryClient.refetchQueries({ queryKey: ["users"] });
       toggleDrawer(false);
     },
     onError: (error: any) => {
@@ -64,6 +55,8 @@ const CreateUserDrawer = ({
       toast.error(errorMessage);
     },
   });
+
+   
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -77,6 +70,7 @@ const CreateUserDrawer = ({
   };
 
   const onSubmit = (data: UserFormInputs) => {
+    console.log("Attempting to create user with data:", data);
     createUserMn.mutate({ ...data });
   };
 
@@ -193,7 +187,7 @@ const CreateUserDrawer = ({
           </div>
           <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
             <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
-            <Button name="Submit" type="submit" />
+            <Button name="Submit" type="submit" style={{backgroundColor:"#04aa6d"}} />
           </div>
         </form>
       </div>

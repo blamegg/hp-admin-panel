@@ -2,20 +2,18 @@
 import * as React from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/redux/store";
-import { setSelectedRole, clearSelectedRole } from "@/redux/slice/roleSlice";
+import { setSelectedRole, clearSelectedRole, fetchRoleFn } from "@/redux/slice/roleSlice";
 
 import DataTable from "react-data-table-component";
 import { Typography } from '@mui/material';
 import {
-  rolesFn,
-  createRoleFn,
   updateRoleFn,
   deleteRoleFn,
   menuListFn,
   RolesInterFace,
   CurrentRoleDataInterFace,
-  menuDataInterface,
   dynamicMenuListFn,
+  RolesInterFace2,
 } from '@/utility/queryFetcher';
 import { useDirection } from '@/context/DirectionContext';
 import EditRoleDrawer from './EditRoleDrawer';
@@ -27,36 +25,20 @@ import Button from "@/components/common/Button";
 import CreateRole from './CreateRole';
 import DeleteRole from './DeleteRole';
 import CustomPagination from '../CustomPagination';
-import PermissionDrawer from './PermissionDrawer';
-import { CleaningServices } from '@mui/icons-material';
-import Permissions from './PermissionDrawer';
 import { useQuery } from '@tanstack/react-query';
 import { setPermissions } from '@/redux/slice/authSlice';
-
-interface Column {
-  id: 'Role' | 'Actions';
-  label: string;
-  minWidth?: number;
-  align?: 'right';
-}
-
-// const columns: readonly Column[] = [
-//   { id: 'Role', label: 'Role' },
-//   { id: 'Actions', label: 'Actions' },
-// ];
-
-
 
 export default function Roles() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const dispatch = useDispatch<AppDispatch>();
+  const allRoles = useSelector((state: RootState) => state.role.allRoles);
   const selectedRole = useSelector((state: RootState) => state.role.selectedRole);
-  const [roles, setRoles] = React.useState<RolesInterFace | null>(null);
+  const totalDocuments = useSelector((state: RootState) => state.role.totalDocuments);
+
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [permissionsMenuList, setPermissionsMenuList] = React.useState<menuDataInterface[]>([]);
-  const [totalDocument, setTotalDocument] = React.useState(0);
+  const [permissionsMenuList, setPermissionsMenuList] = React.useState<RolesInterFace2 | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchBasis, setSearchBasis] = React.useState("name");
 
@@ -65,17 +47,14 @@ export default function Roles() {
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = React.useState(false);
   const [isViewDrawerOpen, setIsViewDrawerOpen] = React.useState(false);
   const [isPermissiondrawerOpen, setIsPermissionDrawerOpen] = React.useState(false);
-  const [permissionDrawerRole, setPermissionDrawerRole] = React.useState<CurrentRoleDataInterFace | null>(null);
 
   const { direction } = useDirection();
   const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
 
 
-
   const hasPermission = (permissionKey: string): boolean => {
     return permissions.includes(permissionKey);
   };
-
 
   const { data } = useQuery({
     queryKey: ["menuList"],
@@ -94,13 +73,12 @@ export default function Roles() {
   }, [data]);
 
 
+
   const fetchRoles = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await rolesFn(currentPage, rowsPerPage);
-      setRoles(response);
-      setTotalDocument(response.pagination?.total || 0);
+      dispatch(fetchRoleFn({ page: currentPage, limit: rowsPerPage }));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -119,7 +97,6 @@ export default function Roles() {
     }
   };
 
-  console.log(permissionsMenuList)
 
   React.useEffect(() => {
     fetchRoles();
@@ -127,11 +104,11 @@ export default function Roles() {
   }, [currentPage, rowsPerPage]);
 
   React.useEffect(() => {
-    const totalPages = Math.ceil(totalDocument / rowsPerPage);
+    const totalPages = Math.ceil(totalDocuments / rowsPerPage);
     if (currentPage > totalPages) {
       setCurrentPage(totalPages > 0 ? totalPages : 1);
     }
-  }, [totalDocument, rowsPerPage, currentPage]);
+  }, [totalDocuments, rowsPerPage, currentPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -192,10 +169,10 @@ export default function Roles() {
     if (!value) dispatch(clearSelectedRole());
   };
 
-  const togglePermissionDrawer = (value: boolean, role?: CurrentRoleDataInterFace | null) => {
+  const togglePermissionDrawer = (value: boolean, role?: CurrentRoleDataInterFace | RolesInterFace | null) => {
     setIsPermissionDrawerOpen(value);
     if (value && role) {
-      dispatch(setSelectedRole(role));
+      dispatch(setSelectedRole(role as CurrentRoleDataInterFace));
     } else if (!value) {
       dispatch(clearSelectedRole());
     }
@@ -216,7 +193,7 @@ export default function Roles() {
     {
       name: "S No",
       selector: (row: CurrentRoleDataInterFace) =>
-        (currentPage - 1) * rowsPerPage + ((roles?.data?.indexOf(row) ?? -1) + 1),
+        (currentPage - 1) * rowsPerPage + ((allRoles?.indexOf(row) ?? -1) + 1),
       sortable: true,
       width: "80px",
     },
@@ -236,7 +213,7 @@ export default function Roles() {
       name: "Actions",
       cell: (row: CurrentRoleDataInterFace) => (
         <div className="flex gap-3">
-          {hasPermission('View All Role') && (
+          {hasPermission('Edit Role') && (
             <button
               onClick={() => {
                 dispatch(setSelectedRole(row));
@@ -247,7 +224,7 @@ export default function Roles() {
               <FaEdit />
             </button>
           )}
-          {hasPermission('Delete User') && (
+          {hasPermission('Delete Role') && (
             <button
               onClick={() => handleDeleteClick(row)}
               className="text-red-500 hover:text-red-700"
@@ -265,19 +242,7 @@ export default function Roles() {
               <FaEye />
             </button>
           )}
-          <Tooltip
-            title="Assign Permissions"
-            arrow
-          >
-            <button
-              onClick={() => {
-                togglePermissionDrawer(true, row)
-              }}
-              className="text-green-500 hover:text-green-700"
-            >
-              <FaRegQuestionCircle />
-            </button>
-          </Tooltip>
+
         </div>
       ),
       width: "160px",
@@ -290,113 +255,126 @@ export default function Roles() {
   if (error) return <Typography color="error">Error: {error}</Typography>;
 
   return (
-    <div className="custom_tbl_container h-[90vh]">
+    <div className="custom_tbl_container h-[90vh] w-full">
       <div className="flex items-center gap-4">
-        <select
-          value={searchBasis}
-          onChange={(e) => setSearchBasis(e.target.value)}
-          className="rounded bg-[#eff4fb] border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
-        >
-          <option value="name">Role Name</option>
-        </select>
-        <input
-          type="text"
-          placeholder={`Search by ${searchBasis}...`}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
-        />
-        <Button
-          name="Create Role"
-          type="submit"
-          onClick={() => toggleAddDrawer(true)}
-        />
-        <Tooltip
-          title="Roles define what users can do and see within the system."
-          arrow
-        >
-          <button>
-            <FaRegQuestionCircle />
-          </button>
-        </Tooltip>
+
+        {hasPermission('View All Role') && (
+          <>
+            <select
+              value={searchBasis}
+              onChange={(e) => setSearchBasis(e.target.value)}
+              className="rounded bg-[#eff4fb] border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+            >
+              <option value="name">Role Name</option>
+            </select>
+            <input
+              type="text"
+              placeholder={`Search by ${searchBasis}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+            />
+          </>
+        )}
+        {hasPermission('Create Role') && (
+          <Button
+            name="Create Role"
+            type="submit"
+            onClick={() => toggleAddDrawer(true)}
+            style={{backgroundColor:"#04aa6d"}}
+          />
+        )}
+        {
+          hasPermission('View All Role') && (
+            <Tooltip
+              title="Roles define what users can do and see within the system."
+              arrow
+            >
+              <button>
+                <FaRegQuestionCircle />
+              </button>
+            </Tooltip>
+          )}
       </div>
 
 
       <div className="mt-5 overflow-x-auto ">
-        <DataTable
-          columns={columns}
-          data={roles?.data?.filter((role: CurrentRoleDataInterFace) =>
-            role.name.toLowerCase().includes(searchQuery.toLowerCase())
-          ) || []}
-          pagination
-          paginationPerPage={rowsPerPage}
-          paginationTotalRows={totalDocument}
-          paginationComponent={() => (
-            <CustomPagination
-              rowsPerPage={rowsPerPage}
-              currentPage={currentPage}
-              rowCount={totalDocument}
-              onChangePage={handlePageChange}
-              onChangeRowsPerPage={handleRowsPerPageChange}
-            />
-          )}
-          className="custom_tbl"
-          customStyles={{
-            header: {
-              style: {
-                fontSize: "12px",
-                minHeight: "30px",
-                backgroundColor: "#F9FAFB", // Light mode header background
-                color: "#1C243F", // Light mode header text
+        {hasPermission('View All Role') && (
+          <DataTable
+            columns={columns}
+            data={allRoles?.filter((role: CurrentRoleDataInterFace) =>
+              role.name.toLowerCase().includes(searchQuery.toLowerCase())
+            ) || []}
+            pagination
+            paginationPerPage={rowsPerPage}
+            paginationTotalRows={totalDocuments}
+            paginationComponent={() => (
+              <CustomPagination
+                rowsPerPage={rowsPerPage}
+                currentPage={currentPage}
+                rowCount={totalDocuments}
+                onChangePage={handlePageChange}
+                onChangeRowsPerPage={handleRowsPerPageChange}
+              />
+            )}
+            className="custom_tbl"
+            customStyles={{
+              header: {
+                style: {
+                  fontSize: "12px",
+                  minHeight: "30px",
+                  backgroundColor: "#F9FAFB", // Light mode header background
+                  color: "#1C243F", // Light mode header text
+                },
               },
-            },
-            headRow: {
-              style: {
-                fontSize: "12px",
-                minHeight: "30px",
-                backgroundColor: "#F9FAFB", // Light mode header row background
-                borderBottomWidth: "1px",
-                borderBottomColor: "#E2E8F0", // stroke
-              },
-            },
-            headCells: {
-              style: {
-                fontWeight: 700,
-                color: "#1C243F", // Light mode header cells text
-                backgroundColor: "#F9FAFB", // Light mode header cells background
-              },
-            },
-            cells: {
-              style: {
-                fontSize: "11px",
-                fontWeight: 500,
-                wordBreak: "break-word",
-                overflowWrap: "break-word",
-                height: "27px",
-                color: "#1C243F", // Light mode cell text
-                backgroundColor: "#FFFFFF", // Light mode cell background
-              },
-            },
-            rows: {
-              style: {
-                fontSize: "11px",
-                minHeight: "27px",
-                "&:not(:last-of-type)": {
-                  borderBottomStyle: "solid",
+              headRow: {
+                style: {
+                  fontSize: "12px",
+                  minHeight: "30px",
+                  backgroundColor: "#F9FAFB", // Light mode header row background
                   borderBottomWidth: "1px",
                   borderBottomColor: "#E2E8F0", // stroke
                 },
-                backgroundColor: "#FFFFFF", // Light mode row background
-                color: "#1C243F", // Light mode row text
               },
-              highlightOnHoverStyle: {
-                backgroundColor: "#F7F9FC", // gray-2
-                color: "#1C243F",
-                cursor: "pointer",
+              headCells: {
+                style: {
+                  fontWeight: 700,
+                  color: "#1C243F", // Light mode header cells text
+                  backgroundColor: "#F9FAFB", // Light mode header cells background
+                },
               },
-            },
-          }}
-        />
+              cells: {
+                style: {
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  height: "27px",
+                  color: "#1C243F", // Light mode cell text
+                  backgroundColor: "#FFFFFF", // Light mode cell background
+                },
+              },
+              rows: {
+                style: {
+                  fontSize: "11px",
+                  minHeight: "27px",
+                  "&:not(:last-of-type)": {
+                    borderBottomStyle: "solid",
+                    borderBottomWidth: "1px",
+                    borderBottomColor: "#E2E8F0", // stroke
+                  },
+                  backgroundColor: "#FFFFFF", // Light mode row background
+                  color: "#1C243F", // Light mode row text
+                },
+                highlightOnHoverStyle: {
+                  backgroundColor: "#F7F9FC", // gray-2
+                  color: "#1C243F",
+                  cursor: "pointer",
+                },
+              },
+            }}
+          />
+        )}
       </div>
 
       <CreateRole
@@ -411,7 +389,6 @@ export default function Roles() {
         isDrawerOpen={isEditDrawerOpen}
         toggleDrawer={toggleEditDrawer}
         onSave={handleEditRole}
-        selectedRole={selectedRole}
         currentRole={selectedRole}
         direction={direction}
         permissionsMenuList={permissionsMenuList}
@@ -426,20 +403,11 @@ export default function Roles() {
         direction={direction}
         fetchRoles={fetchRoles}
       />
-
       <ViewRoleDrawer
         isDrawerOpen={isViewDrawerOpen}
         toggleDrawer={toggleViewDrawer}
         selectedRole={selectedRole}
         direction={direction}
-      />
-
-      <PermissionDrawer
-        isDrawerOpen={isPermissiondrawerOpen}
-        toggleDrawer={togglePermissionDrawer}
-        permissionsMenuList={permissionsMenuList?.data || []}
-        role={permissionDrawerRole}
-        fetchRoles={fetchRoles}
       />
     </div>
   );

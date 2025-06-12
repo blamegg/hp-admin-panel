@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
 
 import Button from "../common/Button";
-import { createRoleFn, CurrentRoleDataInterFace, RolesInterFace2 } from "@/utility/queryFetcher";
+import { createRoleFn, CurrentRoleDataInterFace, RolesInterFace} from "@/utility/queryFetcher";
 import { toast } from "sonner";
 import ModalHeader from "../common/ModalHeader";
-import { SelectChangeEvent } from '@mui/material/Select';
+// import { SelectChangeEvent } from '@mui/material/Select';
 
 import Input from "../common/Input";
 
@@ -14,7 +14,7 @@ interface AddRoleDrawerProps {
   isDrawerOpen: boolean;
   toggleDrawer: (open: boolean) => void;
   fetchRoles: () => void;
-  togglePermissionDrawer: (open: boolean, role?: CurrentRoleDataInterFace | RolesInterFace2 | null) => void;
+  togglePermissionDrawer: (open: boolean, role?: CurrentRoleDataInterFace | RolesInterFace | null) => void;
 }
 
 const CreateRole: React.FC<AddRoleDrawerProps> = ({
@@ -50,7 +50,7 @@ const CreateRole: React.FC<AddRoleDrawerProps> = ({
     }
   };
 
-  const handleRankChange = (event: SelectChangeEvent<number>) => {
+  const handleRankChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setRoleRank(Number(event.target.value));
   };
 
@@ -64,7 +64,7 @@ const CreateRole: React.FC<AddRoleDrawerProps> = ({
         <ModalHeader text={"Create Role"} toggleDrawer={toggleDrawer} />
         <div className=" mx-3 mt-3">
           <Input
-            autoFocus={true}
+            autofocus={true}
             id="role-name"
             label="Role Name"
             type="text"
@@ -77,7 +77,7 @@ const CreateRole: React.FC<AddRoleDrawerProps> = ({
           <div className="mt-2">
             <label htmlFor="role-rank" className="block text-sm font-medium text-black dark:text-white">Rank</label>
             <select
-              labelId="role-rank-label"
+              // labelId="role-rank-label"
               id="role-rank"
               value={roleRank}
               onChange={handleRankChange}
@@ -94,7 +94,7 @@ const CreateRole: React.FC<AddRoleDrawerProps> = ({
         </div>
         <div className="flex justify-end items-center gap-3 absolute bottom-0 h-[70px] w-[100%] pr-2 border-t-2 border-gray">
           <Button type="button" name="Cancel" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
-          <Button type="submit" name=" Create Role" style={{backgroundColor:"#00b300"}} onClick={handleCreateRole}></Button>
+          <Button type="submit" name=" Create Role" style={{backgroundColor:"#04aa6d"}} onClick={handleCreateRole}></Button>
         </div>
       </div>
     </Drawer>

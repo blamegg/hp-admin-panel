@@ -9,6 +9,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import ModalHeader from "../common/ModalHeader";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteUserFn } from "@/utility/queryFetcher";
+import { toast } from "sonner";
 
 interface UserDrawerProps {
   direction: string;
@@ -32,6 +33,8 @@ const DeleteDrawer = ({
     mutationFn: (userId: string) => deleteUserFn(userId),
     onSuccess: () => {
       queryClient.refetchQueries({ queryKey: ["menu-list"] });
+      toast.success(`The user ${selected?.name} has been successfully deleted.`);
+      toggleDrawer(false);
     },
   });
 
@@ -58,7 +61,7 @@ const DeleteDrawer = ({
       <div role="presentation">
         <ModalHeader text="Delete Confirmation" toggleDrawer={toggleDrawer} />
 
-        <div className="relative  flex flex-col items-center justify-center px-7 pb-7 h-[570px]">
+        <div className="relative  flex flex-col items-center justify-center px-7 pb-7 h-[calc(100vh-60px)]">
           {deleteUserMn.isPending && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-75">
               <ImSpinner2 className="animate-spin text-5xl text-companyRed" />
@@ -89,17 +92,14 @@ const DeleteDrawer = ({
               <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
                 Are you sure you want to delete {selected?.name} user?
               </h3>
-              <div className="mt-6 pr-3 flex w-full items-center justify-end gap-7 absolute bottom-0 border-t-2 border-gray h-[50px]">
-                <Button
-                  type="button"
-                  name="Cancel"
-                  onClick={() => toggleDrawer(false)}
-                />
+              
+              <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
+                <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
                 <Button
                   type="button"
                   name="Confirm"
-                  className="bg-green-500"
                   onClick={handleDelete}
+                  style={{backgroundColor:"#04aa6d"}}
                 />
               </div>
             </>

@@ -3,19 +3,16 @@ import { Drawer } from "@mui/material";
 import React, { useEffect } from "react";
 import Button from "@/components/common/Button";
 import ModalHeader from "../common/ModalHeader";
-import { UserDrawerProps } from "@/types/CreateUser";
 import Input from "../common/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  EditUserFormInputs,
-  editUserSchema,
-  UserFormInputs,
-  userSchema,
-} from "@/schema/createUserSchema";
+import { EditUserFormInputs, editUserSchema,} from "@/schema/createUserSchema";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateUserFn } from "@/utility/queryFetcher";
+import { CurrentRoleDataInterFace, updateUserFn } from "@/utility/queryFetcher";
 import { toast } from "sonner";
+import Select from "../common/Select";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const EditDrawer = ({
   direction,
@@ -36,7 +33,7 @@ const EditDrawer = ({
   const updateUserMn = useMutation({
     mutationFn: (payload: any) => updateUserFn(payload, payload.userId),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["menu-list"] });
+      queryClient.refetchQueries({ queryKey: ["users"] });
       toast.success("User is updated successfully");
       toggleDrawer(false);
     },
@@ -55,7 +52,7 @@ const EditDrawer = ({
         name: selected.name || "",
         email: selected.email || "",
         mobile: String(selected.mobile) || "",
-        password: "",
+        role_id: selected.role._id || ""
       });
     }
   }, [selected, reset]);
@@ -64,6 +61,9 @@ const EditDrawer = ({
     console.log(data, "password");
     updateUserMn.mutate({ ...data, userId: selected._id });
   };
+
+  const roles = useSelector((state: RootState) => state.role.allRoles);
+  const roleList = roles?.map((role: CurrentRoleDataInterFace) => ({ value: role._id, label: role.name }));
 
   return (
     <Drawer
@@ -113,7 +113,7 @@ const EditDrawer = ({
                   error={errors.mobile?.message}
                 />
               </div>
-              <div>
+              {/* <div>
                 <Input
                   label="Password"
                   type="password"
@@ -121,15 +121,28 @@ const EditDrawer = ({
                   register={register("password")}
                   error={errors.password?.message}
                 />
+              </div> */}
+              <div>
+                <Select
+                  label="Role"
+                  options={roleList}
+                  error={errors.role_id?.message}
+                  register={register("role_id")}
+                 />
               </div>
             </div>
 
             <div className="mt-6">
+            </div>
+
+            <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
+              <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
               <Button
                 name="Submit"
                 type="submit"
                 loading={updateUserMn.isPending}
-                className="bg-red-600 h-[30px] w-[100px] text-[16px] text-white"
+                  style={{backgroundColor:"#04aa6d"}}
+
               />
             </div>
           </form>

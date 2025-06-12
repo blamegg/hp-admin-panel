@@ -6,6 +6,35 @@ export interface CreatedBy {
   _id: string
 }
 
+
+export interface RolesInterFace {
+  data: CurrentRoleDataInterFace[] ,
+  message: string,
+  pagination?: PaginationInterface,
+  success: boolean
+}
+
+
+export interface RolesInterFace2{
+  message: string,
+  success: boolean,
+  name?:string,
+  data?: menuDataInterface[]
+}
+
+
+export interface RoleDataInterFace2{
+  _id: string,
+  __v: number,
+  createdAt: string,
+  updatedAt: string,
+  updated_by: string,
+  created_by: CreatedBy,
+  deleted: boolean,
+  name: string,
+  status: boolean,
+}
+
 export interface CurrentRoleDataInterFace {
   _id: string,
   __v: number,
@@ -21,17 +50,6 @@ export interface CurrentRoleDataInterFace {
   rank:string;
 }
 
-export interface RoleDataInterFace2{
-  _id: string,
-  __v: number,
-  createdAt: string,
-  updatedAt: string,
-  updated_by: string,
-  created_by: CreatedBy,
-  deleted: boolean,
-  name: string,
-  status: boolean,
-}
 
 export interface subMenuInterFace {
   sub_menu_id: string,
@@ -67,12 +85,6 @@ export interface PaginationInterface {
   totalPages: number
 
 }
-export interface RolesInterFace {
-  data: CurrentRoleDataInterFace[] ,
-  message: string,
-  pagination?: PaginationInterface,
-  success: boolean
-}
 
 export interface menuDataInterface {
   menu_id:string,
@@ -81,12 +93,20 @@ export interface menuDataInterface {
   requiredPermissions?: string[];
 }
 
-export interface RolesInterFace2{
-  message: string,
-  success: boolean,
-  name?:string,
-  data?: menuDataInterface[]
-}
+export interface UpdatePermissionsInterFace {
+    role_id: string;
+    name:string;
+    menus: {
+      menu_id: string;
+      name: string;
+      sub_menus: {
+        sub_menu_id: string;
+        name: string;
+      }[];
+    }[];
+  }
+
+
 
 // fetch menu list
 export const menuListFn = async () => {
@@ -167,7 +187,7 @@ export const permissionsFn = async (roleId:string) => {
 };
 
 // update permission
-export const updatePermissionFn = async (payload: ManusInterface) => {
+export const updatePermissionFn = async (payload: UpdatePermissionsInterFace) => {
   const response = await apiClient.post(
     `${ApiEndpoints.updatePermissions}`,
     payload,

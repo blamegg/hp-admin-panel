@@ -71,7 +71,7 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
 
       <div role="presentation">
         <ModalHeader text="Delete Confirmation" toggleDrawer={toggleDrawer} />
-        <div className="relative  flex flex-col items-center justify-center px-7 pb-7 h-[570px]">
+        <div className="relative  flex flex-col items-center justify-center px-7 pb-7 h-[calc(100vh-60px)] ">
           {deleteRoleMn.isPending && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-75">
               <ImSpinner2 className="animate-spin text-5xl text-companyRed" />
@@ -105,15 +105,15 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
               <div className="mt-6 flex w-full items-center justify-end pr-3 gap-7 absolute bottom-0 border-t-2 border-gray h-[50px]">
                 <Button
                   type="button"
-                  name="Confirm"
-                  onClick={handleDelete}
-                  style={{backgroundColor:"#ff505d"}}
-                />
-                <Button
-                  type="button"
                   name="Cancel"
                   onClick={() => toggleDrawer(false)}
                   style={{ backgroundColor: "gray" }}
+                />
+                <Button
+                  type="button"
+                  name="Confirm"
+                  onClick={handleDelete}
+                  style={{backgroundColor:"#04aa6d"}}
                 />
               </div>
             </>

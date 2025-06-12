@@ -1,8 +1,16 @@
 import React from "react";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { CurrentRoleDataInterFace } from "@/utility/queryFetcher";
 
 const Basic = ({ register, errors }: any) => {
+
+
+  const roles = useSelector((state: RootState) => state.role.allRoles);
+  const roleList = roles?.map((role: CurrentRoleDataInterFace) => ({ value: role._id, label: role.name }));
+  
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <div>
@@ -44,13 +52,9 @@ const Basic = ({ register, errors }: any) => {
       <div>
         <Select
           label="Role"
-          options={[
-            { value: "HR", label: "HR" },
-            { value: "Manager", label: "Manager" },
-            { value: "Employee", label: "Employee" },
-          ]}
-          register={register("role")}
-          error={errors.role?.message}
+          options={roleList}
+          register={register("role_id")}
+          error={errors.role_id?.message}
         >
         </Select>
       </div>

@@ -15,6 +15,8 @@ import { formatTime, formatTimestamp } from "@/utility/helper";
 import EditDrawer from "./EditDrawer";
 import ViewDrawer from "./UserTab/ViewDrawer";
 import { usePathname } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
@@ -30,14 +32,20 @@ const UserTable = () => {
   const pathname = usePathname();
   const [showSearchBar, setShowSearchBar] = useState(false);
 
+  const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
+
+  const hasPermission = (permissionKey: string): boolean => {
+    return permissions.includes(permissionKey);
+  };
+
   useEffect(() => {
     const path = pathname.toLowerCase();
-    setShowSearchBar(path.includes('/users') );
+    setShowSearchBar(path.includes('/users'));
   }, [pathname]);
 
   const { direction } = useDirection();
   const { data: userList } = useQuery({
-    queryKey: ["menu-list"],
+    queryKey: ["users"],
     queryFn: usersFn,
   });
 
@@ -47,6 +55,7 @@ const UserTable = () => {
       setCurrentPage(totalPages > 0 ? totalPages : 1);
     }
   }, [totalItems, rowsPerPage, currentPage]);
+
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -80,25 +89,32 @@ const UserTable = () => {
     setViewDrawer(value);
   };
 
+
   const columns = [
     {
       name: "S No",
       selector: (row: any) =>
         (currentPage - 1) * rowsPerPage + (userList?.data.indexOf(row) + 1),
       sortable: true,
-      width: "80px",
+      width: "75px",
+    },
+    {
+      name: "Role",
+      selector: (row: any) => row.role.name || "",
+      sortable: true,
+      width: "130px",
     },
     {
       name: "Email",
       selector: (row: any) => row.email || "",
       sortable: true,
-      width: "200px",
+      width: "160px",
     },
     {
       name: "Name",
       selector: (row: any) => row.name || "",
       sortable: true,
-      width: "200px",
+      width: "120px",
     },
     {
       name: "Mobile",
@@ -122,133 +138,154 @@ const UserTable = () => {
       name: "Actions",
       cell: (row: any) => (
         <div className="flex gap-3">
-          <button
-            onClick={() => {
-              setSelected(row);
-              toggleEditDrawer(true);
-            }}
-            className="text-blue-500 hover:text-blue-700"
-          >
-            <FaEdit />
-          </button>
-          <button
-            onClick={() => handleDeleteClick(row)}
-            className="text-red-500 hover:text-red-700"
-          >
-            <FaTrash />
-          </button>
-          <button
-            onClick={() => {
-              handleViewClick(row);
-              toggleViewDrawer(true);
-            }}
-          >
-            <FaEye className="w-3 h-3" />
-          </button>
+          {hasPermission('Edit User') && (
+            <button
+              onClick={() => {
+                setSelected(row);
+                toggleEditDrawer(true);
+              }}
+              className="text-blue-500 hover:text-blue-700"
+            >
+              <FaEdit />
+            </button>
+          )}
+          {hasPermission('Delete User') && (
+            <button
+              onClick={() => handleDeleteClick(row)}
+              className="text-red-500 hover:text-red-700"
+            >
+              <FaTrash />
+            </button>
+          )}
+          {hasPermission('View User Details') && (
+            <button
+              onClick={() => {
+                handleViewClick(row);
+                toggleViewDrawer(true);
+              }}
+            >
+              <FaEye className="w-3 h-3" />
+            </button>
+          )}
         </div>
       ),
-      width: "120px",
+      width: "120px"
     },
   ];
 
   return (
     <>
-      <div className="custom_tbl_container h-[90vh]">
+      <div className="custom_tbl_container h-[74vh] w-[350px] md:w-full ">
         {
           showSearchBar && (
             <div className="flex items-center gap-4">
-            <select
-              value={searchBasis}
-              onChange={(e) => setSearchBasis(e.target.value)}
-              className="rounded border px-1 py-2 text-[12px] text-black outline-none"
-            >
-              <option value="name">Name</option>
-              <option value="email">Email</option>
-            </select>
-            <input
-              type="text"
-              placeholder={`Search by ${searchBasis}...`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded border p-1 text-[12px] text-black outline-none"
-            />
-            <Button
-              name="Create User"
-              type="submit"
-              onClick={() => toggleUserDrawer(true)}
-            />
-            <Tooltip
-              title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
-              arrow
-            >
-              <button>
-                <FaRegQuestionCircle />
-              </button>
-            </Tooltip>
-          </div>
+              {hasPermission('View All Users') && (
+                <>
+                  <select
+                    value={searchBasis}
+                    onChange={(e) => setSearchBasis(e.target.value)}
+                    className="rounded bg-[#eff4fb] border  py-2 px-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+
+                  >
+                    <option value="name">Name</option>
+                    <option value="email">Email</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder={`Search by ${searchBasis}...`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+
+                  />
+                </>
+              )}
+              {hasPermission('Create User') && (
+                <Button
+                  name="Create User"
+                  type="submit"
+                  onClick={() => toggleUserDrawer(true)}
+                  style={{ backgroundColor: "#04aa6d" }}
+                />
+              )}
+              {hasPermission('View All Users') && (
+                <Tooltip
+                  title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
+                  arrow
+                  className="hidden md:block"
+                >
+                  <button>
+                    <FaRegQuestionCircle />
+                  </button>
+                </Tooltip>
+              )}
+            </div>
           )
         }
-       
+
 
         <div className="mt-5 overflow-x-auto ">
-          <DataTable
-            columns={columns}
-            data={userList?.data}
-            pagination
-            paginationPerPage={rowsPerPage}
-            paginationTotalRows={userList?.data?.length}
-            paginationComponent={() => (
-              <CustomPagination
-                rowsPerPage={rowsPerPage}
-                currentPage={currentPage}
-                rowCount={userList?.data?.length}
-                onChangePage={handlePageChange}
-                onChangeRowsPerPage={handleRowsPerPageChange}
-              />
-            )}
-            className="custom_tbl"
-            customStyles={{
-              header: {
-                style: {
-                  fontSize: "12px",
-                  minHeight: "30px",
-                },
-              },
-              headRow: {
-                style: {
-                  fontSize: "12px",
-                  minHeight: "30px",
-                },
-              },
-              headCells: {
-                style: {
-                  fontWeight: 700,
-                },
-              },
-              cells: {
-                style: {
-                  fontSize: "11px",
-                  fontWeight: 500,
-                  wordBreak: "break-word",
-                  overflowWrap: "break-word",
-                  height: "27px",
-                },
-              },
-              rows: {
-                style: {
-                  fontSize: "11px",
-                  minHeight: "27px",
-                  "&:not(:last-of-type)": {
-                    borderBottomStyle: "solid",
-                    borderBottomWidth: "1px",
+
+          {hasPermission('View All Users') && (
+            <DataTable
+              columns={columns}
+              data={userList?.data}
+              pagination
+              paginationPerPage={rowsPerPage}
+              paginationTotalRows={userList?.data?.length}
+              paginationComponent={() => (
+                <CustomPagination
+                  rowsPerPage={rowsPerPage}
+                  currentPage={currentPage}
+                  rowCount={userList?.data?.length}
+                  onChangePage={handlePageChange}
+                  onChangeRowsPerPage={handleRowsPerPageChange}
+                />
+              )}
+              className="custom_tbl"
+              customStyles={{
+                header: {
+                  style: {
+                    fontSize: "12px",
+                    minHeight: "30px",
                   },
                 },
-              },
-            }}
-          />
+                headRow: {
+                  style: {
+                    fontSize: "12px",
+                    minHeight: "30px",
+                  },
+                },
+                headCells: {
+                  style: {
+                    fontWeight: 700,
+                  },
+                },
+                cells: {
+                  style: {
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                    height: "27px",
+                  },
+                },
+                rows: {
+                  style: {
+                    fontSize: "11px",
+                    minHeight: "27px",
+                    "&:not(:last-of-type)": {
+                      borderBottomStyle: "solid",
+                      borderBottomWidth: "1px",
+                    },
+                  },
+                },
+              }}
+            />
+          )}
         </div>
       </div>
-      
+
       <CreateUserDrawer
         direction={direction}
         isDrawerOpen={UserDrawer}
@@ -269,7 +306,7 @@ const UserTable = () => {
         selected={selected}
         setSelected={setSelected}
       />
-       <ViewDrawer
+      <ViewDrawer
         direction={direction}
         isDrawerOpen={viewDrawer}
         toggleDrawer={toggleViewDrawer}
