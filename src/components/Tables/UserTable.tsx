@@ -17,6 +17,7 @@ import ViewDrawer from "./UserTab/ViewDrawer";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import CreateBulkUserDrawer from "./CreateBulkUserDrawer";
 
 const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
@@ -25,6 +26,7 @@ const UserTable = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchBasis, setSearchBasis] = useState("name");
   const [UserDrawer, setUserDrawer] = useState(false);
+  const [bulkUserDrawer, setBulkUserDrawer] = useState(false);
   const [deleteDrawer, setDeleteDrawer] = useState(false);
   const [editDrawer, setEditDrawer] = useState(false);
   const [viewDrawer, setViewDrawer] = useState(false);
@@ -76,6 +78,9 @@ const UserTable = () => {
 
   const toggleUserDrawer = (value: boolean) => {
     setUserDrawer(value);
+  };
+  const toggleBulkUserDrawer = (value: boolean) => {
+    setBulkUserDrawer(value);
   };
 
   const toggleDeleteDrawer = (value: boolean) => {
@@ -173,148 +178,164 @@ const UserTable = () => {
     },
   ];
 
-  return (
-    <>
-      <div className="custom_tbl_container h-[74vh] w-[350px] md:w-full ">
-        {
-          showSearchBar && (
-            <div className="flex items-center gap-4">
-              {hasPermission('View All Users') && (
-                <>
-                  <select
-                    value={searchBasis}
-                    onChange={(e) => setSearchBasis(e.target.value)}
-                    className="rounded bg-[#eff4fb] border  py-2 px-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+    return(
+      <>
+        <div className="custom_tbl_container h-[74vh] w-[350px] md:w-full ">
+          {
+            showSearchBar && (
+              <div className=" grid grid-cols-2 md:flex items-center gap-4">
+                {hasPermission('View All Users') && (
+                  <>
+                    <select
+                      value={searchBasis}
+                      onChange={(e) => setSearchBasis(e.target.value)}
+                      className="rounded bg-[#eff4fb] border  py-2 px-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
 
-                  >
-                    <option value="name">Name</option>
-                    <option value="email">Email</option>
-                  </select>
-                  <input
-                    type="text"
-                    placeholder={`Search by ${searchBasis}...`}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+                    >
+                      <option value="name">Name</option>
+                      <option value="email">Email</option>
+                    </select>
+                    <input
+                      type="text"
+                      placeholder={`Search by ${searchBasis}...`}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
 
+                    />
+                  </>
+                )}
+                {hasPermission('Create User') && (
+                  <Button
+                    name="Create User"
+                    type="submit"
+                    onClick={() => toggleUserDrawer(true)}
+                    style={{ backgroundColor: "#04aa6d" }}
+                    className="w-full md:w-auto"
                   />
-                </>
-              )}
-              {hasPermission('Create User') && (
-                <Button
-                  name="Create User"
-                  type="submit"
-                  onClick={() => toggleUserDrawer(true)}
-                  style={{ backgroundColor: "#04aa6d" }}
-                />
-              )}
-              {hasPermission('View All Users') && (
-                <Tooltip
-                  title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
-                  arrow
-                  className="hidden md:block"
-                >
-                  <button>
-                    <FaRegQuestionCircle />
-                  </button>
-                </Tooltip>
-              )}
-            </div>
-          )
-        }
+                )}
+                {hasPermission('Create User') && (
+                  <Button
+                    name="Create Bulk users"
+                    type="submit"
+                    onClick={() => toggleBulkUserDrawer(true)}
+                    style={{ backgroundColor: "#04aa6d" }}
+                    className="w-full md:w-auto"
+                  />
+                )}
+                {hasPermission('View All Users') && (
+                  <Tooltip
+                    title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
+                    arrow
+                    className="hidden md:block"
+                  >
+                    <button>
+                      <FaRegQuestionCircle />
+                    </button>
+                  </Tooltip>
+                )}
+              </div>
+            )
+          }
 
 
-        <div className="mt-5 overflow-x-auto ">
+          <div className="mt-5 overflow-x-auto ">
 
-          {hasPermission('View All Users') && (
-            <DataTable
-              columns={columns}
-              data={userList?.data}
-              pagination
-              paginationPerPage={rowsPerPage}
-              paginationTotalRows={userList?.data?.length}
-              paginationComponent={() => (
-                <CustomPagination
-                  rowsPerPage={rowsPerPage}
-                  currentPage={currentPage}
-                  rowCount={userList?.data?.length}
-                  onChangePage={handlePageChange}
-                  onChangeRowsPerPage={handleRowsPerPageChange}
-                />
-              )}
-              className="custom_tbl"
-              customStyles={{
-                header: {
-                  style: {
-                    fontSize: "12px",
-                    minHeight: "30px",
-                  },
-                },
-                headRow: {
-                  style: {
-                    fontSize: "12px",
-                    minHeight: "30px",
-                  },
-                },
-                headCells: {
-                  style: {
-                    fontWeight: 700,
-                  },
-                },
-                cells: {
-                  style: {
-                    fontSize: "11px",
-                    fontWeight: 500,
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                    height: "27px",
-                  },
-                },
-                rows: {
-                  style: {
-                    fontSize: "11px",
-                    minHeight: "27px",
-                    "&:not(:last-of-type)": {
-                      borderBottomStyle: "solid",
-                      borderBottomWidth: "1px",
+            {hasPermission('View All Users') && (
+              <DataTable
+                columns={columns}
+                data={userList?.data}
+                pagination
+                paginationPerPage={rowsPerPage}
+                paginationTotalRows={userList?.data?.length}
+                paginationComponent={() => (
+                  <CustomPagination
+                    rowsPerPage={rowsPerPage}
+                    currentPage={currentPage}
+                    rowCount={userList?.data?.length}
+                    onChangePage={handlePageChange}
+                    onChangeRowsPerPage={handleRowsPerPageChange}
+                  />
+                )}
+                className="custom_tbl"
+                customStyles={{
+                  header: {
+                    style: {
+                      fontSize: "12px",
+                      minHeight: "30px",
                     },
                   },
-                },
-              }}
-            />
-          )}
+                  headRow: {
+                    style: {
+                      fontSize: "12px",
+                      minHeight: "30px",
+                    },
+                  },
+                  headCells: {
+                    style: {
+                      fontWeight: 700,
+                    },
+                  },
+                  cells: {
+                    style: {
+                      fontSize: "11px",
+                      fontWeight: 500,
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                      height: "27px",
+                    },
+                  },
+                  rows: {
+                    style: {
+                      fontSize: "11px",
+                      minHeight: "27px",
+                      "&:not(:last-of-type)": {
+                        borderBottomStyle: "solid",
+                        borderBottomWidth: "1px",
+                      },
+                    },
+                  },
+                }}
+              />
+            )}
+          </div>
         </div>
-      </div>
 
-      <CreateUserDrawer
-        direction={direction}
-        isDrawerOpen={UserDrawer}
-        toggleDrawer={toggleUserDrawer}
-      />
-      <EditDrawer
-        direction={direction}
-        isDrawerOpen={editDrawer}
-        toggleDrawer={toggleEditDrawer}
-        selected={selected}
-        setSelected={setSelected}
-      />
-      <DeleteDrawer
-        direction={direction}
-        isDrawerOpen={deleteDrawer}
-        toggleDrawer={toggleDeleteDrawer}
-        setDeleteDrawer={setDeleteDrawer}
-        selected={selected}
-        setSelected={setSelected}
-      />
-      <ViewDrawer
-        direction={direction}
-        isDrawerOpen={viewDrawer}
-        toggleDrawer={toggleViewDrawer}
-        selected={selected}
-        setSelected={setSelected}
-      />
-    </>
-  );
+        <CreateUserDrawer
+          direction={direction}
+          isDrawerOpen={UserDrawer}
+          toggleDrawer={toggleUserDrawer}
+        />
+        <EditDrawer
+          direction={direction}
+          isDrawerOpen={editDrawer}
+          toggleDrawer={toggleEditDrawer}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <DeleteDrawer
+          direction={direction}
+          isDrawerOpen={deleteDrawer}
+          toggleDrawer={toggleDeleteDrawer}
+          setDeleteDrawer={setDeleteDrawer}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <ViewDrawer
+          direction={direction}
+          isDrawerOpen={viewDrawer}
+          toggleDrawer={toggleViewDrawer}
+          selected={selected}
+          setSelected={setSelected}
+        />
+
+        <CreateBulkUserDrawer
+          direction={direction}
+          isDrawerOpen={bulkUserDrawer}
+          toggleDrawer={toggleBulkUserDrawer}
+        />
+      </>
+    );
 };
 
 export default UserTable;

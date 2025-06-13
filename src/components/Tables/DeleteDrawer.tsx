@@ -29,28 +29,39 @@ const DeleteDrawer = ({
   selected,
 }: UserDrawerProps) => {
   const queryClient = useQueryClient();
+  const [deletedUserName, setDeletedUserName] = useState<string>("");
+
   const deleteUserMn = useMutation({
     mutationFn: (userId: string) => deleteUserFn(userId),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["menu-list"] });
-      toast.success(`The user ${selected?.name} has been successfully deleted.`);
+      queryClient.refetchQueries({ queryKey: ["users"] });
+      toast.success(`The user ${deletedUserName} has been successfully deleted.`);
       toggleDrawer(false);
+      setSelected(null);
+      setDeletedUserName("");
+      deleteUserMn.reset();
     },
   });
 
   const handleDelete = () => {
-    deleteUserMn.mutate(selected._id);
+    if (selected) {
+      setDeletedUserName(selected.name);
+      deleteUserMn.mutate(selected._id);
+    }
+  };
+
+  const handleClose = () => {
+    setDeleteDrawer(false);
+    setSelected(null);
+    setDeletedUserName("");
+    deleteUserMn.reset();
   };
 
   return (
     <Drawer
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
-      onClose={() => {
-        setDeleteDrawer(false);
-        setSelected(null);
-        deleteUserMn.reset();
-      }}
+      onClose={handleClose}
       disableEnforceFocus
       PaperProps={{
         sx: {
@@ -59,7 +70,7 @@ const DeleteDrawer = ({
       }}
     >
       <div role="presentation">
-        <ModalHeader text="Delete Confirmation" toggleDrawer={toggleDrawer} />
+        <ModalHeader text="Delete Confirmation" toggleDrawer={handleClose} />
 
         <div className="relative  flex flex-col items-center justify-center px-7 pb-7 h-[calc(100vh-60px)]">
           {deleteUserMn.isPending && (
@@ -78,7 +89,7 @@ const DeleteDrawer = ({
               </div>
               <h2 className="mt-2 text-xl font-semibold">User Deleted!</h2>
               <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
-                The user {selected?.name} has been successfully deleted.
+                The user {deletedUserName} has been successfully deleted.
               </h3>
             </>
           ) : (
@@ -94,7 +105,7 @@ const DeleteDrawer = ({
               </h3>
               
               <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
-                <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
+                <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={handleClose} />
                 <Button
                   type="button"
                   name="Confirm"

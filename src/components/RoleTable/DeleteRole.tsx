@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Drawer, Box, Typography } from "@mui/material";
 import { CurrentRoleDataInterFace } from "@/utility/queryFetcher";
 import Button from "../common/Button";
@@ -15,6 +15,7 @@ interface DeleteRoleProps {
   toggleDrawer: (open: boolean) => void;
   onDelete: (id: string) => void;
   selectedRole: CurrentRoleDataInterFace | null;
+  setSelectedRole :any;
   direction: string
   fetchRoles: ()=> void;
 
@@ -24,19 +25,25 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
   isDrawerOpen,
   toggleDrawer,
   selectedRole,
+  setSelectedRole,
   direction,
   fetchRoles
 
 }) => {
+
+  const [deleteRoleName, setDeleteRoleName] = useState<string>('')
   const queryClient = useQueryClient();
 
   const deleteRoleMn = useMutation({
     mutationFn: (roleId: string) => deleteRoleFn(roleId),
     onSuccess: () => {
-      toast.success("Role deleted successfully");
+      toast.success(`The role ${deleteRoleName} has been successfully deleted.`);
       queryClient.refetchQueries({ queryKey: ["roles"] });
       toggleDrawer(false);
-      fetchRoles()
+      setSelectedRole(null);
+      setDeleteRoleName('');
+      fetchRoles();
+      deleteRoleMn.reset();
     },
     onError: (error: any) => {
       let errorMessage = error?.response?.data?.message;
@@ -49,18 +56,23 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
 
   const handleDelete = () => {
     if (selectedRole) {
+      setDeleteRoleName(selectedRole.name);
       deleteRoleMn.mutate(selectedRole._id);
     }
+  };
+
+  const handleClose = () => {
+    toggleDrawer(false);
+    setSelectedRole(null);
+    setDeleteRoleName('');
+    deleteRoleMn.reset();
   };
 
   return (
     <Drawer
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
-      onClose={() => {
-        toggleDrawer(false);
-        deleteRoleMn.reset();
-      }}
+      onClose={handleClose}
       disableEnforceFocus
       PaperProps={{
         sx: {
@@ -70,7 +82,7 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
     >
 
       <div role="presentation">
-        <ModalHeader text="Delete Confirmation" toggleDrawer={toggleDrawer} />
+        <ModalHeader text="Delete Confirmation" toggleDrawer={handleClose} />
         <div className="relative  flex flex-col items-center justify-center px-7 pb-7 h-[calc(100vh-60px)] ">
           {deleteRoleMn.isPending && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-75">
@@ -88,7 +100,7 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
               </div>
               <h2 className="mt-2 text-xl font-semibold">Role Deleted!</h2>
               <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
-                The role {selectedRole?.name} has been successfully deleted.
+                The role {deleteRoleName} has been successfully deleted.
               </h3>
             </>
           ) : (
@@ -102,13 +114,9 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
               <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
                 Are you sure you want to delete {selectedRole?.name} role?
               </h3>
-              <div className="mt-6 flex w-full items-center justify-end pr-3 gap-7 absolute bottom-0 border-t-2 border-gray h-[50px]">
-                <Button
-                  type="button"
-                  name="Cancel"
-                  onClick={() => toggleDrawer(false)}
-                  style={{ backgroundColor: "gray" }}
-                />
+              
+              <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
+                <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={handleClose} />
                 <Button
                   type="button"
                   name="Confirm"

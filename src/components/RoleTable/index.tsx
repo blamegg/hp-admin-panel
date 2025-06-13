@@ -7,13 +7,15 @@ import { setSelectedRole, clearSelectedRole, fetchRoleFn } from "@/redux/slice/r
 import DataTable from "react-data-table-component";
 import { Typography } from '@mui/material';
 import {
+  rolesFn,
+  createRoleFn,
   updateRoleFn,
   deleteRoleFn,
   menuListFn,
   RolesInterFace,
   CurrentRoleDataInterFace,
+  menuDataInterface,
   dynamicMenuListFn,
-  RolesInterFace2,
 } from '@/utility/queryFetcher';
 import { useDirection } from '@/context/DirectionContext';
 import EditRoleDrawer from './EditRoleDrawer';
@@ -25,20 +27,37 @@ import Button from "@/components/common/Button";
 import CreateRole from './CreateRole';
 import DeleteRole from './DeleteRole';
 import CustomPagination from '../CustomPagination';
+import PermissionDrawer from './PermissionDrawer';
+import { CleaningServices } from '@mui/icons-material';
+import Permissions from './PermissionDrawer';
 import { useQuery } from '@tanstack/react-query';
 import { setPermissions } from '@/redux/slice/authSlice';
+
+interface Column {
+  id: 'Role' | 'Actions';
+  label: string;
+  minWidth?: number;
+  align?: 'right';
+}
+
+// const columns: readonly Column[] = [
+//   { id: 'Role', label: 'Role' },
+//   { id: 'Actions', label: 'Actions' },
+// ];
+
+
 
 export default function Roles() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const dispatch = useDispatch<AppDispatch>();
-  const allRoles = useSelector((state: RootState) => state.role.allRoles);
   const selectedRole = useSelector((state: RootState) => state.role.selectedRole);
+  const allRoles = useSelector((state: RootState) => state.role.allRoles);
   const totalDocuments = useSelector((state: RootState) => state.role.totalDocuments);
 
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [permissionsMenuList, setPermissionsMenuList] = React.useState<RolesInterFace2 | null>(null);
+  const [permissionsMenuList, setPermissionsMenuList] = React.useState<menuDataInterface[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchBasis, setSearchBasis] = React.useState("name");
 
@@ -47,14 +66,18 @@ export default function Roles() {
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = React.useState(false);
   const [isViewDrawerOpen, setIsViewDrawerOpen] = React.useState(false);
   const [isPermissiondrawerOpen, setIsPermissionDrawerOpen] = React.useState(false);
+  const [permissionDrawerRole, setPermissionDrawerRole] = React.useState<CurrentRoleDataInterFace | null>(null);
 
   const { direction } = useDirection();
   const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
 
 
+
   const hasPermission = (permissionKey: string): boolean => {
     return permissions.includes(permissionKey);
   };
+
+
 
   const { data } = useQuery({
     queryKey: ["menuList"],
@@ -213,7 +236,7 @@ export default function Roles() {
       name: "Actions",
       cell: (row: CurrentRoleDataInterFace) => (
         <div className="flex gap-3">
-          {hasPermission('Edit Role') && (
+          {hasPermission('View All Role') && (
             <button
               onClick={() => {
                 dispatch(setSelectedRole(row));
@@ -242,7 +265,7 @@ export default function Roles() {
               <FaEye />
             </button>
           )}
-
+         
         </div>
       ),
       width: "160px",
@@ -255,126 +278,115 @@ export default function Roles() {
   if (error) return <Typography color="error">Error: {error}</Typography>;
 
   return (
-    <div className="custom_tbl_container h-[90vh] w-full">
+    <div className="custom_tbl_container h-[90vh]">
       <div className="flex items-center gap-4">
-
-        {hasPermission('View All Role') && (
-          <>
-            <select
-              value={searchBasis}
-              onChange={(e) => setSearchBasis(e.target.value)}
-              className="rounded bg-[#eff4fb] border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
-            >
-              <option value="name">Role Name</option>
-            </select>
-            <input
-              type="text"
-              placeholder={`Search by ${searchBasis}...`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
-            />
-          </>
-        )}
-        {hasPermission('Create Role') && (
+        <select
+          value={searchBasis}
+          onChange={(e) => setSearchBasis(e.target.value)}
+          className="rounded bg-[#eff4fb] border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+        >
+          <option value="name">Role Name</option>
+        </select>
+        <input
+          type="text"
+          placeholder={`Search by ${searchBasis}...`}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+        />
+        {/* {!hasPermission('Create Role') && ( */}
           <Button
-            name="Create Role"
-            type="submit"
-            onClick={() => toggleAddDrawer(true)}
-            style={{backgroundColor:"#04aa6d"}}
+          name="Create Role"
+          type="submit"
+          onClick={() => toggleAddDrawer(true)}
           />
-        )}
-        {
-          hasPermission('View All Role') && (
-            <Tooltip
-              title="Roles define what users can do and see within the system."
-              arrow
-            >
-              <button>
-                <FaRegQuestionCircle />
-              </button>
-            </Tooltip>
-          )}
+        {/* )} */}
+        <Tooltip
+          title="Roles define what users can do and see within the system."
+          arrow
+        >
+          <button>
+            <FaRegQuestionCircle />
+          </button>
+        </Tooltip>
       </div>
 
 
       <div className="mt-5 overflow-x-auto ">
-        {hasPermission('View All Role') && (
-          <DataTable
-            columns={columns}
-            data={allRoles?.filter((role: CurrentRoleDataInterFace) =>
-              role.name.toLowerCase().includes(searchQuery.toLowerCase())
-            ) || []}
-            pagination
-            paginationPerPage={rowsPerPage}
-            paginationTotalRows={totalDocuments}
-            paginationComponent={() => (
-              <CustomPagination
-                rowsPerPage={rowsPerPage}
-                currentPage={currentPage}
-                rowCount={totalDocuments}
-                onChangePage={handlePageChange}
-                onChangeRowsPerPage={handleRowsPerPageChange}
-              />
-            )}
-            className="custom_tbl"
-            customStyles={{
-              header: {
-                style: {
-                  fontSize: "12px",
-                  minHeight: "30px",
-                  backgroundColor: "#F9FAFB", // Light mode header background
-                  color: "#1C243F", // Light mode header text
-                },
+        <DataTable
+          columns={columns}
+          data={allRoles?.filter((role: CurrentRoleDataInterFace) =>
+            role.name.toLowerCase().includes(searchQuery.toLowerCase())
+          ) || []}
+          pagination
+          paginationPerPage={rowsPerPage}
+          paginationTotalRows={totalDocuments}
+          paginationComponent={() => (
+            <CustomPagination
+              rowsPerPage={rowsPerPage}
+              currentPage={currentPage}
+              rowCount={totalDocuments}
+              onChangePage={handlePageChange}
+              onChangeRowsPerPage={handleRowsPerPageChange}
+            />
+          )}
+          className="custom_tbl"
+          customStyles={{
+            header: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                backgroundColor: "#F9FAFB", // Light mode header background
+                color: "#1C243F", // Light mode header text
               },
-              headRow: {
-                style: {
-                  fontSize: "12px",
-                  minHeight: "30px",
-                  backgroundColor: "#F9FAFB", // Light mode header row background
+            },
+            headRow: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                backgroundColor: "#F9FAFB", // Light mode header row background
+                borderBottomWidth: "1px",
+                borderBottomColor: "#E2E8F0", // stroke
+              },
+            },
+            headCells: {
+              style: {
+                fontWeight: 700,
+                color: "#1C243F", // Light mode header cells text
+                backgroundColor: "#F9FAFB", // Light mode header cells background
+              },
+            },
+            cells: {
+              style: {
+                fontSize: "11px",
+                fontWeight: 500,
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                height: "27px",
+                color: "#1C243F", // Light mode cell text
+                backgroundColor: "#FFFFFF", // Light mode cell background
+              },
+            },
+            rows: {
+              style: {
+                fontSize: "11px",
+                minHeight: "27px",
+                "&:not(:last-of-type)": {
+                  borderBottomStyle: "solid",
                   borderBottomWidth: "1px",
                   borderBottomColor: "#E2E8F0", // stroke
                 },
+                backgroundColor: "#FFFFFF", // Light mode row background
+                color: "#1C243F", // Light mode row text
               },
-              headCells: {
-                style: {
-                  fontWeight: 700,
-                  color: "#1C243F", // Light mode header cells text
-                  backgroundColor: "#F9FAFB", // Light mode header cells background
-                },
+              highlightOnHoverStyle: {
+                backgroundColor: "#F7F9FC", // gray-2
+                color: "#1C243F",
+                cursor: "pointer",
               },
-              cells: {
-                style: {
-                  fontSize: "11px",
-                  fontWeight: 500,
-                  wordBreak: "break-word",
-                  overflowWrap: "break-word",
-                  height: "27px",
-                  color: "#1C243F", // Light mode cell text
-                  backgroundColor: "#FFFFFF", // Light mode cell background
-                },
-              },
-              rows: {
-                style: {
-                  fontSize: "11px",
-                  minHeight: "27px",
-                  "&:not(:last-of-type)": {
-                    borderBottomStyle: "solid",
-                    borderBottomWidth: "1px",
-                    borderBottomColor: "#E2E8F0", // stroke
-                  },
-                  backgroundColor: "#FFFFFF", // Light mode row background
-                  color: "#1C243F", // Light mode row text
-                },
-                highlightOnHoverStyle: {
-                  backgroundColor: "#F7F9FC", // gray-2
-                  color: "#1C243F",
-                  cursor: "pointer",
-                },
-              },
-            }}
-          />
-        )}
+            },  
+          }}
+        />
       </div>
 
       <CreateRole
@@ -389,6 +401,7 @@ export default function Roles() {
         isDrawerOpen={isEditDrawerOpen}
         toggleDrawer={toggleEditDrawer}
         onSave={handleEditRole}
+        selectedRole={selectedRole}
         currentRole={selectedRole}
         direction={direction}
         permissionsMenuList={permissionsMenuList}
@@ -403,11 +416,20 @@ export default function Roles() {
         direction={direction}
         fetchRoles={fetchRoles}
       />
+
       <ViewRoleDrawer
         isDrawerOpen={isViewDrawerOpen}
         toggleDrawer={toggleViewDrawer}
         selectedRole={selectedRole}
         direction={direction}
+      />
+
+      <PermissionDrawer
+        isDrawerOpen={isPermissiondrawerOpen}
+        toggleDrawer={togglePermissionDrawer}
+        permissionsMenuList={permissionsMenuList?.data || []}
+        role={permissionDrawerRole}
+        fetchRoles={fetchRoles}
       />
     </div>
   );

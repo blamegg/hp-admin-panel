@@ -130,6 +130,15 @@ export const createUserFn = async (payload: any) => {
   const response = await apiClient.post(ApiEndpoints.users, payload);
   return response.data;
 };
+// create Bulk user
+export const createBulkUserFn = async (payload: FormData) => {
+  const response = await apiClient.post(ApiEndpoints.bulkUsers, payload, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
 
 // view user
 export const viewUserFn = async (userId: string) => {

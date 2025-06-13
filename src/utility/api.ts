@@ -13,6 +13,7 @@ export const ApiEndpoints = {
   register: "/api/v1/signup",
   logout: "/api/v1/logout",
   users: "/api/v1/users",
+  bulkUsers: "/api/v1/users/bulk-import",
   roles: "/api/v1/roles",
   permissions: `/api/v1/rolePermissionMenu/get-menu-permission`,
   updatePermissions: "/api/v1/rolePermissionMenu/assign-menu-permission"
