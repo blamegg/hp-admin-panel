@@ -16,9 +16,7 @@ export const ForgotPassword = () => {
     heading: "Hanging Panda",
     subHeading: "Sign In... OTP",
   });
-
-  const router = useRouter();
-
+  
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);

@@ -56,7 +56,7 @@ const ViewRoleDrawer: React.FC<ViewRoleDrawerProps> = ({
           }
         </div>
         <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-4 border-t-2 border-gray'>
-          <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray", color: "white" }} onClick={() => toggleDrawer(false)} />
+          <Button type="button" name="Close" className="mr-4 bg-graydark"  onClick={() => toggleDrawer(false)} />
         </div>
       </div>
 

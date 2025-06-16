@@ -17,19 +17,7 @@ interface InputProps {
   multiple?: boolean;
 }
 
-/**
- * Custom Input component that supports various input types including file uploads
- * 
- * Example usage for file input:
- * <Input
- *   label="Upload File"
- *   type="file"
- *   accept="image/*"
- *   multiple={false}
- *   onChange={handleFileChange}
- *   placeholder="Choose a file"
- * />
- */
+
 const Input = ({
   onChange,
   autofocus,

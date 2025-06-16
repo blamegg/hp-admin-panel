@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Drawer, Box, Typography } from "@mui/material";
+import { Drawer } from "@mui/material";
 import { CurrentRoleDataInterFace } from "@/utility/queryFetcher";
-import Button from "../common/Button";
 import ModalHeader from "../common/ModalHeader";
 import { AiOutlineDelete } from "react-icons/ai";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,6 +8,7 @@ import { toast } from "sonner";
 import { deleteRoleFn } from "@/utility/queryFetcher";
 import { ImSpinner2 } from "react-icons/im";
 import { FaCheckCircle } from "react-icons/fa";
+import Button from "../common/Button";
 
 interface DeleteRoleProps {
   isDrawerOpen: boolean;
@@ -116,12 +116,12 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
               </h3>
               
               <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
-                <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={handleClose} />
+                <Button type="button" name="Close" className="mr-4 bg-graydark"  onClick={handleClose} />
                 <Button
                   type="button"
                   name="Confirm"
                   onClick={handleDelete}
-                  style={{backgroundColor:"#04aa6d"}}
+                  className="bg-danger"
                 />
               </div>
             </>

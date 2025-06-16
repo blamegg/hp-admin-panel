@@ -7,15 +7,13 @@ import { setSelectedRole, clearSelectedRole, fetchRoleFn } from "@/redux/slice/r
 import DataTable from "react-data-table-component";
 import { Typography } from '@mui/material';
 import {
-  rolesFn,
-  createRoleFn,
   updateRoleFn,
   deleteRoleFn,
   menuListFn,
   RolesInterFace,
   CurrentRoleDataInterFace,
-  menuDataInterface,
   dynamicMenuListFn,
+  RolesInterFace2,
 } from '@/utility/queryFetcher';
 import { useDirection } from '@/context/DirectionContext';
 import EditRoleDrawer from './EditRoleDrawer';
@@ -27,25 +25,8 @@ import Button from "@/components/common/Button";
 import CreateRole from './CreateRole';
 import DeleteRole from './DeleteRole';
 import CustomPagination from '../CustomPagination';
-import PermissionDrawer from './PermissionDrawer';
-import { CleaningServices } from '@mui/icons-material';
-import Permissions from './PermissionDrawer';
 import { useQuery } from '@tanstack/react-query';
 import { setPermissions } from '@/redux/slice/authSlice';
-
-interface Column {
-  id: 'Role' | 'Actions';
-  label: string;
-  minWidth?: number;
-  align?: 'right';
-}
-
-// const columns: readonly Column[] = [
-//   { id: 'Role', label: 'Role' },
-//   { id: 'Actions', label: 'Actions' },
-// ];
-
-
 
 export default function Roles() {
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -57,7 +38,7 @@ export default function Roles() {
 
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [permissionsMenuList, setPermissionsMenuList] = React.useState<menuDataInterface[]>([]);
+  const [permissionsMenuList, setPermissionsMenuList] = React.useState<RolesInterFace2 | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchBasis, setSearchBasis] = React.useState("name");
 
@@ -66,19 +47,19 @@ export default function Roles() {
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = React.useState(false);
   const [isViewDrawerOpen, setIsViewDrawerOpen] = React.useState(false);
   const [isPermissiondrawerOpen, setIsPermissionDrawerOpen] = React.useState(false);
-  const [permissionDrawerRole, setPermissionDrawerRole] = React.useState<CurrentRoleDataInterFace | null>(null);
 
   const { direction } = useDirection();
   const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
 
-
-
+  
   const hasPermission = (permissionKey: string): boolean => {
     return permissions.includes(permissionKey);
   };
 
-
-
+  const hasAnyActionPermission = ()=>{
+    return hasPermission('View Role Details') || hasPermission('Delete Role') || hasPermission('Edit Role')
+  }
+  
   const { data } = useQuery({
     queryKey: ["menuList"],
     queryFn: dynamicMenuListFn,
@@ -232,11 +213,12 @@ export default function Roles() {
       sortable: true,
       width: "200px",
     },
-    {
+    ...(hasAnyActionPermission() ? [
+         {
       name: "Actions",
       cell: (row: CurrentRoleDataInterFace) => (
         <div className="flex gap-3">
-          {hasPermission('View All Role') && (
+          {hasPermission('Edit Role') && (
             <button
               onClick={() => {
                 dispatch(setSelectedRole(row));
@@ -270,8 +252,8 @@ export default function Roles() {
       ),
       width: "160px",
     },
+    ]: [])
   ];
-
 
 
   if (loading) return <Typography>Loading roles...</Typography>;
@@ -294,13 +276,14 @@ export default function Roles() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
         />
-        {/* {!hasPermission('Create Role') && ( */}
+        {hasPermission('Create Role') && (
           <Button
           name="Create Role"
           type="submit"
           onClick={() => toggleAddDrawer(true)}
+          className='bg-primary'
           />
-        {/* )} */}
+         )} 
         <Tooltip
           title="Roles define what users can do and see within the system."
           arrow
@@ -402,7 +385,6 @@ export default function Roles() {
         toggleDrawer={toggleEditDrawer}
         onSave={handleEditRole}
         selectedRole={selectedRole}
-        currentRole={selectedRole}
         direction={direction}
         permissionsMenuList={permissionsMenuList}
         fetchRoles={fetchRoles}
@@ -413,6 +395,7 @@ export default function Roles() {
         toggleDrawer={toggleDeleteDrawer}
         onDelete={handleDeleteRole}
         selectedRole={selectedRole}
+        setSelectedRole={setSelectedRole}
         direction={direction}
         fetchRoles={fetchRoles}
       />
@@ -422,14 +405,6 @@ export default function Roles() {
         toggleDrawer={toggleViewDrawer}
         selectedRole={selectedRole}
         direction={direction}
-      />
-
-      <PermissionDrawer
-        isDrawerOpen={isPermissiondrawerOpen}
-        toggleDrawer={togglePermissionDrawer}
-        permissionsMenuList={permissionsMenuList?.data || []}
-        role={permissionDrawerRole}
-        fetchRoles={fetchRoles}
       />
     </div>
   );

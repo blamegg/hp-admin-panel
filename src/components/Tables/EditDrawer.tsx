@@ -58,7 +58,6 @@ const EditDrawer = ({
   }, [selected, reset]);
 
   const onSubmit = (data: EditUserFormInputs) => {
-    console.log(data, "password");
     updateUserMn.mutate({ ...data, userId: selected._id });
   };
 

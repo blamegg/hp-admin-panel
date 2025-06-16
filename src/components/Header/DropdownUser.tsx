@@ -5,30 +5,50 @@ import ClickOutside from "@/components/ClickOutside";
 import { useDirection } from "@/context/DirectionContext";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { logoutUser } from "@/redux/slice/authSlice";
+import { logoutUser, clearAuthState } from "@/redux/slice/authSlice";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { removeTokenCookie } from "@/utility/helper";
+import { clearAllLocalData } from "@/utility/helper";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.authReducer);
+  const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
   const userInfo = user?.user;
 
-  const handleLogout = async () => {
-    let toastMessage = "";
+  // Check if user has CHANGE_PASSWORD permission
+  const hasChangePasswordPermission = permissions.includes('Change Password');
 
+  const handleLogout = async () => {
     try {
+      // Try to call logout API
       const result = await dispatch(logoutUser()).unwrap();
-      toastMessage = result.message || "Login successful!";
-      toast.success(toastMessage);
-      router.push("/");
-      removeTokenCookie();
+      toast.success(result.message || "Logged out successfully!");
     } catch (error: any) {
-      toastMessage = error || "Login failed. Please try again.";
-      toast.error(toastMessage);
+      // Even if API fails (e.g., "already logged out"), we should still clear local data
+      console.log("Logout API failed:", error);
+      // Don't show error toast for "already logged out" - this is expected behavior
+      if (!error?.includes("already logged out")) {
+        toast.error(error || "Logout failed. Please try again.");
+      }
+    } finally {
+      // Always clear local data regardless of API success/failure
+      try {
+        // Clear all local data (cookies, localStorage, sessionStorage)
+        clearAllLocalData();
+        
+        // Ensure Redux state is cleared
+        dispatch(clearAuthState());
+        
+        toast.success("Logged out successfully!");
+      } catch (clearError) {
+        console.error("Error clearing local data:", clearError);
+      }
+      
+      // Always redirect to login page
+      router.push("/");
     }
   };
 
@@ -150,6 +170,41 @@ const DropdownUser = () => {
                 <p className="text-[13px]">Account Settings</p>
               </Link>
             </li>
+            {hasChangePasswordPermission && (
+              <li>
+                <Link
+                  href="/changePassword"
+                  className="flex items-center gap-3.5 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+                >
+                  <svg
+                    className="fill-current"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16.5 8.25H5.5C4.67157 8.25 4 8.92157 4 9.75V18.75C4 19.5784 4.67157 20.25 5.5 20.25H16.5C17.3284 20.25 18 19.5784 18 18.75V9.75C18 8.92157 17.3284 8.25 16.5 8.25Z"
+                      fill=""
+                    />
+                    <path
+                      d="M11 12.75C12.2426 12.75 13.25 11.7426 13.25 10.5C13.25 9.25736 12.2426 8.25 11 8.25C9.75736 8.25 8.75 9.25736 8.75 10.5C8.75 11.7426 9.75736 12.75 11 12.75Z"
+                      fill=""
+                    />
+                    <path
+                      d="M11 14.25C8.5 14.25 6.5 16.25 6.5 18.75H15.5C15.5 16.25 13.5 14.25 11 14.25Z"
+                      fill=""
+                    />
+                    <path
+                      d="M7.5 6.75V4.5C7.5 2.84315 8.84315 1.5 10.5 1.5H11.5C13.1569 1.5 14.5 2.84315 14.5 4.5V6.75"
+                      fill=""
+                    />
+                  </svg>
+                  <p className="text-[13px]">Change Password</p>
+                </Link>
+              </li>
+            )}
           </ul>
           <div
             onClick={() => handleLogout()}

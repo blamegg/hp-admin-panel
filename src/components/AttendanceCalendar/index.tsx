@@ -134,10 +134,6 @@ export default function AttendanceCalendar() {
     []
   );
 
-  useEffect(() => {
-    console.log("Current date changed:", currentDate);
-  }, [currentDate]);
-
   return (
     <div className="h-[600px] w-[93%] mx-auto p-4 py-4 relative">
       <Calendar

@@ -14,7 +14,6 @@ import { loginUser } from "@/redux/slice/authSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { toast } from "sonner";
 import Button from "../common/Button";
-import { useMutation } from "@tanstack/react-query";
 
 const schema = z.object({
   email: z
@@ -82,7 +81,6 @@ export const Signin = () => {
     }
   };
 
-  console.log(loginStatus, "loginStatus");
 
   return (
     <div

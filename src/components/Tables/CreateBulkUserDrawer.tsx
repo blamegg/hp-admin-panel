@@ -52,7 +52,6 @@ const CreateBulkUserDrawer = ({
       formData.append('file', selectedFile);
       
       const response = await createBulkUserFn(formData);
-      console.log("Upload Response:", response)
       
       // Store results to display in UI
       if (response.success) {
@@ -95,12 +94,12 @@ const CreateBulkUserDrawer = ({
     >
       <div role="presentation">
         <ModalHeader text={"Create Bulk Users"} toggleDrawer={handleClose} />
-        <form onSubmit={handleSubmit} className="px-4 mt-5">
+        <form onSubmit={handleSubmit} className="">
           {!uploadResults ? (
             <>
               <div
                 id="FileUpload"
-                className="relative mb-5.5 block  cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray px-4 py-4 dark:bg-meta-4 sm:py-7.5"
+                className=" relative mb-5.5 mt-5 block  cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray px-4 py-4 dark:bg-meta-4 sm:py-7.5"
               >
                 <input
                   type="file"
@@ -170,9 +169,9 @@ const CreateBulkUserDrawer = ({
             </>
           ) : (
             /* Upload Results Display */
-            <div className="space-y-2">
+            <div className="space-y-2 w-full px-4 mt-5 h-[490px] overflow-auto">
               <div className="text-center">
-                <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
+                <div className="mx-auto w-16 h-16  bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
                   <span className="text-2xl">✅</span>
                 </div>
                 <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-2">
@@ -257,14 +256,14 @@ const CreateBulkUserDrawer = ({
           )}
         </form>
         <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
-          <Button type="button" name="Close" style={{ backgroundColor: "gray" }} onClick={handleClose} />
+          <Button type="button" name="Close" className="bg-graydark" onClick={handleClose} />
           {!uploadResults && (
             <Button 
               name={isUploading ? "Uploading..." : "Submit"} 
               type="button" 
-              style={{backgroundColor:"#04aa6d"}}
               loading={isUploading}
               onClick={handleSubmit}
+              className="bg-success"
             />
           )}
         </div>
@@ -274,3 +273,4 @@ const CreateBulkUserDrawer = ({
 };
 
 export default CreateBulkUserDrawer;
+

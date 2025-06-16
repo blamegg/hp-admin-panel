@@ -70,7 +70,6 @@ const CreateUserDrawer = ({
   };
 
   const onSubmit = (data: UserFormInputs) => {
-    console.log("Attempting to create user with data:", data);
     createUserMn.mutate({ ...data });
   };
 
@@ -186,8 +185,8 @@ const CreateUserDrawer = ({
             )}
           </div>
           <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
-            <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
-            <Button name="Submit" type="submit" style={{backgroundColor:"#04aa6d"}} />
+            <Button type="button" name="Close" className="mr-4 bg-graydark"  onClick={() => toggleDrawer(false)} />
+            <Button name="Submit" type="submit" className="bg-success" />
           </div>
         </form>
       </div>

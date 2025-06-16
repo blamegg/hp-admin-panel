@@ -40,6 +40,11 @@ const UserTable = () => {
     return permissions.includes(permissionKey);
   };
 
+  // Check if user has any action permissions
+  const hasAnyActionPermission = (): boolean => {
+    return hasPermission('Edit User') || hasPermission('Delete User') || hasPermission('View User Details');
+  };
+
   useEffect(() => {
     const path = pathname.toLowerCase();
     setShowSearchBar(path.includes('/users'));
@@ -139,7 +144,8 @@ const UserTable = () => {
       sortable: true,
       width: "150px",
     },
-    {
+    // Conditionally add Actions column only if user has any action permissions
+    ...(hasAnyActionPermission() ? [{
       name: "Actions",
       cell: (row: any) => (
         <div className="flex gap-3">
@@ -175,7 +181,7 @@ const UserTable = () => {
         </div>
       ),
       width: "120px"
-    },
+    }] : []),
   ];
 
     return(
@@ -210,8 +216,7 @@ const UserTable = () => {
                     name="Create User"
                     type="submit"
                     onClick={() => toggleUserDrawer(true)}
-                    style={{ backgroundColor: "#04aa6d" }}
-                    className="w-full md:w-auto"
+                    className="w-full md:w-auto bg-primary"
                   />
                 )}
                 {hasPermission('Create User') && (
@@ -219,8 +224,7 @@ const UserTable = () => {
                     name="Create Bulk users"
                     type="submit"
                     onClick={() => toggleBulkUserDrawer(true)}
-                    style={{ backgroundColor: "#04aa6d" }}
-                    className="w-full md:w-auto"
+                    className="w-full md:w-auto bg-primary"
                   />
                 )}
                 {hasPermission('View All Users') && (

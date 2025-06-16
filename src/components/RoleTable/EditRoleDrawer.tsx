@@ -12,7 +12,7 @@ interface EditRoleDrawerProps {
   isDrawerOpen: boolean;
   toggleDrawer: (open: boolean) => void;
   onSave: (role: string) => Promise<boolean>;
-  currentRole: CurrentRoleDataInterFace | null;
+  selectedRole: CurrentRoleDataInterFace | null;
   permissionsMenuList: RolesInterFace2 | null;
   fetchRoles: () => void;
 }
@@ -22,22 +22,22 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
   isDrawerOpen,
   toggleDrawer,
   onSave,
-  currentRole,
+  selectedRole,
   permissionsMenuList,
   fetchRoles
 }) => {
   const [roleName, setRoleName] = useState<string>("");
 
   useEffect(() => {
-    if (currentRole) {
-      setRoleName(currentRole.name);
+    if (selectedRole) {
+      setRoleName(selectedRole.name);
     } else {
       setRoleName("");
     }
-  }, [currentRole, isDrawerOpen]);
+  }, [selectedRole, isDrawerOpen]);
 
   const handleSave = async () => {
-    if (currentRole) {
+    if (selectedRole) {
       const success = await onSave(roleName);
       if (success) {
         toggleDrawer(false);
@@ -73,8 +73,7 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
             type="submit"
             name="Save"
             onClick={handleSave}
-            style={{backgroundColor:"#00b300"}}
-            className=" px-3 text-white rounded"
+            className=" px-3 text-white rounded bg-success"
           />
         
         </Box>
@@ -84,7 +83,7 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
         </p>
         <Permissions
           permissionsMenuList={permissionsMenuList}
-          currentRole={currentRole}
+          currentRole={selectedRole}
           toggleDrawer={toggleDrawer}
           fetchRoles={fetchRoles}
         />

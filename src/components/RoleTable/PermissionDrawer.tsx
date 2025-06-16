@@ -23,7 +23,7 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
   permissionsMenuList,
   fetchRoles,
   currentRole,
-  toggleDrawer
+  toggleDrawer,
 }) => {
   const [selectedPermissionsId, setSelectedPermissionsId] = React.useState<string[]>([]);
 
@@ -38,6 +38,7 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
     setSelectedPermissionsId(combined);
   }, [currentRole]);
 
+  
 
 
   const handleMainMenuChange = (
@@ -135,7 +136,6 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
         }
       });
     }
-    console.log(formattedPermissions)
     try {
       await updatePermissionFn(formattedPermissions);
       toast.success("Permissions updated successfully");
@@ -171,12 +171,13 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
                 id={permission.menu_id}
                 checked={selectedPermissionsId.includes(permission.menu_id)}
                 onChange={(e) => handleMainMenuChange(e, permission)}
+                className='size-[10px]'
               />
               <label htmlFor={permission.menu_id} className='ms-1 font-semibold text-[14px]'>
                 {permission.name}
               </label>
 
-              <ul className='ms-5'>
+              <ul className='ms-3'>
                 {permission.sub_menus.map(sub => (
                   <li key={sub.sub_menu_id}>
                     <input
@@ -186,6 +187,7 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
                       onChange={(e) =>
                         handleSubMenuChange(e, sub, permission.menu_id, permission.sub_menus)
                       }
+                      className='size-[10px]'
                     />
                     <label htmlFor={sub.sub_menu_id} className='ms-1 text-[12px]'>
                       {sub.name}
@@ -199,8 +201,8 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       </FormControl>
 
       <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-4 border-t-2 border-gray'>
-        <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
-        <Button type="button" name="Update" style={{ backgroundColor: "#04aa6d" }} className="text-white" onClick={handleUpdatePermission} />
+        <Button type="button" name="Close" className="mr-4 bg-graydark" onClick={() => toggleDrawer(false)} />
+        <Button type="button" name="Update" className="bg-success" onClick={handleUpdatePermission} />
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import { FaUsersGear } from "react-icons/fa6";
-import { MdLockOutline } from "react-icons/md";
 import {
   TbHome,
   TbUser,
@@ -10,6 +9,7 @@ import {
 
 // Default icon
 export const defaultSvg = <TbFileInvoice size={18} />;
+
 
 // Sidebar icons list
 export const menuItems = [
@@ -32,8 +32,12 @@ export const menuItems = [
   {
     name: "Roles",
     icon: <FaUsersGear size={18} />,
-    route: '/roles'
+    route: "/roles"
   },
+  // {
+  //   name: "Permissions",
+  //   icon: <MdLockOutline size={18} />,
+  // },
 ];
 
 export const staticMenu = [
@@ -41,7 +45,7 @@ export const staticMenu = [
     name: "MENU LIST",
     menuItems: menuItems.map((menuItem) => ({
       label: menuItem.name,
-      route: `/${menuItem.name.replace(/\s+/g, "").toLowerCase()}`, 
+      route: menuItem.route || `/${menuItem.name.replace(/\s+/g, "").toLowerCase()}`, 
       icon: menuItem.icon || defaultSvg,
     })),
   },

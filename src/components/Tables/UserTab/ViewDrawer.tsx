@@ -40,12 +40,10 @@ const ViewDrawer = ({
     }, [selected, reset]);
 
     const onSubmit = (data: ViewUserFormInputs) => {
-        console.log(data);
     };
 
     const handleDateSelect = (slotInfo: any) => {
         setSelectedDate(slotInfo.start); // Update selected date on slot click
-        console.log("Selected date:", slotInfo.start);
     };
     const localizer = dayjsLocalizer(dayjs)
 
@@ -104,16 +102,16 @@ const ViewDrawer = ({
                                         error={errors.mobile?.message}
                                     />
                                 </div>
-                                    </div>
-                                <div>
-                                    <h1 className="text-black font-semibold mt-3">Address</h1>
-                                    <textarea
-                                        rows={3}
-                                        name=""
-                                        id=""
-                                        className="border w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    ></textarea>
-                                </div>
+                            </div>
+                            <div>
+                                <h1 className="text-black font-semibold mt-3">Address</h1>
+                                <textarea
+                                    rows={3}
+                                    name=""
+                                    id=""
+                                    className="border w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                ></textarea>
+                            </div>
                         </form>
 
                     </div>

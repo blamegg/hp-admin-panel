@@ -47,3 +47,30 @@ export function getTokenCookie() {
 export function removeTokenCookie() {
   Cookies.remove("token");
 }
+
+// comprehensive logout cleanup
+export function clearAllLocalData() {
+  try {
+    // Clear token cookie
+    removeTokenCookie();
+    
+    // Clear all cookies
+    Object.keys(Cookies.get()).forEach(cookieName => {
+      Cookies.remove(cookieName);
+    });
+    
+    // Clear localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.clear();
+    }
+    
+    // Clear sessionStorage
+    if (typeof window !== 'undefined') {
+      sessionStorage.clear();
+    }
+    
+    console.log("All local data cleared successfully");
+  } catch (error) {
+    console.error("Error clearing local data:", error);
+  }
+}

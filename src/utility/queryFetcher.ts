@@ -8,22 +8,22 @@ export interface CreatedBy {
 
 
 export interface RolesInterFace {
-  data: CurrentRoleDataInterFace[] ,
+  data: CurrentRoleDataInterFace[],
   message: string,
   pagination?: PaginationInterface,
   success: boolean
 }
 
 
-export interface RolesInterFace2{
+export interface RolesInterFace2 {
   message: string,
   success: boolean,
-  name?:string,
+  name?: string,
   data?: menuDataInterface[]
 }
 
 
-export interface RoleDataInterFace2{
+export interface RoleDataInterFace2 {
   _id: string,
   __v: number,
   createdAt: string,
@@ -46,8 +46,8 @@ export interface CurrentRoleDataInterFace {
   name: string,
   status: boolean,
   menus?: mainMenuInterface[],
-  data?:RoleDataInterFace2
-  rank:string;
+  data?: RoleDataInterFace2
+  rank: string;
 }
 
 
@@ -87,24 +87,24 @@ export interface PaginationInterface {
 }
 
 export interface menuDataInterface {
-  menu_id:string,
-  name:string,
+  menu_id: string,
+  name: string,
   sub_menus: subMenuInterFace[],
   requiredPermissions?: string[];
 }
 
 export interface UpdatePermissionsInterFace {
-    role_id: string;
-    name:string;
-    menus: {
-      menu_id: string;
+  role_id: string;
+  name: string;
+  menus: {
+    menu_id: string;
+    name: string;
+    sub_menus: {
+      sub_menu_id: string;
       name: string;
-      sub_menus: {
-        sub_menu_id: string;
-        name: string;
-      }[];
     }[];
-  }
+  }[];
+}
 
 
 
@@ -190,7 +190,7 @@ export const deleteRoleFn = async (roleId: string) => {
 };
 
 // fetch permissions
-export const permissionsFn = async (roleId:string) => {
+export const permissionsFn = async (roleId: string) => {
   const response = await apiClient.get(`${ApiEndpoints.permissions}/${roleId}`);
   return response.data;
 };
@@ -201,6 +201,18 @@ export const updatePermissionFn = async (payload: UpdatePermissionsInterFace) =>
     `${ApiEndpoints.updatePermissions}`,
     payload,
   );
+  return response.data;
+};
+
+// change password
+export const changePasswordFn = async (payload: { oldPassword: string; newPassword: string }) => {
+  const response = await apiClient.post(ApiEndpoints.changePassword, payload);
+  return response.data;
+};
+
+// fetch current user
+export const getCurrentUserFn = async (userId: string) => {
+  const response = await apiClient.get(`${ApiEndpoints.currentUser}/${userId}`);
   return response.data;
 };
 

@@ -54,7 +54,6 @@ export const registerUser = createAsyncThunk(
   },
 );
 
-
 export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
@@ -67,12 +66,46 @@ export const logoutUser = createAsyncThunk(
   },
 );
 
+export const fetchCurrentUser = createAsyncThunk(
+  "auth/fetchCurrentUser",
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get(`${ApiEndpoints.currentUser}/${userId}`);
+      console.log("API Response for fetchCurrentUser:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching current user:", error);
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch user data");
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
     setPermissions: (state, action: PayloadAction<string[]>) => {
       state.permissions = action.payload;
+    },
+    updateUserTempPasswordStatus: (state, action: PayloadAction<boolean>) => {
+      if (state.user) {
+        // Handle both possible user data structures
+        if (state.user.user) {
+          // If user data is nested under user.user
+          state.user.user.isTempPassword = action.payload;
+        } else {
+          // If user data is directly in user
+          state.user.isTempPassword = action.payload;
+        }
+      }
+    },
+    clearAuthState: (state) => {
+      state.user = null;
+      state.loginStatus = "idle";
+      state.loginError = null;
+      state.registerStatus = "idle";
+      state.registerError = null;
+      state.permissions = [];
     },
   },
   extraReducers: (builder) => {
@@ -109,14 +142,45 @@ const authSlice = createSlice({
         state.user = null;
         state.loginStatus = "idle";
         state.loginError = null;
+        state.registerStatus = "idle";
+        state.registerError = null;
         state.permissions = [];
       })
       .addCase(logoutUser.rejected, (state, action) => {
+        state.user = null;
+        state.loginStatus = "idle";
+        state.loginError = null;
+        state.registerStatus = "idle";
+        state.registerError = null;
+        state.permissions = [];
+      })
+      .addCase(fetchCurrentUser.pending, (state) => {
+        state.loginStatus = "loading";
+      })
+      .addCase(fetchCurrentUser.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loginStatus = "success";
+        console.log("Updating user state with:", action.payload);
+        
+        // Handle different response structures
+        if (action.payload.user) {
+          // If response has a user property
+          state.user = action.payload.user;
+        } else if (action.payload.data) {
+          // If response has a data property
+          state.user = action.payload.data;
+        } else {
+          // If response is the user object directly
+          state.user = action.payload;
+        }
+        
+        console.log("Updated user state:", state.user);
+      })
+      .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loginStatus = "failed";
         state.loginError = action.payload as string;
       });
   },
 });
 
-export const { setPermissions } = authSlice.actions;
+export const { setPermissions, updateUserTempPasswordStatus, clearAuthState, setTestUserWithTempPassword } = authSlice.actions;
 export default authSlice.reducer;

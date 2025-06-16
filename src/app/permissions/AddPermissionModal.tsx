@@ -66,7 +66,6 @@ const AddPermissionModal: React.FC<AddPermissionModalProps> = ({
     }
   }, [open]);
 
-  console.log(menus)
 
   useEffect(() => {
     if (selectedMenu) {
