@@ -106,10 +106,9 @@ export interface UpdatePermissionsInterFace {
   }[];
 }
 
-
-
 // fetch menu list
 export const menuListFn = async () => {
+
   const response = await apiClient.get(ApiEndpoints.menus);
   return response.data;
 };
@@ -120,16 +119,24 @@ export const dynamicMenuListFn = async () => {
 };
 
 // fetch user list
-export const usersFn = async () => {
-  const response = await apiClient.get(ApiEndpoints.users);
+export const usersFn = async (page: number = 1, limit: number = 10, search?: string, searchBasis?: string) => {
+  let url = `${ApiEndpoints.users}?page=${page}&limit=${limit}`;
+  
+  if (search && search.trim()) {
+    const searchField = searchBasis || 'name';
+    url += `&${searchField}=${encodeURIComponent(search.trim())}`;
+  }
+  const response = await apiClient.get(url);
   return response.data;
 };
+  
 
 // create user
 export const createUserFn = async (payload: any) => {
   const response = await apiClient.post(ApiEndpoints.users, payload);
   return response.data;
 };
+
 // create Bulk user
 export const createBulkUserFn = async (payload: FormData) => {
   const response = await apiClient.post(ApiEndpoints.bulkUsers, payload, {
@@ -154,6 +161,8 @@ export const updateUserFn = async (payload: any, userId: string) => {
   );
   return response.data;
 };
+
+
 
 // delete user
 export const deleteUserFn = async (userId: string) => {
@@ -206,14 +215,14 @@ export const updatePermissionFn = async (payload: UpdatePermissionsInterFace) =>
 
 // change password
 export const changePasswordFn = async (payload: { oldPassword: string; newPassword: string }) => {
-  const response = await apiClient.post(ApiEndpoints.changePassword, payload);
+  const response = await apiClient.post(`${ApiEndpoints.users}/change-password`, payload);
   return response.data;
 };
 
-// fetch current user
-export const getCurrentUserFn = async (userId: string) => {
-  const response = await apiClient.get(`${ApiEndpoints.currentUser}/${userId}`);
+// reset Password 
+export const resetPasswordFn = async (id:string)=>{
+  const response = await apiClient.post(`${ApiEndpoints.users}/reset-password/${id}`)
   return response.data;
-};
+}
 
 

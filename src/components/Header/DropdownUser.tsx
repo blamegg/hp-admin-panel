@@ -27,14 +27,11 @@ const DropdownUser = () => {
       const result = await dispatch(logoutUser()).unwrap();
       toast.success(result.message || "Logged out successfully!");
     } catch (error: any) {
-      // Even if API fails (e.g., "already logged out"), we should still clear local data
-      console.log("Logout API failed:", error);
-      // Don't show error toast for "already logged out" - this is expected behavior
+      
       if (!error?.includes("already logged out")) {
         toast.error(error || "Logout failed. Please try again.");
       }
     } finally {
-      // Always clear local data regardless of API success/failure
       try {
         // Clear all local data (cookies, localStorage, sessionStorage)
         clearAllLocalData();

@@ -12,7 +12,6 @@ import {
   menuListFn,
   RolesInterFace,
   CurrentRoleDataInterFace,
-  dynamicMenuListFn,
   RolesInterFace2,
 } from '@/utility/queryFetcher';
 import { useDirection } from '@/context/DirectionContext';
@@ -25,8 +24,7 @@ import Button from "@/components/common/Button";
 import CreateRole from './CreateRole';
 import DeleteRole from './DeleteRole';
 import CustomPagination from '../CustomPagination';
-import { useQuery } from '@tanstack/react-query';
-import { setPermissions } from '@/redux/slice/authSlice';
+import { usePathname } from 'next/navigation';
 
 export default function Roles() {
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -35,6 +33,8 @@ export default function Roles() {
   const selectedRole = useSelector((state: RootState) => state.role.selectedRole);
   const allRoles = useSelector((state: RootState) => state.role.allRoles);
   const totalDocuments = useSelector((state: RootState) => state.role.totalDocuments);
+  const pathname = usePathname();
+  const isOnRolesPage = pathname.toLowerCase().includes('/roles');
 
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -59,24 +59,6 @@ export default function Roles() {
   const hasAnyActionPermission = ()=>{
     return hasPermission('View Role Details') || hasPermission('Delete Role') || hasPermission('Edit Role')
   }
-  
-  const { data } = useQuery({
-    queryKey: ["menuList"],
-    queryFn: dynamicMenuListFn,
-  });
-
-  React.useEffect(() => {
-    if (data?.data) {
-      const userPermissions = data.data
-        .map((permission: any) => permission.sub_menus)
-        .flat()
-        .map((sub: any) => sub.name);
-
-      dispatch(setPermissions(userPermissions));
-    }
-  }, [data]);
-
-
 
   const fetchRoles = async () => {
     setLoading(true);
@@ -101,11 +83,19 @@ export default function Roles() {
     }
   };
 
-
   React.useEffect(() => {
-    fetchRoles();
-    fetchPermissionMenus();
-  }, [currentPage, rowsPerPage]);
+    if (isOnRolesPage) {
+      fetchRoles();
+    }
+  }, [currentPage, rowsPerPage, isOnRolesPage]);
+
+  // Cleanup when leaving roles page
+  React.useEffect(() => {
+    if (!isOnRolesPage) {
+      setLoading(false);
+      setError(null);
+    }
+  }, [isOnRolesPage]);
 
   React.useEffect(() => {
     const totalPages = Math.ceil(totalDocuments / rowsPerPage);
@@ -160,6 +150,10 @@ export default function Roles() {
 
   const toggleEditDrawer = (value: boolean) => {
     setIsEditDrawerOpen(value);
+    if (value) {
+      // Fetch permission menus only when edit drawer is opened
+      fetchPermissionMenus();
+    }
     if (!value) dispatch(clearSelectedRole());
   };
 
@@ -319,8 +313,8 @@ export default function Roles() {
               style: {
                 fontSize: "12px",
                 minHeight: "30px",
-                backgroundColor: "#F9FAFB", // Light mode header background
-                color: "#1C243F", // Light mode header text
+                backgroundColor: "#F9FAFB",
+                color: "#1C243F", 
               },
             },
             headRow: {

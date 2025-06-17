@@ -5,10 +5,11 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { CurrentRoleDataInterFace } from "@/utility/queryFetcher";
 
-const Basic = ({ register, errors }: any) => {
+const Basic = ({ register, errors, isDrawerOpen }: any) => {
 
-
-  const roles = useSelector((state: RootState) => state.role.allRoles);
+  const roles = useSelector((state: RootState) => 
+    isDrawerOpen ? state.role.allRoles : []
+  );
   const roleList = roles?.map((role: CurrentRoleDataInterFace) => ({ value: role._id, label: role.name }));
   
   return (

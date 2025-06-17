@@ -17,6 +17,7 @@ import { AppDispatch } from "@/redux/store";
 import { updateUserTempPasswordStatus, fetchCurrentUser, setPermissions, clearAuthState } from "@/redux/slice/authSlice";
 import { useQueryClient } from "@tanstack/react-query";
 import { clearAllLocalData } from "@/utility/helper";
+import { persistor } from "@/redux/store";
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -40,7 +41,7 @@ const ChangePassword = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   // Get user data and permissions from Redux
-  const{ user, permissions}= useSelector((state: RootState) => state.authReducer);
+  const { user, permissions } = useSelector((state: RootState) => state.authReducer);
 
   // Check if user has CHANGE_PASSWORD permission
   const hasChangePasswordPermission = permissions.includes('Change Password');
@@ -79,35 +80,73 @@ const ChangePassword = () => {
 
   const onSubmit = async (data: ChangePasswordFormData) => {
     setIsLoading(true);
-    
+
     try {
       const response = await changePasswordFn({
         oldPassword: data.currentPassword,
         newPassword: data.newPassword
       });
-      
+
       // Update user's temp password status in Redux immediately
       if (isTempPassword) {
         dispatch(updateUserTempPasswordStatus(false));
       }
 
-      const successMessage = isTempPassword 
+      const successMessage = isTempPassword
         ? "Password changed successfully! You can now access all features."
         : response.message || "Password changed successfully!";
-      
+
       toast.success(successMessage);
       reset();
       
-      // Navigate to login page after successful password change
-      setTimeout(() => {
-        // Clear all local data (cookies, localStorage, sessionStorage)
-        clearAllLocalData();
-        
-        // Clear auth state and redirect to login
-        dispatch(clearAuthState());
-        router.push("/auth/signin");
-      }, 1000);
-      
+      // For temporary password, just close the modal and let user continue
+      // For regular password change, redirect to login
+      if (isTempPassword) {
+        // Close the modal and allow user to continue
+        router.push("/dashboard");
+      } else {
+        // Immediately clear data and navigate to login page
+        try {
+          console.log("Starting cleanup process...");
+          
+          // Clear all local data (cookies, localStorage, sessionStorage)
+          clearAllLocalData();
+          console.log("Local data cleared");
+          
+          // Clear Redux persist storage
+          await persistor.purge();
+          console.log("Redux persist cleared");
+          
+          // Also manually clear persist keys from localStorage
+          if (typeof window !== 'undefined') {
+            const persistKeys = Object.keys(localStorage).filter(key => key.startsWith('persist:'));
+            persistKeys.forEach(key => {
+              localStorage.removeItem(key);
+              console.log(`Manually removed persist key: ${key}`);
+            });
+          }
+          
+          // Clear auth state
+          dispatch(clearAuthState());
+          console.log("Auth state cleared");
+          
+          // Navigate to first login page
+          router.push("/");
+          
+          // Force navigation if router doesn't work
+          setTimeout(() => {
+            if (window.location.pathname !== "/") {
+              window.location.href = "/";
+            }
+          }, 100);
+          
+        } catch (error) {
+          console.error("Error during cleanup:", error);
+          // Still try to navigate even if cleanup fails
+          router.push("/auth/signin");
+        }
+      }
+
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || "Failed to change password. Please try again.";
       toast.error(errorMessage);
@@ -119,7 +158,7 @@ const ChangePassword = () => {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Change Password" />
-      
+
       <div className="mx-auto max-w-2xl">
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="px-6.5 py-4 dark:border-strokedark">
@@ -127,7 +166,7 @@ const ChangePassword = () => {
               {isTempPassword ? "Change Temporary Password" : "Change Password"}
             </h3>
             <p className="text-sm text-bodydark2 mt-1">
-              {isTempPassword 
+              {isTempPassword
                 ? "You must change your temporary password before accessing other features."
                 : "Enter your current password and choose a new password"
               }
@@ -140,7 +179,7 @@ const ChangePassword = () => {
               </div>
             )}
           </div>
-          
+
           <div className="px-6.5 py-5">
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-2.5">
@@ -227,7 +266,7 @@ const ChangePassword = () => {
                   loading={isLoading}
                   className={`flex-1 py-2.5 px-4 rounded-lg font-medium bg-success `}
                 />
-                
+
                 {!isTempPassword && (
                   <button
                     type="button"

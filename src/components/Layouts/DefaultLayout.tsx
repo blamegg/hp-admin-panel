@@ -28,18 +28,10 @@ export default function DefaultLayout({
   // Check if user has temporary password - check both possible paths
   const isTempPassword = user?.isTempPassword || userInfo?.isTempPassword;
 
-  // Debug logging
-  console.log("DefaultLayout Debug:", {
-    user,
-    userInfo,
-    isTempPassword,
-    pathname,
-    showChangePasswordModal
-  });
+
 
   // Show change password modal if user has temporary password
   useEffect(() => {
-    console.log("useEffect triggered:", { isTempPassword, pathname });
     if (isTempPassword) {
       setShowChangePasswordModal(true);
       // Prevent navigation to any other page
@@ -103,7 +95,7 @@ export default function DefaultLayout({
 
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>
-            <div className="mx-auto max-w-screen-2xl  w-ful py-2 md:px-6 md:py-3 2xl:px-10 2xl:py-4 ">
+            <div className="mx-auto max-w-screen-2xl  w-ful px-3 py-2 md:px-6 md:py-3 2xl:px-10 2xl:py-4 ">
               {children}
             </div>
             <BottomStrip />

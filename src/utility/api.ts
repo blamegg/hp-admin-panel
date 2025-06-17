@@ -17,8 +17,6 @@ export const ApiEndpoints = {
   roles: "/api/v1/roles",
   permissions: `/api/v1/rolePermissionMenu/get-menu-permission`,
   updatePermissions: "/api/v1/rolePermissionMenu/assign-menu-permission",
-  changePassword: "/api/v1/users/change-password",
-  currentUser: "/api/v1/me",
 };
 
 apiClient.interceptors.request.use(

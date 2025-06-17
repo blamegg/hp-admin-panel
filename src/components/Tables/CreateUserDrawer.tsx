@@ -175,7 +175,7 @@ const CreateUserDrawer = ({
 
           <div className="mt-10 px-10">
             {selectedTab === "Basic" && (
-              <Basic register={register} errors={errors} />
+              <Basic register={register} errors={errors} isDrawerOpen={isDrawerOpen} />
             )}
             {selectedTab === "Company" && (
               <Company register={register} errors={errors} />

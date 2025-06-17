@@ -94,12 +94,12 @@ const CreateBulkUserDrawer = ({
     >
       <div role="presentation">
         <ModalHeader text={"Create Bulk Users"} toggleDrawer={handleClose} />
-        <form onSubmit={handleSubmit} className="">
+        <form onSubmit={handleSubmit} className="mt-4 p-3">
           {!uploadResults ? (
             <>
               <div
                 id="FileUpload"
-                className=" relative mb-5.5 mt-5 block  cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray px-4 py-4 dark:bg-meta-4 sm:py-7.5"
+                className="p-3 relative mb-5.5 mt-5 block  cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray px-4 py-4 dark:bg-meta-4 sm:py-7.5"
               >
                 <input
                   type="file"

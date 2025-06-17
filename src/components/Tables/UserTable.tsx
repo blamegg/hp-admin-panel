@@ -9,8 +9,8 @@ import { useDirection } from "@/context/DirectionContext";
 import CreateUserDrawer from "./CreateUserDrawer";
 import Button from "@/components/common/Button";
 import DeleteDrawer from "./DeleteDrawer";
-import { useQuery } from "@tanstack/react-query";
-import { usersFn } from "@/utility/queryFetcher";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { resetPasswordFn, usersFn } from "@/utility/queryFetcher";
 import { formatTime, formatTimestamp } from "@/utility/helper";
 import EditDrawer from "./EditDrawer";
 import ViewDrawer from "./UserTab/ViewDrawer";
@@ -18,6 +18,10 @@ import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import CreateBulkUserDrawer from "./CreateBulkUserDrawer";
+import { MdLockReset } from "react-icons/md";
+import { TbLockOff } from "react-icons/tb";
+import { toast } from "sonner";
+import { useMenuList } from "@/hooks/useMenuList";
 
 const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
@@ -33,6 +37,9 @@ const UserTable = () => {
   const [selected, setSelected] = useState(null);
   const pathname = usePathname();
   const [showSearchBar, setShowSearchBar] = useState(false);
+
+  // Use menu list hook to ensure menu is loaded on users page
+  useMenuList();
 
   const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
 
@@ -51,18 +58,70 @@ const UserTable = () => {
   }, [pathname]);
 
   const { direction } = useDirection();
-  const { data: userList } = useQuery({
-    queryKey: ["users"],
-    queryFn: usersFn,
+  const queryClient = useQueryClient();
+
+  // Use server-side pagination with search
+  const { data: userList, isLoading, refetch } = useQuery({
+    queryKey: ["users", currentPage, rowsPerPage, searchQuery, searchBasis],
+    queryFn: async () => {
+      return await usersFn(currentPage, rowsPerPage, searchQuery, searchBasis);
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale to ensure fresh fetches
+    enabled: showSearchBar, // Only enable when on users page
   });
 
-  useEffect(() => {
-    const totalPages = Math.ceil(totalItems / rowsPerPage);
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages > 0 ? totalPages : 1);
-    }
-  }, [totalItems, rowsPerPage, currentPage]);
 
+  // Update total items when data changes
+  useEffect(() => {
+    if (userList?.pagination) {
+      setTotalItems(userList.pagination.totalCount || 0);
+    }
+  }, [userList]);
+
+
+  // Reset to page 1 when rows per page changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [rowsPerPage]);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, searchBasis]);
+
+  // Handle search with debounce
+  useEffect(() => {
+    if (!showSearchBar) return; // Don't run if not on users page
+    
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim() || searchBasis) {
+        setCurrentPage(1);
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, searchBasis, queryClient, showSearchBar]);
+
+  // Auto-refresh to detect blocked users
+  useEffect(() => {
+    if (!showSearchBar) return; // Don't run if not on users page
+    
+    const intervalId = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(intervalId);
+  }, [queryClient, showSearchBar]);
+
+  // Cleanup queries when leaving users page
+  useEffect(() => {
+    if (!showSearchBar) {
+      // Cancel any pending queries when not on users page
+      queryClient.cancelQueries({ queryKey: ["users"] });
+    }
+  }, [showSearchBar, queryClient]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -80,6 +139,17 @@ const UserTable = () => {
   const handleViewClick = (row: any) => {
     setViewDrawer(true);
   };
+
+  const handleResetPassword = async (row: any) => {
+    try {
+      const response = await resetPasswordFn(row._id)
+      toast.success(response?.message);
+      // Refresh table data after successful password reset
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    } catch (error: any) {
+      toast.error(error.response.data.message)
+    }
+  }
 
   const toggleUserDrawer = (value: boolean) => {
     setUserDrawer(value);
@@ -99,12 +169,11 @@ const UserTable = () => {
     setViewDrawer(value);
   };
 
-
   const columns = [
     {
       name: "S No",
       selector: (row: any) =>
-        (currentPage - 1) * rowsPerPage + (userList?.data.indexOf(row) + 1),
+        (currentPage - 1) * rowsPerPage + (userList?.data?.indexOf(row) + 1),
       sortable: true,
       width: "75px",
     },
@@ -130,13 +199,27 @@ const UserTable = () => {
       name: "Mobile",
       selector: (row: any) => row.mobile || "",
       sortable: true,
-      width: "160px",
+      width: "100px",
     },
     {
       name: "Status",
-      selector: (row: any) => (row.status === true ? "Active" : "Inactive"),
+      selector: (row: any) => {
+        const isActive = row.status === true;
+        const isLocked = row.isLocked;
+
+        if (isLocked) {
+          return (
+            <div className="flex items-center gap-2">
+              <span className="text-red-500 text-xs">Locked</span>
+              <TbLockOff className="w-3 h-3 text-red-500" />
+            </div>
+          );
+        }
+
+        return isActive ? "Active" : "Inactive";
+      },
       sortable: true,
-      width: "100px",
+      width: "80px",
     },
     {
       name: "Date Created",
@@ -150,166 +233,234 @@ const UserTable = () => {
       cell: (row: any) => (
         <div className="flex gap-3">
           {hasPermission('Edit User') && (
-            <button
-              onClick={() => {
-                setSelected(row);
-                toggleEditDrawer(true);
-              }}
-              className="text-blue-500 hover:text-blue-700"
-            >
-              <FaEdit />
-            </button>
+            <Tooltip
+              title="Edit user">
+              <button
+                onClick={() => {
+                  setSelected(row);
+                  toggleEditDrawer(true);
+                }}
+                className="text-blue-500 hover:text-blue-700"
+              >
+                <FaEdit />
+              </button>
+            </Tooltip>
           )}
-          {hasPermission('Delete User') && (
-            <button
-              onClick={() => handleDeleteClick(row)}
-              className="text-red-500 hover:text-red-700"
-            >
-              <FaTrash />
-            </button>
-          )}
+
+
           {hasPermission('View User Details') && (
-            <button
-              onClick={() => {
-                handleViewClick(row);
-                toggleViewDrawer(true);
-              }}
-            >
-              <FaEye className="w-3 h-3" />
-            </button>
+            <Tooltip title="User details">
+              <button
+                onClick={() => {
+                  handleViewClick(row);
+                  toggleViewDrawer(true);
+                }}
+              >
+                <FaEye className="w-3 h-3" />
+              </button>
+
+            </Tooltip>
           )}
+
+
+          {hasPermission('Delete User') && (
+            <Tooltip title="Delete user">
+
+              <button
+                onClick={() => handleDeleteClick(row)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <FaTrash className="text-danger" />
+              </button>
+            </Tooltip>
+
+          )}
+
+          {hasPermission('Reset Password') && (
+            <Tooltip title="Reset Password">
+
+              <button
+                onClick={() => {
+                  handleResetPassword(row);
+                }}
+              >
+                {row.isLocked && <TbLockOff className="w-4 h-4 text-danger" />}
+
+              </button>
+            </Tooltip>
+
+          )}
+
         </div>
       ),
       width: "120px"
     }] : []),
   ];
 
-    return(
-      <>
-        <div className="custom_tbl_container h-[74vh] w-[350px] md:w-full ">
-          {
-            showSearchBar && (
-              <div className=" grid grid-cols-2 md:flex items-center gap-4">
-                {hasPermission('View All Users') && (
-                  <>
-                    <select
-                      value={searchBasis}
-                      onChange={(e) => setSearchBasis(e.target.value)}
-                      className="rounded bg-[#eff4fb] border  py-2 px-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
 
-                    >
-                      <option value="name">Name</option>
-                      <option value="email">Email</option>
-                    </select>
-                    <input
-                      type="text"
-                      placeholder={`Search by ${searchBasis}...`}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+  return (
+    <>
+      <div className="custom_tbl_container h-[74vh]  w-[350px] md:w-full">
+        {
+          showSearchBar && (
+            <div className=" grid grid-cols-2 md:flex items-center gap-4">
+              {hasPermission('View All Users') && (
+                <>
+                  <select
+                    value={searchBasis}
+                    onChange={(e) => setSearchBasis(e.target.value)}
+                    className="rounded bg-[#eff4fb] border  py-2 px-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
 
-                    />
-                  </>
-                )}
-                {hasPermission('Create User') && (
-                  <Button
-                    name="Create User"
-                    type="submit"
-                    onClick={() => toggleUserDrawer(true)}
-                    className="w-full md:w-auto bg-primary"
-                  />
-                )}
-                {hasPermission('Create User') && (
-                  <Button
-                    name="Create Bulk users"
-                    type="submit"
-                    onClick={() => toggleBulkUserDrawer(true)}
-                    className="w-full md:w-auto bg-primary"
-                  />
-                )}
-                {hasPermission('View All Users') && (
-                  <Tooltip
-                    title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
-                    arrow
-                    className="hidden md:block"
                   >
-                    <button>
-                      <FaRegQuestionCircle />
-                    </button>
-                  </Tooltip>
-                )}
-              </div>
-            )
-          }
+                    <option value="name">Name</option>
+                    <option value="email">Email</option>
+                    <option value="mobile">Mobile</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder={`Search by ${searchBasis}...`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        setCurrentPage(1);
+                        queryClient.invalidateQueries({ queryKey: ["users"] });
+                      }
+                    }}
+                    className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+                  />
+                </>
+              )}
+              {hasPermission('Create User') && (
+                <Button
+                  name="Create User"
+                  type="submit"
+                  onClick={() => toggleUserDrawer(true)}
+                  className="w-full md:w-auto bg-primary"
+                />
+              )}
+              {hasPermission('Create User') && (
+                <Button
+                  name="Create Bulk users"
+                  type="submit"
+                  onClick={() => toggleBulkUserDrawer(true)}
+                  className="w-full md:w-auto bg-primary"
+                />
+              )}
+              {hasPermission('View All Users') && (
+                <Tooltip
+                  title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
+                  arrow
+                  className="hidden md:block"
+                >
+                  <button>
+                    <FaRegQuestionCircle />
+                  </button>
+                </Tooltip>
+              )}
+            </div>
+          )
+        }
 
 
-          <div className="mt-5 overflow-x-auto ">
+        <div className="mt-5 overflow-x-auto ">
 
-            {hasPermission('View All Users') && (
-              <DataTable
-                columns={columns}
-                data={userList?.data}
-                pagination
-                paginationPerPage={rowsPerPage}
-                paginationTotalRows={userList?.data?.length}
-                paginationComponent={() => (
+          {hasPermission('View All Users') && (
+            <>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-40">
+                  <div className="text-lg">Loading users...</div>
+                </div>
+              ) : (
+                <>
+                  <div className="max-h-[59vh] overflow-scroll">
+                    <DataTable
+                      columns={columns}
+                      data={userList?.data || []}
+                      pagination={false}
+                      className="custom_tbl "
+                      customStyles={{
+                        header: {
+                          style: {
+                            fontSize: "12px",
+                            minHeight: "30px",
+                            backgroundColor: "#F9FAFB", // Light mode header background
+                            color: "#1C243F", // Light mode header text
+                          },
+                        },
+                        headRow: {
+                          style: {
+                            fontSize: "12px",
+                            minHeight: "30px",
+                            backgroundColor: "#F9FAFB", // Light mode header row background
+                            borderBottomWidth: "1px",
+                            borderBottomColor: "#E2E8F0", // stroke
+                          },
+                        },
+                        headCells: {
+                          style: {
+                            fontWeight: 700,
+                            color: "#1C243F", // Light mode header cells text
+                            backgroundColor: "#F9FAFB", // Light mode header cells background
+                          },
+                        },
+                        cells: {
+                          style: {
+                            fontSize: "11px",
+                            fontWeight: 500,
+                            wordBreak: "break-word",
+                            overflowWrap: "break-word",
+                            height: "27px",
+                            color: "#1C243F", // Light mode cell text
+                            backgroundColor: "#FFFFFF", // Light mode cell background
+                          },
+                        },
+                        rows: {
+                          style: {
+                            fontSize: "11px",
+                            minHeight: "27px",
+                            "&:not(:last-of-type)": {
+                              borderBottomStyle: "solid",
+                              borderBottomWidth: "1px",
+                              borderBottomColor: "#E2E8F0", // stroke
+                            },
+                            backgroundColor: "#FFFFFF", // Light mode row background
+                            color: "#1C243F", // Light mode row text
+                          },
+                          highlightOnHoverStyle: {
+                            backgroundColor: "#F7F9FC", // gray-2
+                            color: "#1C243F",
+                            cursor: "pointer",
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+
+
+                  {/* Custom Pagination */}
                   <CustomPagination
                     rowsPerPage={rowsPerPage}
                     currentPage={currentPage}
-                    rowCount={userList?.data?.length}
+                    rowCount={userList?.pagination.totalCount || 0}
                     onChangePage={handlePageChange}
                     onChangeRowsPerPage={handleRowsPerPageChange}
                   />
-                )}
-                className="custom_tbl"
-                customStyles={{
-                  header: {
-                    style: {
-                      fontSize: "12px",
-                      minHeight: "30px",
-                    },
-                  },
-                  headRow: {
-                    style: {
-                      fontSize: "12px",
-                      minHeight: "30px",
-                    },
-                  },
-                  headCells: {
-                    style: {
-                      fontWeight: 700,
-                    },
-                  },
-                  cells: {
-                    style: {
-                      fontSize: "11px",
-                      fontWeight: 500,
-                      wordBreak: "break-word",
-                      overflowWrap: "break-word",
-                      height: "27px",
-                    },
-                  },
-                  rows: {
-                    style: {
-                      fontSize: "11px",
-                      minHeight: "27px",
-                      "&:not(:last-of-type)": {
-                        borderBottomStyle: "solid",
-                        borderBottomWidth: "1px",
-                      },
-                    },
-                  },
-                }}
-              />
-            )}
-          </div>
+                </>
+              )}
+            </>
+          )}
         </div>
+      </div>
 
+      {UserDrawer && (
         <CreateUserDrawer
           direction={direction}
           isDrawerOpen={UserDrawer}
           toggleDrawer={toggleUserDrawer}
         />
+      )}
+      {editDrawer && (
         <EditDrawer
           direction={direction}
           isDrawerOpen={editDrawer}
@@ -317,6 +468,8 @@ const UserTable = () => {
           selected={selected}
           setSelected={setSelected}
         />
+      )}
+      {deleteDrawer && (
         <DeleteDrawer
           direction={direction}
           isDrawerOpen={deleteDrawer}
@@ -325,6 +478,8 @@ const UserTable = () => {
           selected={selected}
           setSelected={setSelected}
         />
+      )}
+      {viewDrawer && (
         <ViewDrawer
           direction={direction}
           isDrawerOpen={viewDrawer}
@@ -332,14 +487,16 @@ const UserTable = () => {
           selected={selected}
           setSelected={setSelected}
         />
-
+      )}
+      {bulkUserDrawer && (
         <CreateBulkUserDrawer
           direction={direction}
           isDrawerOpen={bulkUserDrawer}
           toggleDrawer={toggleBulkUserDrawer}
         />
-      </>
-    );
+      )}
+    </>
+  );
 };
 
 export default UserTable;

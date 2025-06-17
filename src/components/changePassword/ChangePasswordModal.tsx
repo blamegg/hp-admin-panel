@@ -66,6 +66,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ open, onClose
     setShowConfirmPassword((prev) => !prev);
   };
 
+
   const onSubmit = async (data: ChangePasswordFormData) => {
     setIsLoading(true);
     

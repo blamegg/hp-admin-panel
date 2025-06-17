@@ -8,12 +8,10 @@ import { ToastContainer } from "react-toastify";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReduxProvider } from "@/provider/ReduxProvider";
 import { Toaster } from "sonner";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
-import { fetchRoleFn } from "@/redux/slice/roleSlice";
-import { dynamicMenuListFn } from "@/utility/queryFetcher";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
 import { setPermissions } from "@/redux/slice/authSlice";
-import { useQuery } from '@tanstack/react-query';
+import { useMenuList } from "@/hooks/useMenuList";
 
 import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
@@ -55,25 +53,20 @@ const InnerRootLayout = ({
 }) => {
   const { direction, toggleDirection } = useDirection();
   const dispatch = useDispatch<AppDispatch>();
+  
+  // Use custom hook for menu list management
+  const { menuList } = useMenuList();
 
+  // Update permissions when menu list changes
   useEffect(() => {
-    dispatch(fetchRoleFn({ page: 1, limit: 10 }));
-  }, [dispatch]);
-
-  const { data } = useQuery({
-    queryKey: ["menuList"],
-    queryFn: dynamicMenuListFn,
-  });
-
-  useEffect(() => {
-    if (data?.data) {
-      const userPermissions = data.data
+    if (menuList && menuList.length > 0) {
+      const userPermissions = menuList
         .map((permission: any) => permission.sub_menus)
         .flat()
         .map((sub: any) => sub.name);
       dispatch(setPermissions(userPermissions));
     }
-  }, [data, dispatch]);
+  }, [menuList, dispatch]);
 
   return (
     <html lang="en" dir={direction}>

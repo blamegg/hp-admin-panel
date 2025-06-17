@@ -10,8 +10,6 @@ import { useDirection } from "@/context/DirectionContext";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { defaultSvg, menuItems, staticMenu } from "@/utility/sidebar";
-import { useQuery } from "@tanstack/react-query";
-import { dynamicMenuListFn } from "@/utility/queryFetcher";
 import { useRouter } from "next/navigation";
 
 interface SidebarProps {
@@ -26,11 +24,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
   const color = "#FF505D";
   const { direction } = useDirection();
-  const { data: menu } = useQuery({
-    queryKey: ["menuList"],
-    queryFn: dynamicMenuListFn,
-  });
-
+  
+  // Get menu data from Redux store instead of making API call
+  const { permissions } = useSelector((state: RootState) => state.authReducer);
+  const { menuList } = useSelector((state: RootState) => state.menu);
+  
   // Get user data and permissions from Redux store
   const { user } = useSelector((state: RootState) => state.authReducer);
   const userPermissions = user?.permissions || [];
@@ -51,10 +49,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     return requiredPermissions.some(permission => userPermissions.includes(permission));
   };
 
-  const menuList = [
+  // Use dynamic menu from Redux if available, otherwise fallback to static menu
+  const dynamicMenuList = [
     {
       name: "MENU LIST",
-      menuItems: menu?.data
+      menuItems: (menuList || staticMenu)
         ?.filter((e: any) => hasPermission(e.requiredPermissions)) // Filter top-level menus
         .map((e: any) => {
           return {
@@ -169,7 +168,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             
 
             <nav>
-              {menuList.map((group: any, groupIndex: number) => (
+              {dynamicMenuList.map((group: any, groupIndex: number) => (
                 <div key={groupIndex}>
                   <h3 className="mb-4 ml-4 mr-4 text-sm text-[13px] font-semibold text-bodydark2">
                     {group.name}

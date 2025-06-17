@@ -66,7 +66,7 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
           key={i}
           className={`rounded-md border px-3 py-0 ${
             i + 1 === currentPage
-              ? "bg-companyRed text-white"
+              ? "bg-primary text-white"
               : "hover:bg-gray-200"
           }`}
           onClick={() => handlePageChange(i + 1)}
@@ -112,7 +112,7 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
           <option value={5}>5</option>
           <option value={10}>10</option>
           <option value={20}>20</option>
-          <option value={50}>50</option>
+          <option value={35}>35</option>
         </select>
         <button
           className={`rounded-md border px-2 py-0 ${

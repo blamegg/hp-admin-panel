@@ -70,8 +70,7 @@ export const fetchCurrentUser = createAsyncThunk(
   "auth/fetchCurrentUser",
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(`${ApiEndpoints.currentUser}/${userId}`);
-      console.log("API Response for fetchCurrentUser:", response.data);
+      const response = await apiClient.get(`${ApiEndpoints.users}/${userId}`);
       return response.data;
     } catch (error: any) {
       console.error("Error fetching current user:", error);

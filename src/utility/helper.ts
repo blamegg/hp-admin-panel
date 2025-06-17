@@ -55,18 +55,33 @@ export function clearAllLocalData() {
     removeTokenCookie();
     
     // Clear all cookies
-    Object.keys(Cookies.get()).forEach(cookieName => {
+    const allCookies = Object.keys(Cookies.get());
+    console.log("Found cookies:", allCookies);
+    allCookies.forEach(cookieName => {
       Cookies.remove(cookieName);
     });
     
     // Clear localStorage
     if (typeof window !== 'undefined') {
+      const localStorageKeys = Object.keys(localStorage);
       localStorage.clear();
     }
     
     // Clear sessionStorage
     if (typeof window !== 'undefined') {
+      const sessionStorageKeys = Object.keys(sessionStorage);
       sessionStorage.clear();
+    }
+    
+    // Clear Redux persist storage
+    if (typeof window !== 'undefined') {
+      // Clear specific Redux persist keys
+      const keysToRemove = ['persist:auth'];
+      keysToRemove.forEach(key => {
+        if (localStorage.getItem(key)) {
+          localStorage.removeItem(key);
+        }
+      });
     }
     
     console.log("All local data cleared successfully");
