@@ -99,9 +99,11 @@ export interface UpdatePermissionsInterFace {
   menus: {
     menu_id: string;
     name: string;
+    order?: number;
     sub_menus: {
       sub_menu_id: string;
       name: string;
+      order?: number;
     }[];
   }[];
 }
@@ -117,6 +119,7 @@ export const dynamicMenuListFn = async () => {
   const response = await apiClient.get(ApiEndpoints.dynamicMenus);
   return response.data;
 };
+
 
 // fetch user list
 export const usersFn = async (page: number = 1, limit: number = 10, search?: string, searchBasis?: string) => {
@@ -200,14 +203,23 @@ export const deleteRoleFn = async (roleId: string) => {
 
 // fetch permissions
 export const permissionsFn = async (roleId: string) => {
-  const response = await apiClient.get(`${ApiEndpoints.permissions}/${roleId}`);
+  const response = await apiClient.get(`${ApiEndpoints.permissions}/get-menu-permission/${roleId}`);
   return response.data;
 };
 
 // update permission
 export const updatePermissionFn = async (payload: UpdatePermissionsInterFace) => {
   const response = await apiClient.post(
-    `${ApiEndpoints.updatePermissions}`,
+    `${ApiEndpoints.permissions}/assign-menu-permission`,
+    payload,
+  );
+  return response.data;
+};
+
+// update menu order
+export const updateMenuOrderFn = async (payload: { orders: { id: string; order: number }[] }) => {
+  const response = await apiClient.post(
+    `${ApiEndpoints.menus}/update-order`,
     payload,
   );
   return response.data;

@@ -26,7 +26,7 @@ import DeleteRole from './DeleteRole';
 import CustomPagination from '../CustomPagination';
 import { usePathname } from 'next/navigation';
 
-export default function Roles() {
+export default React.memo(function Roles() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const dispatch = useDispatch<AppDispatch>();
@@ -41,6 +41,7 @@ export default function Roles() {
   const [permissionsMenuList, setPermissionsMenuList] = React.useState<RolesInterFace2 | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchBasis, setSearchBasis] = React.useState("name");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState("");
 
   const [isAddDrawerOpen, setIsAddDrawerOpen] = React.useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false);
@@ -51,16 +52,33 @@ export default function Roles() {
   const { direction } = useDirection();
   const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
 
-  
-  const hasPermission = (permissionKey: string): boolean => {
+  // Memoize permission checks to prevent unnecessary re-renders
+  const hasPermission = React.useCallback((permissionKey: string): boolean => {
     return permissions.includes(permissionKey);
-  };
+  }, [permissions]);
 
-  const hasAnyActionPermission = ()=>{
-    return hasPermission('View Role Details') || hasPermission('Delete Role') || hasPermission('Edit Role')
-  }
+  const hasAnyActionPermission = React.useCallback(() => {
+    return hasPermission('View Role Details') || hasPermission('Delete Role') || hasPermission('Edit Role');
+  }, [hasPermission]);
 
-  const fetchRoles = async () => {
+  // Debounce search query to prevent excessive re-renders
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Memoize filtered data to prevent unnecessary re-renders
+  const filteredRoles = React.useMemo(() => {
+    if (!allRoles) return [];
+    return allRoles.filter((role: CurrentRoleDataInterFace) =>
+      role.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+    );
+  }, [allRoles, debouncedSearchQuery]);
+
+  const fetchRoles = React.useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -70,10 +88,10 @@ export default function Roles() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, rowsPerPage, dispatch]);
 
 
-  const fetchPermissionMenus = async () => {
+  const fetchPermissionMenus = React.useCallback(async () => {
     setError(null);
     try {
       const response = await menuListFn();
@@ -81,13 +99,11 @@ export default function Roles() {
     } catch (err: any) {
       console.error('Failed to fetch permissions:', err);
     }
-  };
+  }, []);
 
   React.useEffect(() => {
-    if (isOnRolesPage) {
-      fetchRoles();
-    }
-  }, [currentPage, rowsPerPage, isOnRolesPage]);
+    fetchRoles();
+  }, [currentPage, rowsPerPage]); // Only depend on pagination changes
 
   // Cleanup when leaving roles page
   React.useEffect(() => {
@@ -99,10 +115,10 @@ export default function Roles() {
 
   React.useEffect(() => {
     const totalPages = Math.ceil(totalDocuments / rowsPerPage);
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages > 0 ? totalPages : 1);
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
     }
-  }, [totalDocuments, rowsPerPage, currentPage]);
+  }, [totalDocuments, rowsPerPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -292,9 +308,7 @@ export default function Roles() {
       <div className="mt-5 overflow-x-auto ">
         <DataTable
           columns={columns}
-          data={allRoles?.filter((role: CurrentRoleDataInterFace) =>
-            role.name.toLowerCase().includes(searchQuery.toLowerCase())
-          ) || []}
+          data={filteredRoles}
           pagination
           paginationPerPage={rowsPerPage}
           paginationTotalRows={totalDocuments}
@@ -394,7 +408,7 @@ export default function Roles() {
         fetchRoles={fetchRoles}
       />
 
-      <ViewRoleDrawer
+      <ViewRoleDrawer  
         isDrawerOpen={isViewDrawerOpen}
         toggleDrawer={toggleViewDrawer}
         selectedRole={selectedRole}
@@ -402,4 +416,6 @@ export default function Roles() {
       />
     </div>
   );
-}
+})
+
+// Roles?.displayName = 'Roles';

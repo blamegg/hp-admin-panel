@@ -60,6 +60,8 @@ const PermissionsPage = () => {
     }
   };
 
+  console.log(permissions)
+
   // Fetch permissions on component mount and when page/limit changes
   useEffect(() => {
     fetchPermissions();

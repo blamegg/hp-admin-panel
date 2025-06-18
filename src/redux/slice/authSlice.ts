@@ -2,6 +2,7 @@ import { SignInFormData } from "@/components/Signin/signIn";
 import { apiClient, ApiEndpoints } from "@/utility/api";
 import { setTokenCookie } from "@/utility/helper";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { permissionsFn } from "@/utility/queryFetcher";
 
 interface AuthState {
   user: any | null;
@@ -10,6 +11,8 @@ interface AuthState {
   registerStatus: "idle" | "loading" | "success" | "failed";
   registerError: string | null;
   permissions: string[];
+  permissionsStatus: "idle" | "loading" | "success" | "failed";
+  permissionsError: string | null;
 }
 
 export interface UserProps {
@@ -28,6 +31,8 @@ const initialState: AuthState = {
   registerStatus: "idle",
   registerError: null,
   permissions: [],
+  permissionsStatus: "idle",
+  permissionsError: null,
 };
 
 export const loginUser = createAsyncThunk(
@@ -79,6 +84,19 @@ export const fetchCurrentUser = createAsyncThunk(
   },
 );
 
+// New async thunk to fetch permissions using permissionsFn
+export const fetchUserPermissions = createAsyncThunk(
+  "auth/fetchUserPermissions",
+  async (roleId: string, { rejectWithValue }) => {
+    try {
+      const response = await permissionsFn(roleId);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch permissions");
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -105,6 +123,8 @@ const authSlice = createSlice({
       state.registerStatus = "idle";
       state.registerError = null;
       state.permissions = [];
+      state.permissionsStatus = "idle";
+      state.permissionsError = null;
     },
   },
   extraReducers: (builder) => {
@@ -144,6 +164,8 @@ const authSlice = createSlice({
         state.registerStatus = "idle";
         state.registerError = null;
         state.permissions = [];
+        state.permissionsStatus = "idle";
+        state.permissionsError = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.user = null;
@@ -152,6 +174,8 @@ const authSlice = createSlice({
         state.registerStatus = "idle";
         state.registerError = null;
         state.permissions = [];
+        state.permissionsStatus = "idle";
+        state.permissionsError = null;
       })
       .addCase(fetchCurrentUser.pending, (state) => {
         state.loginStatus = "loading";
@@ -177,9 +201,32 @@ const authSlice = createSlice({
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loginStatus = "failed";
         state.loginError = action.payload as string;
+      })
+      // Handle fetchUserPermissions cases
+      .addCase(fetchUserPermissions.pending, (state) => {
+        state.permissionsStatus = "loading";
+        state.permissionsError = null;
+      })
+      .addCase(fetchUserPermissions.fulfilled, (state, action) => {
+        state.permissionsStatus = "success";
+        // Extract permissions from the response
+        // You may need to adjust this based on your API response structure
+        if (action.payload.data && Array.isArray(action.payload.data)) {
+          const permissions = action.payload.data
+            .map((permission: any) => permission.sub_menus)
+            .flat()
+            .map((sub: any) => sub.name);
+          state.permissions = permissions;
+        } else {
+          state.permissions = [];
+        }
+      })
+      .addCase(fetchUserPermissions.rejected, (state, action) => {
+        state.permissionsStatus = "failed";
+        state.permissionsError = action.payload as string;
       });
   },
 });
 
-export const { setPermissions, updateUserTempPasswordStatus, clearAuthState, setTestUserWithTempPassword } = authSlice.actions;
+export const { setPermissions, updateUserTempPasswordStatus, clearAuthState } = authSlice.actions;
 export default authSlice.reducer;

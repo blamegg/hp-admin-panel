@@ -10,17 +10,25 @@ import { ReduxProvider } from "@/provider/ReduxProvider";
 import { Toaster } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { setPermissions } from "@/redux/slice/authSlice";
-import { useMenuList } from "@/hooks/useMenuList";
+import { fetchUserPermissions } from "@/redux/slice/authSlice";
 
 import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
 import "@/css/satoshi.css";
 import "@/css/style.css";
 import "react-toastify/dist/ReactToastify.css";
-import "react-toastify/dist/ReactToastify.css";
 
-const queryClient = new QueryClient();
+// Create a stable QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export default function RootLayout({
   children,
@@ -51,22 +59,18 @@ const InnerRootLayout = ({
   loading: boolean;
   children: React.ReactNode;
 }) => {
-  const { direction, toggleDirection } = useDirection();
+  const { direction } = useDirection();
   const dispatch = useDispatch<AppDispatch>();
   
-  // Use custom hook for menu list management
-  const { menuList } = useMenuList();
-
-  // Update permissions when menu list changes
+  // Get user data from Redux
+  const user = useSelector((state: RootState) => state.authReducer.user);
+  const permissionsStatus = useSelector((state: RootState) => state.authReducer.permissionsStatus);
+  
   useEffect(() => {
-    if (menuList && menuList.length > 0) {
-      const userPermissions = menuList
-        .map((permission: any) => permission.sub_menus)
-        .flat()
-        .map((sub: any) => sub.name);
-      dispatch(setPermissions(userPermissions));
+    if (user && user.role && user.role._id && permissionsStatus === "idle") {
+      dispatch(fetchUserPermissions(user.role._id));
     }
-  }, [menuList, dispatch]);
+  }, [user, permissionsStatus, dispatch]);
 
   return (
     <html lang="en" dir={direction}>

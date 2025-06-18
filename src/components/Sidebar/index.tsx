@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { defaultSvg, menuItems, staticMenu } from "@/utility/sidebar";
 import { useRouter } from "next/navigation";
+import { useMenuList } from "@/hooks/useMenuList";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -18,19 +19,17 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
   const color = "#FF505D";
   const { direction } = useDirection();
   
-  // Get menu data from Redux store instead of making API call
-  const { permissions } = useSelector((state: RootState) => state.authReducer);
-  const { menuList } = useSelector((state: RootState) => state.menu);
+  // Use the useMenuList hook to get dynamic menu data
+  const { menuList, isLoading, menuListStatus, isLoggedIn } = useMenuList();
   
   // Get user data and permissions from Redux store
-  const { user } = useSelector((state: RootState) => state.authReducer);
+  const { user, permissions } = useSelector((state: RootState) => state.authReducer);
   const userPermissions = user?.permissions || [];
 
   // Check if user has temporary password - check both possible paths
@@ -49,12 +48,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     return requiredPermissions.some(permission => userPermissions.includes(permission));
   };
 
-  // Use dynamic menu from Redux if available, otherwise fallback to static menu
-  const dynamicMenuList = [
+  // Use dynamic menu from useMenuList hook if available, otherwise fallback to static menu
+  const dynamicMenuList = menuList && menuList.length > 0 ? [
     {
       name: "MENU LIST",
-      menuItems: (menuList || staticMenu)
-        ?.filter((e: any) => hasPermission(e.requiredPermissions)) // Filter top-level menus
+      menuItems: menuList
+        .filter((e: any) => hasPermission(e.requiredPermissions)) // Filter top-level menus
         .map((e: any) => {
           return {
             label: e.name,
@@ -72,7 +71,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           };
         }),
     },
-  ];
+  ] : staticMenu;
+
 
   // Navigation function to change password page
   const handleChangePassword = () => {
@@ -166,28 +166,38 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
           <div className="no-scrollbar mt-5 flex flex-col overflow-y-auto duration-300 ease-linear">
             
+           
 
             <nav>
-              {dynamicMenuList.map((group: any, groupIndex: number) => (
-                <div key={groupIndex}>
-                  <h3 className="mb-4 ml-4 mr-4 text-sm text-[13px] font-semibold text-bodydark2">
-                    {group.name}
-                  </h3>
-
-                  <ul className="mb-6 flex flex-col gap-1.5">
-                    {group.menuItems?.map((menuItem: any, menuIndex: any) => (
-                      <SidebarItem
-                        key={menuIndex}
-                        item={menuItem}
-                        pageName={pageName}
-                        setPageName={setPageName}
-                        color={color}
-                      />
-
-                    ))}
-                  </ul>
+              {isLoading ? (
+                <div className="px-4 py-3">
+                  <div className="flex items-center gap-2 text-bodydark2">
+                    <div className="w-4 h-4 border-2 border-bodydark2 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm">Loading menu...</span>
+                  </div>
                 </div>
-              ))}
+              ) : (
+                dynamicMenuList.map((group: any, groupIndex: number) => (
+                  <div key={groupIndex}>
+                    <h3 className="ml-4 mr-4 text-sm text-[13px] font-semibold text-bodydark2">
+                      {group.name}
+                    </h3>
+
+                    <ul className="flex flex-col gap-1.5">
+                      {group.menuItems?.map((menuItem: any, menuIndex: any) => (
+                        <SidebarItem
+                          key={menuIndex}
+                          item={menuItem}
+                          pageName={pageName}
+                          setPageName={setPageName}
+                          color={color}
+                        />
+
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              )}
             </nav>
 
             {/* Desktop Temp Password Warning - Shows inside sidebar */}

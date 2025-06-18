@@ -15,11 +15,13 @@ const DropdownUser = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.authReducer);
+  const test = useSelector((state: RootState) => state);
   const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
   const userInfo = user?.user;
 
   // Check if user has CHANGE_PASSWORD permission
   const hasChangePasswordPermission = permissions.includes('Change Password');
+
 
   const handleLogout = async () => {
     try {

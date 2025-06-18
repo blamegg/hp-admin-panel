@@ -25,11 +25,14 @@ const SidebarItem = ({ item, pageName, setPageName, color }: any) => {
 
   const isItemActive = isActive(item);
 
+  // Provide fallback href to prevent undefined error
+  const href = item.route || "#";
+
   return (
     <>
       <li>
         <Link
-          href={item.route}
+          href={href}
           onClick={handleClick}
           style={{ backgroundColor: isItemActive ? appColor : "" }}
           className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2  font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4`}

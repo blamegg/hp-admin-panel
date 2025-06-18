@@ -43,6 +43,17 @@ const UserTable = () => {
 
   const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
 
+  console.log("🔍 UserTable Permissions Debug:", {
+    permissions,
+    permissionsLength: permissions?.length || 0,
+    hasViewAllUsers: permissions?.includes('View All Users'),
+    hasCreateUser: permissions?.includes('Create User'),
+    hasEditUser: permissions?.includes('Edit User'),
+    hasDeleteUser: permissions?.includes('Delete User'),
+    hasViewUserDetails: permissions?.includes('View User Details'),
+    hasResetPassword: permissions?.includes('Reset Password')
+  });
+
   const hasPermission = (permissionKey: string): boolean => {
     return permissions.includes(permissionKey);
   };
@@ -54,7 +65,14 @@ const UserTable = () => {
 
   useEffect(() => {
     const path = pathname.toLowerCase();
-    setShowSearchBar(path.includes('/users'));
+    const shouldShow = path.includes('/users');
+    console.log("🔍 UserTable showSearchBar Debug:", {
+      pathname,
+      path,
+      shouldShow,
+      currentShowSearchBar: showSearchBar
+    });
+    setShowSearchBar(shouldShow);
   }, [pathname]);
 
   const { direction } = useDirection();
@@ -64,13 +82,31 @@ const UserTable = () => {
   const { data: userList, isLoading, refetch } = useQuery({
     queryKey: ["users", currentPage, rowsPerPage, searchQuery, searchBasis],
     queryFn: async () => {
-      return await usersFn(currentPage, rowsPerPage, searchQuery, searchBasis);
+      console.log("🔍 UserTable: Fetching users with params:", {
+        currentPage,
+        rowsPerPage,
+        searchQuery,
+        searchBasis,
+        showSearchBar
+      });
+      const result = await usersFn(currentPage, rowsPerPage, searchQuery, searchBasis);
+      console.log("🔍 UserTable: API response:", result);
+      return result;
     },
     refetchOnWindowFocus: false,
     staleTime: 0, // Always consider data stale to ensure fresh fetches
     enabled: showSearchBar, // Only enable when on users page
   });
 
+  console.log("🔍 UserTable Debug Info:", {
+    showSearchBar,
+    isLoading,
+    userList,
+    permissions,
+    hasViewPermission: hasPermission('View All Users'),
+    dataLength: userList?.data?.length || 0,
+    pagination: userList?.pagination
+  });
 
   // Update total items when data changes
   useEffect(() => {
@@ -179,7 +215,11 @@ const UserTable = () => {
     },
     {
       name: "Role",
-      selector: (row: any) => row.role.name || "",
+      selector: (row: any) => {
+        console.log("🔍 User row data:", row);
+        console.log("🔍 User role data:", row.role);
+        return row.role?.name || "No Role";
+      },
       sortable: true,
       width: "130px",
     },
@@ -365,7 +405,8 @@ const UserTable = () => {
 
         <div className="mt-5 overflow-x-auto ">
 
-          {hasPermission('View All Users') && (
+          {/* Temporarily show data for debugging */}
+          {hasPermission('View All Users') ? (
             <>
               {isLoading ? (
                 <div className="flex items-center justify-center h-40">
@@ -449,6 +490,12 @@ const UserTable = () => {
                 </>
               )}
             </>
+          ) : (
+            <div className="flex items-center justify-center h-40">
+              <div className="text-lg text-red-500">
+                No permission to view users. Available permissions: {permissions?.join(', ') || 'None'}
+              </div>
+            </div>
           )}
         </div>
       </div>

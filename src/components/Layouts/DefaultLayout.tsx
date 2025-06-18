@@ -28,15 +28,13 @@ export default function DefaultLayout({
   // Check if user has temporary password - check both possible paths
   const isTempPassword = user?.isTempPassword || userInfo?.isTempPassword;
 
-
-
   // Show change password modal if user has temporary password
   useEffect(() => {
     if (isTempPassword) {
       setShowChangePasswordModal(true);
-      // Prevent navigation to any other page
+      // Only redirect if not already on dashboard
       if (pathname !== "/dashboard") {
-        router.push("/dashboard");
+        router.replace("/dashboard");
       }
     } else {
       setShowChangePasswordModal(false);

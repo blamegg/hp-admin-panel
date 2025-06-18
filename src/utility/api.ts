@@ -15,8 +15,7 @@ export const ApiEndpoints = {
   users: "/api/v1/users",
   bulkUsers: "/api/v1/users/bulk-import",
   roles: "/api/v1/roles",
-  permissions: `/api/v1/rolePermissionMenu/get-menu-permission`,
-  updatePermissions: "/api/v1/rolePermissionMenu/assign-menu-permission",
+  permissions: `/api/v1/rolePermissionMenu`,
 };
 
 apiClient.interceptors.request.use(
