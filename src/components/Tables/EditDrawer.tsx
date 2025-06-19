@@ -27,14 +27,7 @@ const EditDrawer = ({
   const queryClient = useQueryClient();
   const dispatch = useDispatch<AppDispatch>();
   
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<EditUserFormInputs>({
-    resolver: zodResolver(editUserSchema),
-  });
+  const { register, handleSubmit, reset, formState: { errors }, getValues, } = useForm<EditUserFormInputs>({ resolver: zodResolver(editUserSchema), });
   const updateUserMn = useMutation({
     mutationFn: (payload: any) => updateUserFn(payload, payload.userId),
     onSuccess: () => {
@@ -65,7 +58,7 @@ const EditDrawer = ({
   // Fetch roles when drawer is opened
   useEffect(() => {
     if (isDrawerOpen) {
-      dispatch(fetchRoleFn({ page: 1, limit: 1000 })); // Fetch all roles for dropdown
+      dispatch(fetchRoleFn({ page: 1, limit: 100 })); // Fetch all roles for dropdown
     }
   }, [isDrawerOpen, dispatch]);
 
@@ -75,7 +68,7 @@ const EditDrawer = ({
 
   const roles = useSelector((state: RootState) => state.role.allRoles );
   const roleList = roles?.map((role: CurrentRoleDataInterFace) => ({ value: role._id, label: role.name }));
-  console.log(roleList)
+
 
   return (
     <Drawer
@@ -142,13 +135,13 @@ const EditDrawer = ({
             </form>
           </div>
           <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-[100%] pr-8 border-t-2 border-gray'>
-            <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={() => toggleDrawer(false)} />
+            <Button type="button" name="Close" className="mr-4 bg-graydark" onClick={() => toggleDrawer(false)} />
             <Button
               name="Submit"
-              type="button"
+              type="submit"
               loading={updateUserMn.isPending}
-              style={{ backgroundColor: "#04aa6d" }}
               onClick={handleSubmit(onSubmit)}
+              className="bg-success"
             />
           </div>
         </div>

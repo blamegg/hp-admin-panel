@@ -8,14 +8,13 @@ export const apiClient = api.create({
 
 export const ApiEndpoints = {
   menus:"/api/v1/menus",
-  dynamicMenus:"/api/v1/menus/role",
   login: "/api/v1/login",
   register: "/api/v1/signup",
   logout: "/api/v1/logout",
   users: "/api/v1/users",
-  bulkUsers: "/api/v1/users/bulk-import",
   roles: "/api/v1/roles",
   permissions: `/api/v1/rolePermissionMenu`,
+  changePassword: "/api/v1/change-password",
 };
 
 apiClient.interceptors.request.use(

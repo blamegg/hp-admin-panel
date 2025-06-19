@@ -133,13 +133,6 @@ const ChangePassword = () => {
           // Navigate to first login page
           router.push("/");
           
-          // Force navigation if router doesn't work
-          setTimeout(() => {
-            if (window.location.pathname !== "/") {
-              window.location.href = "/";
-            }
-          }, 100);
-          
         } catch (error) {
           console.error("Error during cleanup:", error);
           // Still try to navigate even if cleanup fails

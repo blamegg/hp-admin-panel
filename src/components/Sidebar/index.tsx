@@ -26,10 +26,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const { direction } = useDirection();
   
   // Use the useMenuList hook to get dynamic menu data
-  const { menuList, isLoading, menuListStatus, isLoggedIn } = useMenuList();
+  const { menuList, isLoading } = useMenuList();
   
   // Get user data and permissions from Redux store
-  const { user, permissions } = useSelector((state: RootState) => state.authReducer);
+  const { user} = useSelector((state: RootState) => state.authReducer);
   const userPermissions = user?.permissions || [];
 
   // Check if user has temporary password - check both possible paths

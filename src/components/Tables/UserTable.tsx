@@ -22,6 +22,7 @@ import { MdLockReset } from "react-icons/md";
 import { TbLockOff } from "react-icons/tb";
 import { toast } from "sonner";
 import { useMenuList } from "@/hooks/useMenuList";
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 
 const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
@@ -41,18 +42,9 @@ const UserTable = () => {
   // Use menu list hook to ensure menu is loaded on users page
   useMenuList();
 
-  const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
+  useUserPermissions();
 
-  console.log("🔍 UserTable Permissions Debug:", {
-    permissions,
-    permissionsLength: permissions?.length || 0,
-    hasViewAllUsers: permissions?.includes('View All Users'),
-    hasCreateUser: permissions?.includes('Create User'),
-    hasEditUser: permissions?.includes('Edit User'),
-    hasDeleteUser: permissions?.includes('Delete User'),
-    hasViewUserDetails: permissions?.includes('View User Details'),
-    hasResetPassword: permissions?.includes('Reset Password')
-  });
+  const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
 
   const hasPermission = (permissionKey: string): boolean => {
     return permissions.includes(permissionKey);
@@ -66,12 +58,7 @@ const UserTable = () => {
   useEffect(() => {
     const path = pathname.toLowerCase();
     const shouldShow = path.includes('/users');
-    console.log("🔍 UserTable showSearchBar Debug:", {
-      pathname,
-      path,
-      shouldShow,
-      currentShowSearchBar: showSearchBar
-    });
+
     setShowSearchBar(shouldShow);
   }, [pathname]);
 
@@ -82,15 +69,8 @@ const UserTable = () => {
   const { data: userList, isLoading, refetch } = useQuery({
     queryKey: ["users", currentPage, rowsPerPage, searchQuery, searchBasis],
     queryFn: async () => {
-      console.log("🔍 UserTable: Fetching users with params:", {
-        currentPage,
-        rowsPerPage,
-        searchQuery,
-        searchBasis,
-        showSearchBar
-      });
+     
       const result = await usersFn(currentPage, rowsPerPage, searchQuery, searchBasis);
-      console.log("🔍 UserTable: API response:", result);
       return result;
     },
     refetchOnWindowFocus: false,
@@ -98,15 +78,6 @@ const UserTable = () => {
     enabled: showSearchBar, // Only enable when on users page
   });
 
-  console.log("🔍 UserTable Debug Info:", {
-    showSearchBar,
-    isLoading,
-    userList,
-    permissions,
-    hasViewPermission: hasPermission('View All Users'),
-    dataLength: userList?.data?.length || 0,
-    pagination: userList?.pagination
-  });
 
   // Update total items when data changes
   useEffect(() => {
@@ -215,11 +186,7 @@ const UserTable = () => {
     },
     {
       name: "Role",
-      selector: (row: any) => {
-        console.log("🔍 User row data:", row);
-        console.log("🔍 User role data:", row.role);
-        return row.role?.name || "No Role";
-      },
+      selector: (row: any) => row.role.name || "",
       sortable: true,
       width: "130px",
     },
@@ -259,7 +226,7 @@ const UserTable = () => {
         return isActive ? "Active" : "Inactive";
       },
       sortable: true,
-      width: "80px",
+      width: "90px",
     },
     {
       name: "Date Created",
@@ -337,7 +304,6 @@ const UserTable = () => {
     }] : []),
   ];
 
-
   return (
     <>
       <div className="custom_tbl_container h-[74vh]  w-[350px] md:w-full">
@@ -406,7 +372,7 @@ const UserTable = () => {
         <div className="mt-5 overflow-x-auto ">
 
           {/* Temporarily show data for debugging */}
-          {hasPermission('View All Users') ? (
+          {hasPermission('View All Users') && (
             <>
               {isLoading ? (
                 <div className="flex items-center justify-center h-40">
@@ -490,12 +456,6 @@ const UserTable = () => {
                 </>
               )}
             </>
-          ) : (
-            <div className="flex items-center justify-center h-40">
-              <div className="text-lg text-red-500">
-                No permission to view users. Available permissions: {permissions?.join(', ') || 'None'}
-              </div>
-            </div>
           )}
         </div>
       </div>

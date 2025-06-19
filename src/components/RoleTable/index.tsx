@@ -7,7 +7,6 @@ import { setSelectedRole, clearSelectedRole, fetchRoleFn } from "@/redux/slice/r
 import DataTable from "react-data-table-component";
 import { Typography } from '@mui/material';
 import {
-  updateRoleFn,
   deleteRoleFn,
   menuListFn,
   RolesInterFace,
@@ -128,24 +127,6 @@ export default React.memo(function Roles() {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
   };
-
-  const handleEditRole = async (role: string): Promise<boolean> => {
-    if (!selectedRole) {
-      console.error('selectedRole is null or undefined.');
-      return false;
-    }
-    try {
-      await updateRoleFn({ name: role }, selectedRole._id);
-      fetchRoles();
-      toast.success("Role updated successfully")
-      return true;
-    } catch (err: any) {
-      console.error('Failed to edit role:', err);
-      toast.error(err.response.data.message);
-      return false;
-    }
-  };
-
 
   const handleDeleteRole = async (id: string) => {
     try {
@@ -270,8 +251,8 @@ export default React.memo(function Roles() {
   if (error) return <Typography color="error">Error: {error}</Typography>;
 
   return (
-    <div className="custom_tbl_container h-[90vh]">
-      <div className="flex items-center gap-4">
+    <div className="custom_tbl_container h-[74vh] w-[350px] md:w-full">
+      <div className="grid grid-cols-2 md:flex items-center gap-4  ">
         <select
           value={searchBasis}
           onChange={(e) => setSearchBasis(e.target.value)}
@@ -289,9 +270,9 @@ export default React.memo(function Roles() {
         {hasPermission('Create Role') && (
           <Button
           name="Create Role"
-          type="submit"
+          type="button"
           onClick={() => toggleAddDrawer(true)}
-          className='bg-primary'
+          className='w-full md:w-auto bg-primary'
           />
          )} 
         <Tooltip
@@ -391,7 +372,6 @@ export default React.memo(function Roles() {
       <EditRoleDrawer
         isDrawerOpen={isEditDrawerOpen}
         toggleDrawer={toggleEditDrawer}
-        onSave={handleEditRole}
         selectedRole={selectedRole}
         direction={direction}
         permissionsMenuList={permissionsMenuList}
@@ -417,5 +397,3 @@ export default React.memo(function Roles() {
     </div>
   );
 })
-
-// Roles?.displayName = 'Roles';

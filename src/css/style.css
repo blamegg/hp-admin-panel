@@ -4,9 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @layer base {
   body {
     @apply relative z-1 bg-whiten font-satoshi text-base font-normal text-body;
+    overflow-y: initial !important;
+    padding-right: 0 !important;     
   }
 }
 

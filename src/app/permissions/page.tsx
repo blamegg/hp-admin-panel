@@ -6,7 +6,7 @@ import { Typography, Paper, TableContainer, Table, TableHead, TableRow, TableCel
 import { CiEdit } from "react-icons/ci";
 import { MdDeleteOutline } from "react-icons/md";
 // You will need to implement these API functions in src/utility/queryFetcher.ts
-import { permissionsFn, createPermissionFn, updatePermissionFn, deletePermissionFn, menuListFn } from '@/utility/queryFetcher';
+import { permissionsFn, createPermissionFn, updatePermissionFn, deletePermissionFn, } from '@/utility/queryFetcher';
 import EditPermissionModal from "./EditPermissionModal";
 import AddPermissionModal from "./AddPermissionModal";
 
@@ -96,7 +96,7 @@ const PermissionsPage = () => {
       fetchPermissions(); // Refresh the list after deleting
     } catch (err: any) {
       console.error('Failed to delete permission:', err);
-      // Handle error
+      
     }
   };
 

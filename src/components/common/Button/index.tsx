@@ -22,6 +22,7 @@ const Button = ({
   loading = false,
   loadingSpinnerClassName,
   disabled,
+  style,
   ...rest
 }: ButtonProps) => {
   const color = useSelector((state: RootState) => state?.app?.color);

@@ -17,7 +17,6 @@ import { getMenuList } from '@/redux/slice/menuList';
  */
 export const useMenuList = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const pathname = usePathname();
   const hasFetchedRef = useRef(false);
   
   // Get authentication state from Redux
@@ -38,13 +37,11 @@ export const useMenuList = () => {
   // Fetch dynamic menu list when conditions are met
   useEffect(() => {
     if (shouldFetchMenuList && !hasFetchedRef.current) {
-      console.log('🔄 useMenuList: Fetching menu list');
       hasFetchedRef.current = true;
       dispatch(getMenuList());
     }
   }, [shouldFetchMenuList, dispatch]);
 
-  // Reset the ref when user changes
   useEffect(() => {
     hasFetchedRef.current = false;
   }, [user]);

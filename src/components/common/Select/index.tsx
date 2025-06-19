@@ -5,9 +5,12 @@ interface SelectProps {
   options: { value: string; label: string }[];
   register?: any;
   error?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  className?:string;
 }
 
-const Select = ({ label, options, register, error, ...props }: SelectProps) => {
+const Select = ({ label, options, register, error,className, ...props }: SelectProps) => {
   return (
     <>
       <label className="block text-sm font-medium text-black dark:text-white">

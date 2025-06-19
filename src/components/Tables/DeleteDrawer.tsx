@@ -65,7 +65,7 @@ const DeleteDrawer = ({
       disableEnforceFocus
       PaperProps={{
         sx: {
-          width: "26%",
+          width: "30%",
         },
       }}
     >
@@ -105,12 +105,12 @@ const DeleteDrawer = ({
               </h3>
               
               <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
-                <Button type="button" name="Close" className="mr-4" style={{ backgroundColor: "gray" }} onClick={handleClose} />
+                <Button type="button" name="Close" className="mr-4 bg-graydark"  onClick={handleClose} />
                 <Button
                   type="button"
                   name="Confirm"
                   onClick={handleDelete}
-                  style={{backgroundColor:"#04aa6d"}}
+                  className="bg-danger"
                 />
               </div>
             </>

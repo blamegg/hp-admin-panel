@@ -17,10 +17,10 @@ export default function DefaultLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const { direction, toggleDirection } = useDirection();
+  const { direction } = useDirection();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Get user data from Redux
   const { user } = useSelector((state: RootState) => state.authReducer);
   const userInfo = user?.user;
@@ -55,13 +55,13 @@ export default function DefaultLayout({
       <div className="min-h-screen bg-gray-50 dark:bg-boxdark">
         {/* Overlay background */}
         <div className="fixed inset-0 bg-black/50 z-40"></div>
-        
+
         {/* Modal */}
-        <ChangePasswordModal 
-          open={showChangePasswordModal} 
+        <ChangePasswordModal
+          open={showChangePasswordModal}
           onClose={handleModalClose}
         />
-        
+
         {/* Loading indicator */}
         <div className="flex h-screen items-center justify-center">
           <div className="text-center">
@@ -74,7 +74,7 @@ export default function DefaultLayout({
       </div>
     );
   }
-  
+
   return (
     <>
       {/* <!-- ===== Page Wrapper Start ===== --> */}
@@ -93,7 +93,7 @@ export default function DefaultLayout({
 
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>
-            <div className="mx-auto max-w-screen-2xl  w-ful px-3 py-2 md:px-6 md:py-3 2xl:px-10 2xl:py-4 ">
+            <div className="h-full overflow-y-auto mx-auto max-w-screen-2xl w-full px-3 py-2 md:px-6 md:py-3 2xl:px-10 2xl:py-4">
               {children}
             </div>
             <BottomStrip />

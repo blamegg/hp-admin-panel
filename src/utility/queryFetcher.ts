@@ -116,7 +116,7 @@ export const menuListFn = async () => {
 };
 // fetch Dynamic menu list
 export const dynamicMenuListFn = async () => {
-  const response = await apiClient.get(ApiEndpoints.dynamicMenus);
+  const response = await apiClient.get(`${ApiEndpoints.menus}/role`);
   return response.data;
 };
 
@@ -142,7 +142,7 @@ export const createUserFn = async (payload: any) => {
 
 // create Bulk user
 export const createBulkUserFn = async (payload: FormData) => {
-  const response = await apiClient.post(ApiEndpoints.bulkUsers, payload, {
+  const response = await apiClient.post(`${ApiEndpoints.users}/bulk-import`, payload, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -186,8 +186,8 @@ export const createRoleFn = async (payload: { name: string, rank: number }) => {
   return response.data;
 };
 
-// update role
-export const updateRoleFn = async (payload: { name: string }, roleId: string) => {
+// update role and Rank
+export const updateRoleAndRankFn = async (payload: { name: string, rank:string }, roleId: string) => {
   const response = await apiClient.put(
     `${ApiEndpoints.roles}/${roleId}`,
     payload,

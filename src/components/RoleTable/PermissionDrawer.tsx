@@ -161,7 +161,7 @@ const SortablePermissionItem = ({
     <Box
       ref={setNodeRef}
       style={style}
-      className={`border h-[180px] border-blue-300 rounded-lg p-1 bg-white shadow-sm hover:shadow-md transition-all duration-200 ${isDragging ? 'shadow-lg scale-105' : ''
+      className={`border border-blue-300  md:h-[180px] rounded-lg p-1 bg-white shadow-sm hover:shadow-md transition-all duration-200 ${isDragging ? 'shadow-lg scale-105' : ''
         } ${isSubMenuDragging ? 'border-blue-300 bg-blue-50' : ''
         }`}
     >
@@ -439,7 +439,7 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       <FormControl
         fullWidth
         sx={{
-          height: "420px",
+          maxHeight:{xs:"auto", md:"420px"},
           mb: 2,
           mt:3,
           display: "grid",
@@ -473,14 +473,14 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
           </SortableContext>
         </DndContext>
       </FormControl>
-      <div className='flex justify-between items-center gap-2 relative bottom-0 h-[60px] w-full px-4 border-t-2 border-gray'>
-        <div className='flex gap-3 items-center'>
-          <Button type="button" name="Reset Order" className="bg-graydark hover:bg-gray-600" onClick={handleResetOrder} />
-          <Button type="button" name="Save Order" className="bg-success" onClick={handleSaveOrder} />
+      <div className='grid grid-cols-2 md:flex justify-between items-center gap-2 relative bottom-0 h-[60px] md:h-[80px] w-full px-4 border-t-2 border-gray'>
+        <div className='flex flex-col-reverse md:flex md:flex-row gap-3 items-center'>
+          <Button type="button" name="Reset Order" className="bg-graydark hover:bg-gray-600 w-full md:w-auto" onClick={handleResetOrder} />
+          <Button type="button" name="Save Order" className="bg-success w-full md:w-auto" onClick={handleSaveOrder} />
         </div>
-        <div className="flex gap-2">
-          <Button type="button" name="Close" className="bg-graydark" onClick={() => toggleDrawer(false)} />
-          <Button type="button" name="Update" className="bg-success" onClick={handleUpdatePermission} />
+        <div className="flex flex-col-reverse md:flex md:flex-row gap-2">
+          <Button type="button" name="Close" className="bg-graydark w-full md:w-auto" onClick={() => toggleDrawer(false)} />
+          <Button type="button" name="Update" className="bg-success w-full md:w-auto" onClick={handleUpdatePermission} />
         </div>
       </div>
     </div>

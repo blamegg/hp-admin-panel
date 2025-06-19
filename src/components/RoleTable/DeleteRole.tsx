@@ -76,7 +76,7 @@ const DeleteRole: React.FC<DeleteRoleProps> = ({
       disableEnforceFocus
       PaperProps={{
         sx: {
-          width: "26%",
+          width: "30%",
         },
       }}
     >

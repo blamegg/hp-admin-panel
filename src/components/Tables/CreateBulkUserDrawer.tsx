@@ -23,8 +23,7 @@ const CreateBulkUserDrawer = ({
   isDrawerOpen,
   toggleDrawer,
 }: UserDrawerProps) => {
-  const [profile, setProfile] = useState<string>("/images/user/user-06.png");
-  const [selectedTab, setSelectedTab] = useState<string>("Basic");
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResults, setUploadResults] = useState<any>(null);
