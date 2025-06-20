@@ -76,13 +76,13 @@ const SortableSubMenuItem = ({
     <li
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-2 rounded transition-all duration-200 hover:bg-gray-50 ${isDragging ? 'bg-blue-50 border border-blue-200 shadow-sm' : ''
+      className={`flex items-baseline gap-2 rounded transition-all duration-200 hover:bg-gray-50 ${isDragging ? 'bg-blue-50 border border-blue-200 shadow-sm' : ''
         }`}
     >
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors p-0.5 rounded hover:bg-gray-100"
+        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors rounded hover:bg-gray-100"
         title="Drag to reorder sub-menu"
       >
         <GripVertical size={12} />
@@ -161,7 +161,7 @@ const SortablePermissionItem = ({
     <Box
       ref={setNodeRef}
       style={style}
-      className={`border border-blue-300  md:h-[180px] rounded-lg p-1 bg-white shadow-sm hover:shadow-md transition-all duration-200 ${isDragging ? 'shadow-lg scale-105' : ''
+      className={`border border-blue-300   rounded-lg p-1 bg-white shadow-sm hover:shadow-md transition-all duration-200 ${isDragging ? 'shadow-lg scale-105' : ''
         } ${isSubMenuDragging ? 'border-blue-300 bg-blue-50' : ''
         }`}
     >
@@ -439,9 +439,9 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       <FormControl
         fullWidth
         sx={{
-          maxHeight:{xs:"auto", md:"420px"},
+          maxHeight:{xs:"330px", sm:"830px", md:"600px", lg:"430px"},
           mb: 2,
-          mt:3,
+          mt:{xs:1, md:3},
           display: "grid",
           gridTemplateColumns: "1fr",
           overflow: "scroll",
@@ -473,7 +473,7 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
           </SortableContext>
         </DndContext>
       </FormControl>
-      <div className='grid grid-cols-2 md:flex justify-between items-center gap-2 relative bottom-0 h-[60px] md:h-[80px] w-full px-4 border-t-2 border-gray'>
+      <div className='grid grid-cols-2 md:flex justify-between items-center gap-2 absolute bottom-0 h-[50px]  w-full px-4 border-2 border-danger'>
         <div className='flex flex-col-reverse md:flex md:flex-row gap-3 items-center'>
           <Button type="button" name="Reset Order" className="bg-graydark hover:bg-gray-600 w-full md:w-auto" onClick={handleResetOrder} />
           <Button type="button" name="Save Order" className="bg-success w-full md:w-auto" onClick={handleSaveOrder} />

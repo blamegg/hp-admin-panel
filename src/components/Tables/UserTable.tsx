@@ -22,7 +22,7 @@ import { MdLockReset } from "react-icons/md";
 import { TbLockOff } from "react-icons/tb";
 import { toast } from "sonner";
 import { useMenuList } from "@/hooks/useMenuList";
-import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useUserPermissions, useHasPermission } from '@/hooks/useUserPermissions';
 
 const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
@@ -41,14 +41,11 @@ const UserTable = () => {
 
   // Use menu list hook to ensure menu is loaded on users page
   useMenuList();
-
   useUserPermissions();
 
-  const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
+  const hasPermission = useHasPermission();
 
-  const hasPermission = (permissionKey: string): boolean => {
-    return permissions.includes(permissionKey);
-  };
+
 
   // Check if user has any action permissions
   const hasAnyActionPermission = (): boolean => {
@@ -58,7 +55,6 @@ const UserTable = () => {
   useEffect(() => {
     const path = pathname.toLowerCase();
     const shouldShow = path.includes('/users');
-
     setShowSearchBar(shouldShow);
   }, [pathname]);
 
@@ -66,7 +62,7 @@ const UserTable = () => {
   const queryClient = useQueryClient();
 
   // Use server-side pagination with search
-  const { data: userList, isLoading, refetch } = useQuery({
+  const { data: userList, isLoading } = useQuery({
     queryKey: ["users", currentPage, rowsPerPage, searchQuery, searchBasis],
     queryFn: async () => {
      
@@ -125,7 +121,6 @@ const UserTable = () => {
   // Cleanup queries when leaving users page
   useEffect(() => {
     if (!showSearchBar) {
-      // Cancel any pending queries when not on users page
       queryClient.cancelQueries({ queryKey: ["users"] });
     }
   }, [showSearchBar, queryClient]);
@@ -372,7 +367,7 @@ const UserTable = () => {
         <div className="mt-5 overflow-x-auto ">
 
           {/* Temporarily show data for debugging */}
-          {hasPermission('View All Users') && (
+          {/* {hasPermission('View All Users') && ( */}
             <>
               {isLoading ? (
                 <div className="flex items-center justify-center h-40">
@@ -456,7 +451,7 @@ const UserTable = () => {
                 </>
               )}
             </>
-          )}
+          {/* )} */}
         </div>
       </div>
 

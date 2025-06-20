@@ -5,6 +5,7 @@ export type UserFormInputs = z.infer<typeof userSchema>;
 export type EditUserFormInputs = z.infer<typeof editUserSchema>;
 export type ViewUserFormInputs = z.infer<typeof viewUserSchema>;
 
+
 export const userSchema = z.object({
   name: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address"),
@@ -26,3 +27,5 @@ export const viewUserSchema = z.object({
   password: z.string().optional(),
   mobile: z.string().min(10, "Phone number must be at least 10 digits"),
 });
+
+

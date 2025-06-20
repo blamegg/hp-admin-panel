@@ -6,6 +6,7 @@ import appReducer from "./slice/appSlice";
 import messageReducer from "./slice/MessageSlice";
 import menuReducer from "./slice/menuList";
 import roleReducer from "./slice/roleSlice";
+import leaveReducer from "./slice/leaveSlice";
 
 const authPersistConfig = {
   key: "auth",
@@ -21,6 +22,7 @@ const store = configureStore({
     message: messageReducer,
     menu: menuReducer,
     role: roleReducer,
+    leave: leaveReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

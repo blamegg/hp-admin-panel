@@ -24,7 +24,7 @@ const CreateUserDrawer = ({
 }: UserDrawerProps) => {
   const [profile, setProfile] = useState<string>("/images/user/user-06.png");
   const [selectedTab, setSelectedTab] = useState<string>("Basic");
-  const { register, handleSubmit, reset, formState: { errors }, } = useForm<UserFormInputs>(
+  const { register, handleSubmit, reset, formState: { errors }} = useForm<UserFormInputs>(
     {
       resolver: zodResolver(userSchema), mode: "onSubmit", defaultValues:
       {

@@ -9,6 +9,7 @@ import { RootState } from "@/redux/store";
 import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import ChangePasswordModal from "@/components/changePassword/ChangePasswordModal";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 
 export default function DefaultLayout({
   children,
@@ -24,6 +25,8 @@ export default function DefaultLayout({
   // Get user data from Redux
   const { user } = useSelector((state: RootState) => state.authReducer);
   const userInfo = user?.user;
+
+   useUserPermissions();
 
   // Check if user has temporary password - check both possible paths
   const isTempPassword = user?.isTempPassword || userInfo?.isTempPassword;

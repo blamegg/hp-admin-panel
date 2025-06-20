@@ -108,6 +108,13 @@ export interface UpdatePermissionsInterFace {
   }[];
 }
 
+export interface CreateLeaveInterface{
+  name: string;
+  description?: string;
+  half_day_allowed?:boolean;
+  paid?:boolean;
+}
+
 // fetch menu list
 export const menuListFn = async () => {
 
@@ -203,6 +210,7 @@ export const deleteRoleFn = async (roleId: string) => {
 
 // fetch permissions
 export const permissionsFn = async (roleId: string) => {
+  console.log("roleId", roleId)
   const response = await apiClient.get(`${ApiEndpoints.permissions}/get-menu-permission/${roleId}`);
   return response.data;
 };
@@ -237,4 +245,26 @@ export const resetPasswordFn = async (id:string)=>{
   return response.data;
 }
 
+// Create leave
+export const createLeaveFn = async (payload: CreateLeaveInterface)=>{
+  const response = await apiClient.post(`${ApiEndpoints.leave}`, payload);
+  return response.data;
+}
 
+// fetch leave
+export const fetchLeaveFn = async ()=>{
+  const response = await apiClient.get(ApiEndpoints.leave);
+  return response.data;
+}
+
+// delete leave
+export const deleteLeaveFn = async (leaveId: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.leave}/${leaveId}`);
+  return response.data;
+};
+
+// update leave
+export const updateLeaveFn = async (payload: any, leaveId: string) => {
+  const response = await apiClient.put(`${ApiEndpoints.leave}/${leaveId}`, payload);
+  return response.data;
+};

@@ -14,6 +14,7 @@ import {
   RolesInterFace2,
 } from '@/utility/queryFetcher';
 import { useDirection } from '@/context/DirectionContext';
+import { useHasPermission } from '@/hooks/useUserPermissions';
 import EditRoleDrawer from './EditRoleDrawer';
 import ViewRoleDrawer from './ViewRoleDrawer';
 import { FaEye, FaEdit, FaTrash, FaRegQuestionCircle } from 'react-icons/fa';
@@ -49,12 +50,7 @@ export default React.memo(function Roles() {
   const [isPermissiondrawerOpen, setIsPermissionDrawerOpen] = React.useState(false);
 
   const { direction } = useDirection();
-  const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
-
-  // Memoize permission checks to prevent unnecessary re-renders
-  const hasPermission = React.useCallback((permissionKey: string): boolean => {
-    return permissions.includes(permissionKey);
-  }, [permissions]);
+  const hasPermission = useHasPermission();
 
   const hasAnyActionPermission = React.useCallback(() => {
     return hasPermission('View Role Details') || hasPermission('Delete Role') || hasPermission('Edit Role');
@@ -65,17 +61,23 @@ export default React.memo(function Roles() {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
     }, 300);
-
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Reset to page 1 when search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, searchBasis]);
 
   // Memoize filtered data to prevent unnecessary re-renders
   const filteredRoles = React.useMemo(() => {
     if (!allRoles) return [];
-    return allRoles.filter((role: CurrentRoleDataInterFace) =>
-      role.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
-    );
-  }, [allRoles, debouncedSearchQuery]);
+    if (!debouncedSearchQuery.trim()) return allRoles;
+    return allRoles.filter((role: any) => {
+      const value = role[searchBasis]?.toString().toLowerCase() || '';
+      return value.includes(debouncedSearchQuery.toLowerCase());
+    });
+  }, [allRoles, debouncedSearchQuery, searchBasis]);
 
   const fetchRoles = React.useCallback(async () => {
     setLoading(true);

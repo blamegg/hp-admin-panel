@@ -13,6 +13,7 @@ export const ApiEndpoints = {
   logout: "/api/v1/logout",
   users: "/api/v1/users",
   roles: "/api/v1/roles",
+  leave:"/api/v1/leaveTypes",
   permissions: `/api/v1/rolePermissionMenu`,
   changePassword: "/api/v1/change-password",
 };

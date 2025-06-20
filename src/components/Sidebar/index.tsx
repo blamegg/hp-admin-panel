@@ -12,6 +12,7 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { defaultSvg, menuItems, staticMenu } from "@/utility/sidebar";
 import { useRouter } from "next/navigation";
 import { useMenuList } from "@/hooks/useMenuList";
+import { useHasPermission } from '@/hooks/useUserPermissions';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -40,12 +41,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     return null;
   }
 
+  // Call the hook ONCE at the top
+  const hasPermissionSingle = useHasPermission();
   // Helper function to check if the user has permission for a menu item
   const hasPermission = (requiredPermissions: string[] | undefined): boolean => {
-    if (!requiredPermissions || requiredPermissions.length === 0) {
-      return true; // No specific permissions required, so accessible by default
-    }
-    return requiredPermissions.some(permission => userPermissions.includes(permission));
+    if (!requiredPermissions || requiredPermissions.length === 0) return true;
+    return requiredPermissions.some((perm) => hasPermissionSingle(perm));
   };
 
   // Use dynamic menu from useMenuList hook if available, otherwise fallback to static menu

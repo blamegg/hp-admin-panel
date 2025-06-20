@@ -210,8 +210,10 @@ const authSlice = createSlice({
       .addCase(fetchUserPermissions.fulfilled, (state, action) => {
         state.permissionsStatus = "success";
         // Extract permissions from the response
-        // You may need to adjust this based on your API response structure
-        if (action.payload.data && Array.isArray(action.payload.data)) {
+        // Try to handle both {permissions: [...]} and {data: [...]} structures
+        if (action.payload.permissions && Array.isArray(action.payload.permissions)) {
+          state.permissions = action.payload.permissions;
+        } else if (action.payload.data && Array.isArray(action.payload.data)) {
           const permissions = action.payload.data
             .map((permission: any) => permission.sub_menus)
             .flat()
