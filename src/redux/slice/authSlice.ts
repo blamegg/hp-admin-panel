@@ -209,19 +209,24 @@ const authSlice = createSlice({
       })
       .addCase(fetchUserPermissions.fulfilled, (state, action) => {
         state.permissionsStatus = "success";
-        // Extract permissions from the response
-        // Try to handle both {permissions: [...]} and {data: [...]} structures
-        if (action.payload.permissions && Array.isArray(action.payload.permissions)) {
-          state.permissions = action.payload.permissions;
-        } else if (action.payload.data && Array.isArray(action.payload.data)) {
-          const permissions = action.payload.data
-            .map((permission: any) => permission.sub_menus)
-            .flat()
-            .map((sub: any) => sub.name);
-          state.permissions = permissions;
-        } else {
-          state.permissions = [];
+        let extractedPermissions: string[] = [];
+
+        if (action.payload.data && Array.isArray(action.payload.data)) {
+          // Only add main menu and sub-menu names if assigned
+          extractedPermissions = [
+            ...action.payload.data
+              .filter((menu: any) => menu.assigned)
+              .map((menu: any) => menu.name),
+            ...action.payload.data
+              .flatMap((menu: any) =>
+                (menu.sub_menus || [])
+                  .filter((sub: any) => sub.assigned)
+                  .map((sub: any) => sub.name)
+              ),
+          ];
         }
+        // Only set assigned permissions, do not add any fallback cases
+        state.permissions = extractedPermissions;
       })
       .addCase(fetchUserPermissions.rejected, (state, action) => {
         state.permissionsStatus = "failed";
@@ -232,3 +237,4 @@ const authSlice = createSlice({
 
 export const { setPermissions, updateUserTempPasswordStatus, clearAuthState } = authSlice.actions;
 export default authSlice.reducer;
+

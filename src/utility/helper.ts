@@ -30,22 +30,45 @@ export function formatTimestamp(timestamp: string) {
 
 // set token
 export function setTokenCookie(token: string) {
-  const oneYear = 365;
-  Cookies.set("token", token, {
-    expires: oneYear,
-    sameSite: "strict",
-  });
+  try {
+    console.log('Setting token cookie');
+    const oneYear = 365;
+    Cookies.set("token", token, {
+      expires: oneYear,
+      sameSite: "strict",
+      secure: window.location.protocol === 'https:',
+      path: '/'
+    });
+    console.log('Token cookie set successfully');
+  } catch (error) {
+    console.error('Error setting token cookie:', error);
+  }
 }
 
 // get token
 export function getTokenCookie() {
-  const token = Cookies.get("token");
-  return token;
+  try {
+    const token = Cookies.get("token");
+    if (!token) {
+      console.warn('No token found in cookies');
+      return null;
+    }
+    return token;
+  } catch (error) {
+    console.error('Error getting token cookie:', error);
+    return null;
+  }
 }
 
 // remove token
 export function removeTokenCookie() {
-  Cookies.remove("token");
+  try {
+    console.log('Removing token cookie');
+    Cookies.remove("token", { path: '/' });
+    console.log('Token cookie removed successfully');
+  } catch (error) {
+    console.error('Error removing token cookie:', error);
+  }
 }
 
 // comprehensive logout cleanup
@@ -84,7 +107,6 @@ export function clearAllLocalData() {
       });
     }
     
-    console.log("All local data cleared successfully");
   } catch (error) {
     console.error("Error clearing local data:", error);
   }

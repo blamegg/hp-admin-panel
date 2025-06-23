@@ -9,8 +9,6 @@ export const useUserPermissions = () => {
   const permissionsStatus = useSelector((state: RootState) => state.authReducer.permissionsStatus);
 
   useEffect(() => {
-  console.log("User:", user);
-
   const cleanRoleId =
     typeof user?.role?._id === 'string' && user.role._id.startsWith('"')
       ? JSON.parse(user.role._id)
@@ -26,9 +24,19 @@ export const useUserPermissions = () => {
 
 // Reusable hook to get hasPermission function
 export const useHasPermission = () => {
-  const permissions = useSelector((state: RootState) => state?.authReducer?.permissions);
-  console.log(permissions)
-  const hasPermission = (permissionKey: string): boolean => permissions.includes(permissionKey)
+  const permissions = useSelector(
+    (state: RootState) => state.authReducer.permissions,
+  );
+
+  const hasPermission = useMemo(() => {
+    return (permissionKey: string): boolean => {
+      if (!permissions || !Array.isArray(permissions)) {
+        return false;
+      }
+      return permissions.includes(permissionKey);
+    };
+  }, [permissions]);
 
   return hasPermission;
-}; 
+};
+

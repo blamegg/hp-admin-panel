@@ -2,18 +2,16 @@
 import React, { useEffect, useState } from 'react'
 import Button from '../common/Button'
 import CreateLeave from './CreateLeave'
-import DeleteDrawer from '../Tables/DeleteDrawer'
 import DeleteLeave from './DeleteLeave'
 import EditLeave from './EditLeave'
 import { useDirection } from '@/context/DirectionContext'
-import { fetchLeaveFn } from '@/utility/queryFetcher'
+import { fetchLeaveTypeFn } from '@/utility/queryFetcher'
 import { useDispatch, useSelector } from 'react-redux'
-import { setLeaves, setLeavesLoading, setLeavesError } from '@/redux/slice/leaveSlice'
+import { setLeaves, setLeavesLoading, setLeavesError } from '@/redux/slice/leaveTypesSlice'
 import { RootState } from '@/redux/store'
 import DataTable from 'react-data-table-component'
 import CustomPagination from '../CustomPagination'
 import { FaEdit, FaTrash } from 'react-icons/fa'
-import { CreateLeaveFormInput } from '@/schema/leaveSchema'
 import { useHasPermission } from '@/hooks/useUserPermissions'
 
 const Leaves = () => {
@@ -26,17 +24,17 @@ const Leaves = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState("");
   const [selected, setSelected] = useState<any>(null);
-  
-  const {direction} = useDirection()
+
+  const { direction } = useDirection()
   const { leaveTypes, total, page, totalPages, limit, loading, error } = useSelector((state: RootState) => state.leave);
   const dispatch = useDispatch();
   const hasPermission = useHasPermission();
-  const permissions = useSelector((state: RootState) => state?.authReducer);
-  console.log(permissions)
 
-  const fetchLeaves = React.useCallback(() => {
-    dispatch(setLeavesLoading());
-    fetchLeaveFn()
+  console.log(leaveTypes, "leaveTypes")
+
+  const fetchLeavesType = React.useCallback(() => {
+    // dispatch(setLeavesLoading());
+    fetchLeaveTypeFn()
       .then(data => {
         dispatch(setLeaves(data));
       })
@@ -46,8 +44,8 @@ const Leaves = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    fetchLeaves();
-  }, [fetchLeaves]);
+    fetchLeavesType();
+  }, [fetchLeavesType]);
 
   // Debouncinng search query
   useEffect(() => {
@@ -72,9 +70,9 @@ const Leaves = () => {
     });
   }, [leaveTypes, debouncedSearchQuery, searchBasis]);
 
-  const toggleCreateDrawer = (value:boolean) => setIsCreateDrawerOpen(value)
-  const toggleEditLeaveDrawer = (value:boolean) => setIsEditDrawerOpen(value);
-  const toggleDeleteLeaveDrawer = (value:boolean) => setIsDeleteDrawerOpen(value)
+  const toggleCreateDrawer = (value: boolean) => setIsCreateDrawerOpen(value)
+  const toggleEditLeaveDrawer = (value: boolean) => setIsEditDrawerOpen(value);
+  const toggleDeleteLeaveDrawer = (value: boolean) => setIsDeleteDrawerOpen(value)
 
   const columns = [
     {
@@ -143,7 +141,7 @@ const Leaves = () => {
           className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
         />
         {hasPermission('Create Leave Type') && (
-          <Button name='Create Leave' type="button" onClick={()=> toggleCreateDrawer(true)} />
+          <Button name='Create Leave' type="button" onClick={() => toggleCreateDrawer(true)} />
         )}
       </div>
 
@@ -165,13 +163,13 @@ const Leaves = () => {
             />
           )}
           className="custom_tbl"
-            customStyles={{
+          customStyles={{
             header: {
               style: {
                 fontSize: "12px",
                 minHeight: "30px",
                 backgroundColor: "#F9FAFB",
-                color: "#1C243F", 
+                color: "#1C243F",
               },
             },
             headRow: {
@@ -218,14 +216,14 @@ const Leaves = () => {
                 color: "#1C243F",
                 cursor: "pointer",
               },
-            },  
+            },
           }}
         />
       </div>
 
-      <CreateLeave direction={direction} open={isCreateDrawerOpen} toggleDrawer={toggleCreateDrawer}  selected={selected} fetchLeaves={fetchLeaves} />
-      <EditLeave direction={direction} open={isEditDrawerOpen} toggleDrawer={toggleEditLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeaves={fetchLeaves} />
-      <DeleteLeave direction={direction} open={isDeleteDrawerOpen} toggleDrawer={toggleDeleteLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeaves={fetchLeaves} />
+      <CreateLeave direction={direction} open={isCreateDrawerOpen} toggleDrawer={toggleCreateDrawer} fetchLeavesType={fetchLeavesType} />
+      <EditLeave direction={direction} open={isEditDrawerOpen} toggleDrawer={toggleEditLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeavesType={fetchLeavesType} />
+      <DeleteLeave direction={direction} open={isDeleteDrawerOpen} toggleDrawer={toggleDeleteLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeavesType={fetchLeavesType} />
     </div>
   )
 }

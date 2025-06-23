@@ -4,11 +4,10 @@ import {
   updatePermissionFn,
   subMenuInterFace,
   menuDataInterface,
-  ManusInterface,
   UpdatePermissionsInterFace,
   updateMenuOrderFn
 } from '@/utility/queryFetcher';
-import { Box, FormControl, Tooltip } from '@mui/material';
+import { Box, FormControl } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import Button from '../common/Button';
@@ -147,10 +146,6 @@ const SortablePermissionItem = ({
   };
 
   const [isSubMenuDragging, setIsSubMenuDragging] = React.useState(false);
-
-  const handleSubMenuDragStart = () => {
-    setIsSubMenuDragging(true);
-  };
 
   const handleSubMenuDragEndWithFeedback = (event: DragEndEvent) => {
     setIsSubMenuDragging(false);
@@ -439,14 +434,15 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       <FormControl
         fullWidth
         sx={{
-          maxHeight:{xs:"330px", sm:"830px", md:"600px", lg:"430px"},
+          maxHeight:{xs:"220px", lg:"430px"},
           mb: 2,
-          mt:{xs:1, md:3},
+          mt: { xs: 1, md: 3 },
           display: "grid",
           gridTemplateColumns: "1fr",
           overflow: "scroll",
           paddingLeft: "25px",
-          paddingRight: "25px"
+          paddingRight: "25px",
+          overflowY: 'scroll',
         }}
       >
         <DndContext
@@ -473,16 +469,16 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
           </SortableContext>
         </DndContext>
       </FormControl>
-      <div className='grid grid-cols-2 md:flex justify-between items-center gap-2 absolute bottom-0 h-[50px]  w-full px-4 border-2 border-danger'>
-        <div className='flex flex-col-reverse md:flex md:flex-row gap-3 items-center'>
-          <Button type="button" name="Reset Order" className="bg-graydark hover:bg-gray-600 w-full md:w-auto" onClick={handleResetOrder} />
-          <Button type="button" name="Save Order" className="bg-success w-full md:w-auto" onClick={handleSaveOrder} />
+        <div className='grid grid-cols-2 sm:flex justify-between items-center gap-2 absolute bottom-0 py-1 lg:py-3 w-full px-3 bg-white'>
+          <div className='flex flex-col-reverse md:flex md:flex-row gap-3 items-center'>
+            <Button type="button" name="Reset Order" className="bg-graydark hover:bg-gray-600 w-full md:w-auto" onClick={handleResetOrder} />
+            <Button type="button" name="Save Order" className="bg-success w-full md:w-auto" onClick={handleSaveOrder} />
+          </div>
+          <div className="flex flex-col-reverse md:flex md:flex-row gap-2">
+            <Button type="button" name="Close" className="bg-graydark w-full md:w-auto" onClick={() => toggleDrawer(false)} />
+            <Button type="button" name="Update" className="bg-success w-full md:w-auto" onClick={handleUpdatePermission} />
+          </div>
         </div>
-        <div className="flex flex-col-reverse md:flex md:flex-row gap-2">
-          <Button type="button" name="Close" className="bg-graydark w-full md:w-auto" onClick={() => toggleDrawer(false)} />
-          <Button type="button" name="Update" className="bg-success w-full md:w-auto" onClick={handleUpdatePermission} />
-        </div>
-      </div>
     </div>
   );
 };

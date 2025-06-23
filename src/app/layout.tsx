@@ -11,6 +11,8 @@ import { Toaster } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { fetchUserPermissions } from "@/redux/slice/authSlice";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
@@ -47,7 +49,9 @@ export default function RootLayout({
         <QueryClientProvider client={queryClient}>
           <DirectionProvider>
             <ReduxProvider>
-              <InnerRootLayout loading={loading}>{children}</InnerRootLayout>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <InnerRootLayout loading={loading}>{children}</InnerRootLayout>
+              </LocalizationProvider>
             </ReduxProvider>
           </DirectionProvider>
         </QueryClientProvider>

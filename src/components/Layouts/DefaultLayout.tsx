@@ -7,9 +7,11 @@ import BottomStrip from "../BottomStrip";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useRouter, usePathname } from "next/navigation";
-import { toast } from "sonner";
 import ChangePasswordModal from "@/components/changePassword/ChangePasswordModal";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+import { fetchLeaveType } from "@/redux/slice/leaveTypesSlice";
 
 export default function DefaultLayout({
   children,
@@ -21,12 +23,13 @@ export default function DefaultLayout({
   const { direction } = useDirection();
   const router = useRouter();
   const pathname = usePathname();
+  const dispatch = useDispatch<AppDispatch>();
 
   // Get user data from Redux
   const { user } = useSelector((state: RootState) => state.authReducer);
   const userInfo = user?.user;
 
-   useUserPermissions();
+  useUserPermissions();
 
   // Check if user has temporary password - check both possible paths
   const isTempPassword = user?.isTempPassword || userInfo?.isTempPassword;
@@ -51,6 +54,11 @@ export default function DefaultLayout({
       setShowChangePasswordModal(false);
     }
   };
+
+  // Fetch leave types globally on layout mount
+  useEffect(() => {
+    dispatch(fetchLeaveType());
+  }, [dispatch]);
 
   // If user has temporary password, show only the modal overlay
   if (isTempPassword) {
@@ -77,6 +85,7 @@ export default function DefaultLayout({
       </div>
     );
   }
+
 
   return (
     <>

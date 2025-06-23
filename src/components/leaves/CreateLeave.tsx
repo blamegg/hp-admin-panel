@@ -17,10 +17,10 @@ interface CreateLeaveInferFace {
     open: boolean;
     toggleDrawer: (open: boolean) => void;
     direction: string;
-    fetchLeaves: () => void;
+    fetchLeavesType: () => void;
 }
 
-const CreateLeave = ({ open, toggleDrawer, direction, fetchLeaves }: CreateLeaveInferFace) => {
+const CreateLeave = ({ open, toggleDrawer, direction, fetchLeavesType }: CreateLeaveInferFace) => {
 
     const { register, handleSubmit, reset, formState: { errors }, control } = useForm({
         resolver: zodResolver(leaveSchema),
@@ -40,7 +40,7 @@ const CreateLeave = ({ open, toggleDrawer, direction, fetchLeaves }: CreateLeave
             reset();
             toast.success("Successfully created leave");
             queryClient.refetchQueries({ queryKey: ["users"] });
-            fetchLeaves();
+            fetchLeavesType();
             toggleDrawer(false);
         },
         onError: (error: any) => {
@@ -56,9 +56,6 @@ const CreateLeave = ({ open, toggleDrawer, direction, fetchLeaves }: CreateLeave
         console.log(data);
         createLeaveMutation.mutate({ ...data });
     }
-
-    const [paid, setPaid] = useState(false);
-    const [halfDayAllowed, setHalfDayAllowed] = useState(false);
 
     return (
         <Drawer

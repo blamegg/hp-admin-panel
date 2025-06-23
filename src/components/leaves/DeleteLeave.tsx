@@ -15,10 +15,10 @@ interface DeleteLeaveInterface {
   direction: string;
   selected: any;
   setSelected: React.Dispatch<any>;
-  fetchLeaves: () => void;
+  fetchLeavesType: () => void;
 }
 
-const DeleteLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetchLeaves }: DeleteLeaveInterface) => {
+const DeleteLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetchLeavesType }: DeleteLeaveInterface) => {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -31,7 +31,7 @@ const DeleteLeave = ({ open, toggleDrawer, direction, selected, setSelected, fet
       await deleteLeaveFn(selected._id)
       setSuccess(true)
       toast.success(`Leave ${selected.name} deleted successfully.`)
-      fetchLeaves()
+      fetchLeavesType()
       setTimeout(() => {
         handleClose()
       }, 1200)

@@ -17,15 +17,15 @@ interface EditLeaveInterface {
   direction: string;
   selected: any;
   setSelected: React.Dispatch<any>;
-  fetchLeaves: () => void;
+  fetchLeavesType: () => void;
 }
 
-const EditLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetchLeaves }: EditLeaveInterface) => {
+const EditLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetchLeavesType }: EditLeaveInterface) => {
   const { register, handleSubmit, reset, formState: { errors }, control } = useForm({ defaultValues: selected });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  console.log(selected)
+  
   useEffect(() => {
     if (selected) {
       reset(selected);
@@ -40,7 +40,7 @@ const EditLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetch
       await updateLeaveFn(data, selected._id);
       setSuccess(true);
       toast.success(`Leave ${data.name} updated successfully.`);
-      fetchLeaves();
+      fetchLeavesType();
       setTimeout(() => {
         handleClose();
       }, 1200);

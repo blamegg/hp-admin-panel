@@ -37,12 +37,14 @@ const ViewRoleDrawer: React.FC<ViewRoleDrawerProps> = ({
           {selectedRole?.menus && selectedRole.menus.length > 0 ? (
             <div className="ml-2 mt-1">
               {selectedRole?.menus?.map((permission: any) => (
-                <ul className="list-disc ml-5">
+                <ul className="list-disc ml-5" key={permission.menu_id || permission._id}>
                   <li>
                     <h2 className="font-semibold text-[14px]"> {permission.name}</h2>
                     <ul>
-                      {permission?.sub_menus?.map((sub_permissions: any, index: string) => (
-                        <li className="ms-2 text-[13px]"><span className="me-1">{index + 1}.</span>{sub_permissions.name}</li>
+                      {permission?.sub_menus?.map((sub_permissions: any, index: number) => (
+                        <li className="ms-2 text-[13px]" key={sub_permissions.sub_menu_id || sub_permissions._id || index}>
+                          <span className="me-1">{index + 1}.</span>{sub_permissions.name}
+                        </li>
                       ))}
                     </ul>
                   </li>

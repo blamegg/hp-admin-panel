@@ -41,7 +41,6 @@ const PermissionsPage = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [limit, setLimit] = React.useState(10);
   const [totalDocument, setTotalDocument] = useState(0);
-  const [menus, setMenus] = useState([])
 
   // Function to fetch permissions
   const fetchPermissions = async () => {

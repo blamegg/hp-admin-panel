@@ -11,18 +11,16 @@ import Button from "@/components/common/Button";
 import DeleteDrawer from "./DeleteDrawer";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { resetPasswordFn, usersFn } from "@/utility/queryFetcher";
-import { formatTime, formatTimestamp } from "@/utility/helper";
+import { formatTimestamp } from "@/utility/helper";
 import EditDrawer from "./EditDrawer";
 import ViewDrawer from "./UserTab/ViewDrawer";
 import { usePathname } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import CreateBulkUserDrawer from "./CreateBulkUserDrawer";
-import { MdLockReset } from "react-icons/md";
 import { TbLockOff } from "react-icons/tb";
 import { toast } from "sonner";
 import { useMenuList } from "@/hooks/useMenuList";
 import { useUserPermissions, useHasPermission } from '@/hooks/useUserPermissions';
+
 
 const UserTable = () => {
   const [totalItems, setTotalItems] = useState(0);
@@ -39,13 +37,11 @@ const UserTable = () => {
   const pathname = usePathname();
   const [showSearchBar, setShowSearchBar] = useState(false);
 
-  // Use menu list hook to ensure menu is loaded on users page
   useMenuList();
   useUserPermissions();
 
+
   const hasPermission = useHasPermission();
-
-
 
   // Check if user has any action permissions
   const hasAnyActionPermission = (): boolean => {
@@ -73,6 +69,7 @@ const UserTable = () => {
     staleTime: 0, // Always consider data stale to ensure fresh fetches
     enabled: showSearchBar, // Only enable when on users page
   });
+
 
 
   // Update total items when data changes
@@ -139,6 +136,7 @@ const UserTable = () => {
     setSelected(row);
   };
   const handleViewClick = (row: any) => {
+    setSelected(row);
     setViewDrawer(true);
   };
 
@@ -229,7 +227,6 @@ const UserTable = () => {
       sortable: true,
       width: "150px",
     },
-    // Conditionally add Actions column only if user has any action permissions
     ...(hasAnyActionPermission() ? [{
       name: "Actions",
       cell: (row: any) => (
@@ -301,7 +298,7 @@ const UserTable = () => {
 
   return (
     <>
-      <div className="custom_tbl_container h-[74vh]  w-[350px] md:w-full">
+      <div className="custom_tbl_container h-[74vh] w-full max-w-screen-lg mx-auto">
         {
           showSearchBar && (
             <div className=" grid grid-cols-2 md:flex items-center gap-4">
@@ -366,12 +363,11 @@ const UserTable = () => {
 
         <div className="mt-5 overflow-x-auto ">
 
-          {/* Temporarily show data for debugging */}
           {/* {hasPermission('View All Users') && ( */}
             <>
               {isLoading ? (
                 <div className="flex items-center justify-center h-40">
-                  <div className="text-lg">Loading users...</div>
+                 <p>Loading...</p>
                 </div>
               ) : (
                 <>

@@ -1,5 +1,4 @@
-import { CreateLeaveFormInput } from "@/schema/leaveSchema";
-import { fetchLeaveFn } from "@/utility/queryFetcher";
+import { fetchLeaveTypeFn } from "@/utility/queryFetcher";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface LeaveType {
@@ -37,7 +36,7 @@ const initialState: LeaveState = {
 };
 
 // Async thunk to fetch leaves
-export const fetchLeave = createAsyncThunk<
+export const fetchLeaveType = createAsyncThunk<
   {
     leaveTypes: LeaveType[];
     total: number;
@@ -51,7 +50,18 @@ export const fetchLeave = createAsyncThunk<
   'leave/fetchLeave',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetchLeaveFn();
+      const response = await fetchLeaveTypeFn();
+      // If response is an array, wrap it in the expected object
+      if (Array.isArray(response)) {
+        return {
+          leaveTypes: response,
+          total: response.length,
+          page: 1,
+          totalPages: 1,
+          limit: 10,
+        };
+      }
+      // If response is already an object with leaveTypes, return as is
       return response;
     } catch (error: any) {
       return rejectWithValue(error?.response?.data?.message || "Something went wrong");
@@ -61,7 +71,7 @@ export const fetchLeave = createAsyncThunk<
 
 // Slice
 const leaveSlice = createSlice({
-  name: "leave",
+  name: "leavesType",
   initialState,
   reducers: {
     setLeaves: (state, action: PayloadAction<{ leaveTypes: LeaveType[]; total: number; page: number; totalPages: number; limit: number }>) => {
@@ -84,11 +94,11 @@ const leaveSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchLeave.pending, (state) => {
+      .addCase(fetchLeaveType.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchLeave.fulfilled, (state, action: PayloadAction<{ leaveTypes: LeaveType[]; total: number; page: number; totalPages: number; limit: number }>) => {
+      .addCase(fetchLeaveType.fulfilled, (state, action: PayloadAction<{ leaveTypes: LeaveType[]; total: number; page: number; totalPages: number; limit: number }>) => {
         state.leaveTypes = action.payload.leaveTypes;
         state.total = action.payload.total;
         state.page = action.payload.page;
@@ -96,7 +106,7 @@ const leaveSlice = createSlice({
         state.limit = action.payload.limit;
         state.loading = false;
       })
-      .addCase(fetchLeave.rejected, (state, action) => {
+      .addCase(fetchLeaveType.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch leave data";
       });
