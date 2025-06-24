@@ -12,6 +12,7 @@ interface ButtonProps {
   loading?: boolean;
   loadingSpinnerClassName?: string;
   style?: React.CSSProperties;
+  form?: string;
 }
 
 const Button = ({
@@ -23,6 +24,7 @@ const Button = ({
   loadingSpinnerClassName,
   disabled,
   style,
+  form,
   ...rest
 }: ButtonProps) => {
   const color = useSelector((state: RootState) => state?.app?.color);
@@ -31,6 +33,7 @@ const Button = ({
     <button
       type={type}
       onClick={onClick}
+      form={form}
       {...rest}
       disabled={loading || disabled}
       className={twMerge(

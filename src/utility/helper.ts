@@ -30,45 +30,21 @@ export function formatTimestamp(timestamp: string) {
 
 // set token
 export function setTokenCookie(token: string) {
-  try {
-    console.log('Setting token cookie');
-    const oneYear = 365;
-    Cookies.set("token", token, {
-      expires: oneYear,
-      sameSite: "strict",
-      secure: window.location.protocol === 'https:',
-      path: '/'
-    });
-    console.log('Token cookie set successfully');
-  } catch (error) {
-    console.error('Error setting token cookie:', error);
-  }
+  Cookies.set("token", token, {
+    expires: 1,
+    sameSite: "strict",
+  });
 }
 
 // get token
 export function getTokenCookie() {
-  try {
-    const token = Cookies.get("token");
-    if (!token) {
-      console.warn('No token found in cookies');
-      return null;
-    }
-    return token;
-  } catch (error) {
-    console.error('Error getting token cookie:', error);
-    return null;
-  }
+  const token = Cookies.get("token");
+  return token;
 }
 
 // remove token
 export function removeTokenCookie() {
-  try {
-    console.log('Removing token cookie');
-    Cookies.remove("token", { path: '/' });
-    console.log('Token cookie removed successfully');
-  } catch (error) {
-    console.error('Error removing token cookie:', error);
-  }
+  Cookies.remove("token");
 }
 
 // comprehensive logout cleanup

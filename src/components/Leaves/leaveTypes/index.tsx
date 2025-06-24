@@ -1,20 +1,20 @@
 "use client"
 import React, { useEffect, useState } from 'react'
-import Button from '../common/Button'
-import CreateLeave from './CreateLeave'
-import DeleteLeave from './DeleteLeave'
-import EditLeave from './EditLeave'
+import Button from '../../common/Button'
+import DeleteLeave from './DeleteLeaveTypes'
 import { useDirection } from '@/context/DirectionContext'
-import { fetchLeaveTypeFn } from '@/utility/queryFetcher'
+import { fetchLeaveTypesFn } from '@/utility/queryFetcher'
 import { useDispatch, useSelector } from 'react-redux'
-import { setLeaves, setLeavesLoading, setLeavesError } from '@/redux/slice/leaveTypesSlice'
+import { setLeaves, setLeavesError } from '@/redux/slice/leaveTypesSlice'
 import { RootState } from '@/redux/store'
 import DataTable from 'react-data-table-component'
-import CustomPagination from '../CustomPagination'
+import CustomPagination from '../../CustomPagination'
 import { FaEdit, FaTrash } from 'react-icons/fa'
 import { useHasPermission } from '@/hooks/useUserPermissions'
+import CreateLeaveType from './CreateLeaveTypes'
+import EditLeaveTypes from './EditLeaveTypes'
 
-const Leaves = () => {
+const LeaveTypes = () => {
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
@@ -26,15 +26,14 @@ const Leaves = () => {
   const [selected, setSelected] = useState<any>(null);
 
   const { direction } = useDirection()
-  const { leaveTypes, total, page, totalPages, limit, loading, error } = useSelector((state: RootState) => state.leave);
+  const { leaveTypes, total, loading } = useSelector((state: RootState) => state.leaveTypes);
   const dispatch = useDispatch();
   const hasPermission = useHasPermission();
 
-  console.log(leaveTypes, "leaveTypes")
 
-  const fetchLeavesType = React.useCallback(() => {
+  const fetchLeaveTypes = React.useCallback(() => {
     // dispatch(setLeavesLoading());
-    fetchLeaveTypeFn()
+    fetchLeaveTypesFn()
       .then(data => {
         dispatch(setLeaves(data));
       })
@@ -44,8 +43,8 @@ const Leaves = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    fetchLeavesType();
-  }, [fetchLeavesType]);
+    fetchLeaveTypes();
+  }, [fetchLeaveTypes]);
 
   // Debouncinng search query
   useEffect(() => {
@@ -221,11 +220,11 @@ const Leaves = () => {
         />
       </div>
 
-      <CreateLeave direction={direction} open={isCreateDrawerOpen} toggleDrawer={toggleCreateDrawer} fetchLeavesType={fetchLeavesType} />
-      <EditLeave direction={direction} open={isEditDrawerOpen} toggleDrawer={toggleEditLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeavesType={fetchLeavesType} />
-      <DeleteLeave direction={direction} open={isDeleteDrawerOpen} toggleDrawer={toggleDeleteLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeavesType={fetchLeavesType} />
+      <CreateLeaveType direction={direction} open={isCreateDrawerOpen} toggleDrawer={toggleCreateDrawer} fetchLeaveTypes={fetchLeaveTypes} />
+      <EditLeaveTypes direction={direction} open={isEditDrawerOpen} toggleDrawer={toggleEditLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeaveTypes={fetchLeaveTypes} />
+      <DeleteLeave direction={direction} open={isDeleteDrawerOpen} toggleDrawer={toggleDeleteLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeaveTypes={fetchLeaveTypes} />
     </div>
   )
 }
 
-export default Leaves
+export default LeaveTypes

@@ -61,7 +61,7 @@ const UserTable = () => {
   const { data: userList, isLoading } = useQuery({
     queryKey: ["users", currentPage, rowsPerPage, searchQuery, searchBasis],
     queryFn: async () => {
-     
+
       const result = await usersFn(currentPage, rowsPerPage, searchQuery, searchBasis);
       return result;
     },
@@ -93,7 +93,7 @@ const UserTable = () => {
   // Handle search with debounce
   useEffect(() => {
     if (!showSearchBar) return; // Don't run if not on users page
-    
+
     const timeoutId = setTimeout(() => {
       if (searchQuery.trim() || searchBasis) {
         setCurrentPage(1);
@@ -107,7 +107,7 @@ const UserTable = () => {
   // Auto-refresh to detect blocked users
   useEffect(() => {
     if (!showSearchBar) return; // Don't run if not on users page
-    
+
     const intervalId = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     }, 30000); // Refresh every 30 seconds
@@ -174,32 +174,40 @@ const UserTable = () => {
       name: "S No",
       selector: (row: any) =>
         (currentPage - 1) * rowsPerPage + (userList?.data?.indexOf(row) + 1),
-      sortable: true,
-      width: "75px",
+      sortable: false,
+      width: "60px",
+      wrap: true,
+      maxWidth: "80px",
+      minWidth: "50px",
     },
     {
       name: "Role",
       selector: (row: any) => row.role.name || "",
       sortable: true,
-      width: "130px",
+      wrap: true,
+      width: "100px",
+      maxWidth: "80px",
+      minWidth: "50px",
     },
     {
       name: "Email",
       selector: (row: any) => row.email || "",
       sortable: true,
-      width: "160px",
+      maxWidth: "200px",
+      width: "180px",
+      minWidth: "150px",
     },
     {
       name: "Name",
       selector: (row: any) => row.name || "",
       sortable: true,
-      width: "120px",
+      // width: "120px",
     },
     {
       name: "Mobile",
       selector: (row: any) => row.mobile || "",
       sortable: true,
-      width: "100px",
+      // width: "100px",
     },
     {
       name: "Status",
@@ -219,13 +227,13 @@ const UserTable = () => {
         return isActive ? "Active" : "Inactive";
       },
       sortable: true,
-      width: "90px",
+      // width: "90px",
     },
     {
       name: "Date Created",
       selector: (row: any) => formatTimestamp(row.createdAt),
-      sortable: true,
-      width: "150px",
+      // sortable: true,
+      // width: "150px",
     },
     ...(hasAnyActionPermission() ? [{
       name: "Actions",
@@ -292,13 +300,13 @@ const UserTable = () => {
 
         </div>
       ),
-      width: "120px"
+      // width: "120px"
     }] : []),
   ];
 
   return (
-    <>
-      <div className="custom_tbl_container h-[74vh] w-full max-w-screen-lg mx-auto">
+    <div className="w-full">
+      <div className="custom_tbl_container h-[74vh] w-full  ">
         {
           showSearchBar && (
             <div className=" grid grid-cols-2 md:flex items-center gap-4">
@@ -364,89 +372,89 @@ const UserTable = () => {
         <div className="mt-5 overflow-x-auto ">
 
           {/* {hasPermission('View All Users') && ( */}
-            <>
-              {isLoading ? (
-                <div className="flex items-center justify-center h-40">
-                 <p>Loading...</p>
-                </div>
-              ) : (
-                <>
-                  <div className="max-h-[59vh] overflow-scroll">
-                    <DataTable
-                      columns={columns}
-                      data={userList?.data || []}
-                      pagination={false}
-                      className="custom_tbl "
-                      customStyles={{
-                        header: {
-                          style: {
-                            fontSize: "12px",
-                            minHeight: "30px",
-                            backgroundColor: "#F9FAFB", // Light mode header background
-                            color: "#1C243F", // Light mode header text
-                          },
+          <>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-40">
+                <p>Loading...</p>
+              </div>
+            ) : (
+              <>
+                <div className="max-h-[59vh] w-full overflow-scroll">
+                  <DataTable
+                    columns={columns}
+                    data={userList?.data || []}
+                    pagination={false}
+                    className="custom_tbl  w-full"
+                    customStyles={{
+                      header: {
+                        style: {
+                          fontSize: "12px",
+                          minHeight: "30px",
+                          backgroundColor: "#F9FAFB", // Light mode header background
+                          color: "#1C243F", // Light mode header text
                         },
-                        headRow: {
-                          style: {
-                            fontSize: "12px",
-                            minHeight: "30px",
-                            backgroundColor: "#F9FAFB", // Light mode header row background
+                      },
+                      headRow: {
+                        style: {
+                          fontSize: "12px",
+                          minHeight: "30px",
+                          backgroundColor: "#F9FAFB", // Light mode header row background
+                          borderBottomWidth: "1px",
+                          borderBottomColor: "#E2E8F0", // stroke
+                        },
+                      },
+                      headCells: {
+                        style: {
+                          fontWeight: 700,
+                          color: "#1C243F", // Light mode header cells text
+                          backgroundColor: "#F9FAFB", // Light mode header cells background
+                        },
+                      },
+                      cells: {
+                        style: {
+                          fontSize: "11px",
+                          fontWeight: 500,
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
+                          height: "27px",
+                          color: "#1C243F", // Light mode cell text
+                          backgroundColor: "#FFFFFF", // Light mode cell background
+                        },
+                      },
+                      rows: {
+                        style: {
+                          fontSize: "11px",
+                          minHeight: "27px",
+                          "&:not(:last-of-type)": {
+                            borderBottomStyle: "solid",
                             borderBottomWidth: "1px",
                             borderBottomColor: "#E2E8F0", // stroke
                           },
+                          backgroundColor: "#FFFFFF", // Light mode row background
+                          color: "#1C243F", // Light mode row text
                         },
-                        headCells: {
-                          style: {
-                            fontWeight: 700,
-                            color: "#1C243F", // Light mode header cells text
-                            backgroundColor: "#F9FAFB", // Light mode header cells background
-                          },
+                        highlightOnHoverStyle: {
+                          backgroundColor: "#F7F9FC", // gray-2
+                          color: "#1C243F",
+                          cursor: "pointer",
                         },
-                        cells: {
-                          style: {
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            wordBreak: "break-word",
-                            overflowWrap: "break-word",
-                            height: "27px",
-                            color: "#1C243F", // Light mode cell text
-                            backgroundColor: "#FFFFFF", // Light mode cell background
-                          },
-                        },
-                        rows: {
-                          style: {
-                            fontSize: "11px",
-                            minHeight: "27px",
-                            "&:not(:last-of-type)": {
-                              borderBottomStyle: "solid",
-                              borderBottomWidth: "1px",
-                              borderBottomColor: "#E2E8F0", // stroke
-                            },
-                            backgroundColor: "#FFFFFF", // Light mode row background
-                            color: "#1C243F", // Light mode row text
-                          },
-                          highlightOnHoverStyle: {
-                            backgroundColor: "#F7F9FC", // gray-2
-                            color: "#1C243F",
-                            cursor: "pointer",
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-
-
-                  {/* Custom Pagination */}
-                  <CustomPagination
-                    rowsPerPage={rowsPerPage}
-                    currentPage={currentPage}
-                    rowCount={userList?.pagination.totalCount || 0}
-                    onChangePage={handlePageChange}
-                    onChangeRowsPerPage={handleRowsPerPageChange}
+                      },
+                    }}
                   />
-                </>
-              )}
-            </>
+                </div>
+
+
+                {/* Custom Pagination */}
+                <CustomPagination
+                  rowsPerPage={rowsPerPage}
+                  currentPage={currentPage}
+                  rowCount={userList?.pagination.totalCount || 0}
+                  onChangePage={handlePageChange}
+                  onChangeRowsPerPage={handleRowsPerPageChange}
+                />
+              </>
+            )}
+          </>
           {/* )} */}
         </div>
       </div>
@@ -493,7 +501,7 @@ const UserTable = () => {
           toggleDrawer={toggleBulkUserDrawer}
         />
       )}
-    </>
+    </div>
   );
 };
 

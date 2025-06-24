@@ -46,14 +46,6 @@ const ViewDrawer = ({
     const handleDateSelect = (slotInfo: any) => {
         setSelectedDate(slotInfo.start); // Update selected date on slot click
     };
-    const localizer = dayjsLocalizer(dayjs)
-
-    const leaveData = {
-        totalLeave: 20,
-        takingLeave: 5,
-        remainingLeave: 15,
-    };
-
 
     return (
         <Drawer

@@ -1,4 +1,4 @@
-import { fetchLeaveTypeFn } from "@/utility/queryFetcher";
+import { fetchLeaveTypesFn } from "@/utility/queryFetcher";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface LeaveType {
@@ -50,7 +50,7 @@ export const fetchLeaveType = createAsyncThunk<
   'leave/fetchLeave',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetchLeaveTypeFn();
+      const response = await fetchLeaveTypesFn();
       // If response is an array, wrap it in the expected object
       if (Array.isArray(response)) {
         return {

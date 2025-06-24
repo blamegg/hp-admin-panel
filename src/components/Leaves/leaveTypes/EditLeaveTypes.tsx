@@ -1,26 +1,26 @@
 import { Drawer } from '@mui/material'
 import React from 'react'
-import ModalHeader from '../common/ModalHeader'
-import Button from '../common/Button';
+import ModalHeader from '../../common/ModalHeader'
+import Button from '../../common/Button';
 import { Form, useForm } from 'react-hook-form';
-import Input from '../common/Input';
+import Input from '../../common/Input';
 import { useState, useEffect } from 'react';
-import { updateLeaveFn } from '@/utility/queryFetcher';
+import { updateLeaveTypeFn } from '@/utility/queryFetcher';
 import { toast } from 'sonner';
-import CheckboxFour from '../Checkboxes/CheckboxFour';
-import Textarea from '../common/Input/Textarea';
+import CheckboxFour from '../../Checkboxes/CheckboxFour';
+import Textarea from '../../common/Input/Textarea';
 import { Controller } from 'react-hook-form';
 
-interface EditLeaveInterface {
+interface EditLeaveTypeInterface {
   open: boolean;
   toggleDrawer: (open: boolean) => void;
   direction: string;
   selected: any;
   setSelected: React.Dispatch<any>;
-  fetchLeavesType: () => void;
+  fetchLeaveTypes: () => void;
 }
 
-const EditLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetchLeavesType }: EditLeaveInterface) => {
+const EditLeaveTypes = ({ open, toggleDrawer, direction, selected, setSelected, fetchLeaveTypes }: EditLeaveTypeInterface) => {
   const { register, handleSubmit, reset, formState: { errors }, control } = useForm({ defaultValues: selected });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -37,10 +37,10 @@ const EditLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetch
     setLoading(true);
     setError(null);
     try {
-      await updateLeaveFn(data, selected._id);
+      await updateLeaveTypeFn(data, selected._id);
       setSuccess(true);
       toast.success(`Leave ${data.name} updated successfully.`);
-      fetchLeavesType();
+      fetchLeaveTypes();
       setTimeout(() => {
         handleClose();
       }, 1200);
@@ -126,4 +126,4 @@ const EditLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetch
   )
 }
 
-export default EditLeave;
+export default EditLeaveTypes;

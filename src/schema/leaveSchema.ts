@@ -6,14 +6,11 @@ export const leaveSchema = z.object({
   half_day_allowed: z.boolean().optional(),
   paid:z.boolean().optional()
 })
-
-export type CreateLeaveFormInput = z.infer<typeof leaveSchema>;
-
 export const leaveFormSchema = z.object({
   leave_type: z.string().min(1, "Leave type is required"),
   leave_mode: z.enum(["Half-Day", "Full-Day", "Day-Range", "Multi-Days"], { required_error: "Leave mode is required" }),
-  start_date: z.any().refine((val) => val && typeof val === 'object' && val.isValid && val.isValid(), { message: "Start date is required" }),
-  end_date: z.any().optional().refine((val) => !val || (typeof val === 'object' && val.isValid && val.isValid()), { message: "End date is invalid" }),
+  start_date: z.string().min(1, "Start date is required"),
+  end_date: z.string().optional(),
   description: z.string().optional(),
   dates: z.array(z.any()).optional(),
   half_day_session: z.string().optional(),
@@ -32,3 +29,4 @@ export const leaveFormSchema = z.object({
 });
 
 export type LeaveFormInputs = z.infer<typeof leaveFormSchema>;
+export type CreateLeaveFormInput = z.infer<typeof leaveSchema>;

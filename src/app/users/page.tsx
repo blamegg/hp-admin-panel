@@ -13,7 +13,7 @@ const TablesPage = () => {
     <DefaultLayout>
       <Breadcrumb pageName="HP | Users" />
 
-      <div className="flex flex-col gap-10 ">
+      <div className="flex flex-col gap-10 w-full">
         <UserTable />
       </div>
     </DefaultLayout>

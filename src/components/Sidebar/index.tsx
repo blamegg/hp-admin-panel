@@ -28,6 +28,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   
   // Use the useMenuList hook to get dynamic menu data
   const { menuList, isLoading } = useMenuList();
+
+  console.log(menuList)
   
   // Get user data and permissions from Redux store
   const { user} = useSelector((state: RootState) => state.authReducer);

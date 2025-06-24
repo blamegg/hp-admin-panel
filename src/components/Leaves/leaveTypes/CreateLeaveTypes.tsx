@@ -1,15 +1,15 @@
 import { Drawer } from '@mui/material';
 import React, { useState } from 'react'
-import ModalHeader from '../common/ModalHeader'
-import Button from '../common/Button';
-import Input from '../common/Input';
+import ModalHeader from '../../common/ModalHeader'
+import Button from '../../common/Button';
+import Input from '../../common/Input';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateLeaveFormInput, leaveSchema } from '@/schema/leaveSchema';
-import { createLeaveFn } from '@/utility/queryFetcher';
+import { createLeaveTypeFn } from '@/utility/queryFetcher';
 import { toast } from 'sonner';
-import CheckboxFour from '../Checkboxes/CheckboxFour';
-import Textarea from '../common/Input/Textarea';
+import CheckboxFour from '../../Checkboxes/CheckboxFour';
+import Textarea from '../../common/Input/Textarea';
 import { Controller } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -17,10 +17,10 @@ interface CreateLeaveInferFace {
     open: boolean;
     toggleDrawer: (open: boolean) => void;
     direction: string;
-    fetchLeavesType: () => void;
+    fetchLeaveTypes: () => void;
 }
 
-const CreateLeave = ({ open, toggleDrawer, direction, fetchLeavesType }: CreateLeaveInferFace) => {
+const CreateLeaveType = ({ open, toggleDrawer, direction, fetchLeaveTypes }: CreateLeaveInferFace) => {
 
     const { register, handleSubmit, reset, formState: { errors }, control } = useForm({
         resolver: zodResolver(leaveSchema),
@@ -34,13 +34,13 @@ const CreateLeave = ({ open, toggleDrawer, direction, fetchLeavesType }: CreateL
 
     const queryClient = useQueryClient();
 
-    const createLeaveMutation = useMutation({
-        mutationFn: (payload: CreateLeaveFormInput) => createLeaveFn(payload),
+    const createLeaveTypeMutation = useMutation({
+        mutationFn: (payload: CreateLeaveFormInput) => createLeaveTypeFn(payload),
         onSuccess: () => {
             reset();
-            toast.success("Successfully created leave");
+            toast.success("Successfully created leave Type");
             queryClient.refetchQueries({ queryKey: ["users"] });
-            fetchLeavesType();
+            fetchLeaveTypes();
             toggleDrawer(false);
         },
         onError: (error: any) => {
@@ -52,9 +52,9 @@ const CreateLeave = ({ open, toggleDrawer, direction, fetchLeavesType }: CreateL
         }
     })
 
-    const handleCreateLeave = (data: CreateLeaveFormInput) => {
+    const handleCreateLeaveType = (data: CreateLeaveFormInput) => {
         console.log(data);
-        createLeaveMutation.mutate({ ...data });
+        createLeaveTypeMutation.mutate({ ...data });
     }
 
     return (
@@ -66,8 +66,8 @@ const CreateLeave = ({ open, toggleDrawer, direction, fetchLeavesType }: CreateL
                 }
             }}
         >
-            <ModalHeader text={"Create Leave"} toggleDrawer={toggleDrawer} />
-            <form onSubmit={handleSubmit(handleCreateLeave)} >
+            <ModalHeader text={"Create Leave Type"} toggleDrawer={toggleDrawer} />
+            <form onSubmit={handleSubmit(handleCreateLeaveType)} >
                 <div className='px-4 mt-4'>
                     <div>
                         <Input
@@ -124,4 +124,4 @@ const CreateLeave = ({ open, toggleDrawer, direction, fetchLeavesType }: CreateL
     )
 }
 
-export default CreateLeave
+export default CreateLeaveType

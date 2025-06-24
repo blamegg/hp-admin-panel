@@ -1,12 +1,12 @@
 import { Drawer } from '@mui/material'
 import React from 'react'
-import ModalHeader from '../common/ModalHeader'
-import Button from '../common/Button'
+import ModalHeader from '../../common/ModalHeader'
+import Button from '../../common/Button'
 import { ImSpinner2 } from 'react-icons/im'
 import { FaCheckCircle } from 'react-icons/fa'
 import { AiOutlineDelete } from 'react-icons/ai'
 import { useState } from 'react'
-import { deleteLeaveFn } from '@/utility/queryFetcher'
+import { deleteLeaveTypesFn } from '@/utility/queryFetcher'
 import { toast } from 'sonner'
 
 interface DeleteLeaveInterface {
@@ -15,10 +15,10 @@ interface DeleteLeaveInterface {
   direction: string;
   selected: any;
   setSelected: React.Dispatch<any>;
-  fetchLeavesType: () => void;
+  fetchLeaveTypes: () => void;
 }
 
-const DeleteLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetchLeavesType }: DeleteLeaveInterface) => {
+const DeleteLeave = ({ open, toggleDrawer, direction, selected, setSelected, fetchLeaveTypes }: DeleteLeaveInterface) => {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -28,10 +28,10 @@ const DeleteLeave = ({ open, toggleDrawer, direction, selected, setSelected, fet
     setLoading(true)
     setError(null)
     try {
-      await deleteLeaveFn(selected._id)
+      await deleteLeaveTypesFn(selected._id)
       setSuccess(true)
       toast.success(`Leave ${selected.name} deleted successfully.`)
-      fetchLeavesType()
+      fetchLeaveTypes()
       setTimeout(() => {
         handleClose()
       }, 1200)

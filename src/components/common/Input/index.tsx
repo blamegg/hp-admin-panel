@@ -4,7 +4,7 @@ import FormError from "../FormError";
 interface InputProps {
   label: string;
   placeholder: string;
-  type: "text" | "email" | "number" | "password" | "file";
+  type: "text" | "email" | "number" | "password" | "file" | "date";
   register?: any;
   error?: string;
   disabled?: boolean;
