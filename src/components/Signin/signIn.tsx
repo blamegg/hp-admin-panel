@@ -198,7 +198,7 @@ export const Signin = () => {
                 Don&apos;t have an account?{" "}
                 <Link
                   className="font-semibold text-primary hover:underline"
-                  href="/register"
+                  href="/auth/signup"
                 >
                   Sign up
                 </Link>

@@ -7,12 +7,12 @@ import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { logo } from "@/assets";
 import { useDirection } from "@/context/DirectionContext";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/redux/store";
-import { defaultSvg, menuItems, staticMenu } from "@/utility/sidebar";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 import { useRouter } from "next/navigation";
 import { useMenuList } from "@/hooks/useMenuList";
 import { useHasPermission } from '@/hooks/useUserPermissions';
+import { getIconComponent } from "@/utility/iconMap";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -25,14 +25,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
   const color = "#FF505D";
   const { direction } = useDirection();
-  
+
   // Use the useMenuList hook to get dynamic menu data
   const { menuList, isLoading } = useMenuList();
 
   console.log(menuList)
-  
+
   // Get user data and permissions from Redux store
-  const { user} = useSelector((state: RootState) => state.authReducer);
+  const { user } = useSelector((state: RootState) => state.authReducer);
 
   // Check if user has temporary password - check both possible paths
   const isTempPassword = user?.isTempPassword || user?.user?.isTempPassword;
@@ -49,30 +49,26 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     return requiredPermissions.some((perm) => hasPermissionSingle(perm));
   };
 
-  // Use dynamic menu from useMenuList hook if available, otherwise fallback to static menu
+  // Use dynamic menu from useMenuList hook, fallback to an empty array
   const dynamicMenuList = menuList && menuList.length > 0 ? [
     {
       name: "MENU LIST",
       menuItems: menuList
-        .filter((e: any) => hasPermission(e.requiredPermissions)) // Filter top-level menus
+        .filter((e: any) => hasPermission(e.requiredPermissions))
         .map((e: any) => {
           return {
             label: e.name,
-            route: e.url, // Use e.url directly for top-level menus
-            icon:
-              menuItems.find(
-                (menuIcon) =>
-                  menuIcon.name.toLowerCase() === e.name.toLowerCase(),
-              )?.icon || defaultSvg,
+            route: e.url,
+            icon: getIconComponent(e.icon_code),
             children: e.sub_menus?.filter((sub: any) => hasPermission(sub.requiredPermissions)).map((sub: any) => ({
               label: sub.name,
-              route: sub.url, // Use sub.url directly for sub-menus
-              icon: defaultSvg,
+              route: sub.url,
+              icon: getIconComponent(sub.icon_code),
             })),
           };
         }),
     },
-  ] : staticMenu;
+  ] : [];
 
 
   // Navigation function to change password page
@@ -93,7 +89,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <p className="text-xs text-yellow-200/80 leading-relaxed mb-2">
           Change your password to access all features.
         </p>
-        <button 
+        <button
           onClick={handleChangePassword}
           className="text-xs text-yellow-300 hover:text-yellow-100 underline cursor-pointer transition-colors"
         >
@@ -117,7 +113,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 Temporary Password
               </span>
             </div>
-            <button 
+            <button
               onClick={handleChangePassword}
               className="text-xs md:text-sm text-yellow-300 hover:text-yellow-100 underline cursor-pointer transition-colors"
             >
@@ -166,8 +162,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           </div>
 
           <div className="no-scrollbar mt-5 flex flex-col overflow-y-auto duration-300 ease-linear">
-            
-           
+
+
 
             <nav>
               {isLoading ? (

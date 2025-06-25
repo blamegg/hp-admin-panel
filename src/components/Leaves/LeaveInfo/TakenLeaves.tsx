@@ -9,6 +9,9 @@ import DataTable from "react-data-table-component";
 import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
 import { TbLockOff } from 'react-icons/tb';
 import { AppliedLeave } from '@/redux/slice/takenLeaveSclice';
+import EditTakenLeave from './EditTakenLeaveDrawer';
+import { deleteLeaveFn } from '@/utility/queryFetcher';
+import DeleteTakenLeaveDrawer from './DeleteTakenLeaveDrawer';
 
 interface LeaveType {
   _id: string;
@@ -43,15 +46,27 @@ const formatDate = (dateString: string) => new Date(dateString).toLocaleDateStri
 interface TakenLeavesProps {
   leaves: AppliedLeave[];
   loading: boolean;
+  currentPage: number;
+  rowsPerPage: number;
 }
 
-const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading }) => {
+const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage, rowsPerPage }) => {
 
-  
+  const [isEditTakenLeaveDrawerShowing, setIsEditTakenLeaveDrawerShowing] = useState(false);
+  const [isDeleteTakenLeaveDrawerShowing, setIsDeleteTakenLeaveDrawerShowing] = useState(false);
+  const [selectedLeave, setSelectedLeave] = useState<AppliedLeave | null>(null);
+
+  const toggleEditTakenLeaveDrawer = (value: boolean) => {
+    setIsEditTakenLeaveDrawerShowing(value);
+  }
+  const toggleDeleteTakenLeaveDrawer = (value: boolean) => {
+    setIsDeleteTakenLeaveDrawerShowing(value);
+  }
+
   const columns = [
     {
       name: "S No",
-      selector: (row: AppliedLeave, index: number) => index + 1,
+      cell: (row: AppliedLeave, index: number) => (currentPage - 1) * rowsPerPage + index + 1,
       sortable: false,
       width: "60px",
     },
@@ -62,10 +77,16 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading }) => {
       width: "110px",
     },
     {
-      name: "Dates",
-      cell: (row: AppliedLeave) => `${formatDate(row.start_date)} ${row.end_date ? ` - ${formatDate(row.end_date)}` : ''}`,
+      name: "From",
+      cell: (row: AppliedLeave) => `${formatDate(row?.start_date)}`,
       sortable: true,
-      width: "200px",
+      width: "120px",
+    },
+    {
+      name: "To",
+      cell: (row: AppliedLeave) => `${formatDate(row?.end_date)}`,
+      sortable: true,
+      width: "120px",
     },
     {
       name: "Mode",
@@ -90,41 +111,30 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading }) => {
             title="Edit Leave">
             <button
               onClick={() => {
-                // setSelected(row);
-                // toggleEditDrawer(true);
+                setSelectedLeave(row);
+                toggleEditTakenLeaveDrawer(true);
               }}
               className="text-blue-500 hover:text-blue-700"
             >
               <FaEdit />
             </button>
           </Tooltip>
-    
-          <Tooltip title="Leave details">
-            <button
-              onClick={() => {
-                // handleViewClick(row);
-                // toggleViewDrawer(true);
-              }}
-            >
-              <FaEye className="w-3 h-3" />
-            </button>
-    
-          </Tooltip>
-    
+
           <Tooltip title="Delete Leave">
             <button
-              // onClick={() => handleDeleteClick(row)}
+              onClick={() => {
+                setSelectedLeave(row)
+                toggleDeleteTakenLeaveDrawer(true)
+              }}
               className="text-red-500 hover:text-red-700"
             >
               <FaTrash className="text-danger" />
             </button>
           </Tooltip>
-    
+
           <Tooltip title="Reset Password">
             <button
-              onClick={() => {
-                // handleResetPassword(row);
-              }}
+              // onClick={}
             >
               {row.isLocked && <TbLockOff className="w-4 h-4 text-danger" />}
             </button>
@@ -134,10 +144,9 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading }) => {
     }
   ];
 
-  console.log(leaves)
 
   return (
-    <div className="flex justify-center items-center ">
+    <div className="flex justify-center items-center h-full">
       <DataTable
         columns={columns}
         data={leaves}
@@ -201,8 +210,19 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading }) => {
           },
         }}
       />
+      <EditTakenLeave
+        toggleDrawer={toggleEditTakenLeaveDrawer}
+        isEditTakenLeaveDrawerShowing={isEditTakenLeaveDrawerShowing}
+        selectedLeave={selectedLeave}
+      />
+      <DeleteTakenLeaveDrawer
+        toggleDrawer={toggleDeleteTakenLeaveDrawer}
+        isDeleteTakenLeaveDrawerShowing={isDeleteTakenLeaveDrawerShowing}
+        selectedLeave={selectedLeave}
+      />
     </div>
   );
 }
 
 export default TakenLeaves
+

@@ -282,19 +282,51 @@ export const updateLeaveTypeFn = async (payload: any, leaveId: string) => {
 };
 
 // fetch taken leave list
-export const fetchTakenLeaveListFn = async (params: { search?: string, search_by?: string } = {}) => {
+export const fetchTakenLeaveListFn = async (params: { 
+  status?: string;
+  leave_type?: string;
+  start_date?: string;
+  end_date?: string;
+  page?: number;
+  limit?: number;
+} = {}) => {
   let url = `${ApiEndpoints.leaves}`;
-  const { search, search_by } = params;
-  if (search && search.trim() && search_by) {
-    url += `?${search_by}=${encodeURIComponent(search.trim())}`;
+  // Use URLSearchParams to easily construct the query string
+  const queryParams = new URLSearchParams();
+
+  // Iterate over the params object and append them to the query string if they have a value
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) {
+      queryParams.append(key, String(value));
+    }
+  });
+
+  // If there are any query parameters, add them to the URL
+  if (queryParams.toString()) {
+    url += `?${queryParams.toString()}`;
   }
   const response = await apiClient.get(url);
+  console.log(response) 
   return response.data;
 };
 
 // apply leave
 export const applyLeaveFn = async (payload: ApplyLeaveInterface) => {
-  console.log(payload)
   const response = await apiClient.post(`${ApiEndpoints.leaves}`, payload);
   return response.data;
+}
+
+// Approve or Reject leave application
+export const approveRejectLeaveFn = async(leaveId:string, status:string)=>{
+
+  console.log(leaveId)
+  console.log(status)
+    const response = await apiClient.put(`${ApiEndpoints.leaves}/status/${leaveId}`, status);
+    return response.data;
+}
+// delete Leave Application
+export const deleteLeaveFn = async(leaveId:string)=>{
+  console.log(leaveId)
+    const response = await apiClient.delete(`${ApiEndpoints.leaves}/status/${leaveId}`);
+    return response.data;
 }

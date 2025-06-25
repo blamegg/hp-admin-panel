@@ -18,7 +18,7 @@ const LEAVE_MODES = [
     { value: "Half-Day", label: "Half-Day" },
     { value: "Full-Day", label: "Full-Day" },
     { value: "Day-Range", label: "Day-Range" },
-    { value: "Multi-Days", label: "Multi-Days" },
+    { value: "Multi-Day", label: "Multi-Days" },
 ];
 
 const HALF_DAY_SESSIONS = [
@@ -73,7 +73,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleLeaveFo
     return (
         <div className="flex justify-center items-center">
             <Drawer anchor="right" open={isLeaveFormShowing} onClose={() => toggleLeaveFormDrawer(false)}>
-                <ModalHeader text="Apply for Leave" toggleDrawer={toggleLeaveFormDrawer} />
+                <ModalHeader text="Apply for Leave" toggleDrawer={()=>toggleLeaveFormDrawer(false)} />
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6  mt-6">
                     <div className="flex flex-wrap gap-4 px-4">
                         <div className="md:flex items-center justify-between gap-10 w-full ">

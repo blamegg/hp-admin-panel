@@ -14,27 +14,47 @@ export interface AppliedLeave {
   updatedAt: string;
 }
 
+export interface Pagination {
+  total: number;
+  totalPages: number;
+  currentPage: number;
+  limit: number;
+  hasNext: boolean;
+}
+
+export interface AppliedLeavesResponse {
+  success: boolean;
+  message: string;
+  pagination: Pagination;
+  leaves: AppliedLeave[];
+}
 
 interface AppliedLeaveState {
   appliedLeaves: AppliedLeave[];
+  pagination: Pagination | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: AppliedLeaveState = {
   appliedLeaves: [],
+  pagination: null,
   loading: false,
   error: null,
 };
 
 interface FetchLeaveParams {
-  search?: string;
-  search_by?: string;
+  status?: string;
+  leave_type?: string;
+  start_date?: string;
+  end_date?: string;
+  page?: number;
+  limit?: number;
 }
 
 // Async thunk to fetch applied leaves
 export const fetchTakenLeaves = createAsyncThunk<
-  AppliedLeave[],
+  AppliedLeavesResponse,
   FetchLeaveParams | void,
   { rejectValue: string }
 >("appliedLeaves/fetch", async (params, { rejectWithValue }) => {
@@ -56,8 +76,9 @@ const appliedLeaveSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchTakenLeaves.fulfilled, (state, action: PayloadAction<AppliedLeave[]>) => {
-        state.appliedLeaves = action.payload;
+      .addCase(fetchTakenLeaves.fulfilled, (state, action: PayloadAction<AppliedLeavesResponse>) => {
+        state.appliedLeaves = action.payload.leaves;
+        state.pagination = action.payload.pagination;
         state.loading = false;
       })
       .addCase(fetchTakenLeaves.rejected, (state, action) => {

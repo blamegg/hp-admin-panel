@@ -6,8 +6,8 @@ import React from 'react'
 const page = () => {
   return (
     <DefaultLayout>
-        <Breadcrumb pageName="Leaves" />
-       <LeaveInfo />
+      <Breadcrumb pageName="Leaves" />
+      <LeaveInfo />
     </DefaultLayout>
   )
 }
