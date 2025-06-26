@@ -14,6 +14,8 @@ import Select from "../../common/Select";
 import Input from "../../common/Input";
 import CustomPagination from "@/components/CustomPagination";
 import EditTakenLeave from "./EditTakenLeaveDrawer";
+import { useHasPermission } from "@/hooks/useUserPermissions";
+import { toSentenceCase } from '@/utility/helper';
 
 interface LeaveRecord {
   totalLeaves: number;
@@ -43,6 +45,9 @@ const LeaveInfo: React.FC = () => {
 
   const leaveState = useSelector((state: RootState) => state.appliedLeaves);
   const { leaveTypes } = useSelector((state: RootState) => state.leaveTypes);
+
+  const hasPermission = useHasPermission();
+
 
 
   const statusOptions = [
@@ -96,8 +101,8 @@ const LeaveInfo: React.FC = () => {
   };
 
   return (
-    <div className="">
-      <div className="grid grid-cols-4 gap-6 w-full mb-6">
+    <div className="w-[350px] md:w-full pb-4 md:pb-0">
+      <div className="grid lg:grid-cols-4 grid-cols-2 gap-6 w-full mb-4">
         {/* Total Leaves */}
         <div className="flex items-center  bg-white rounded-sm px-2 py-2">
           <FaClipboardList size={25} className="text-blue-600 mr-2" />
@@ -131,7 +136,7 @@ const LeaveInfo: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="flex gap-10 mb-6">
+      <div className="grid grid-cols-2 md:flex items-center gap-4  w-full mb-4 ">
         <div className="w-full">
           <Select
             label="Status"
@@ -167,15 +172,16 @@ const LeaveInfo: React.FC = () => {
             placeholder="End Date"
           />
         </div>
-
-        <div className="self-end w-full">
-          <Button
-            name="Apply Leave"
-            type="button"
-            onClick={() => toggleLeaveFormDrawer(true)}
-            className=" bg-primary"
-          />
-        </div>
+        {hasPermission(toSentenceCase('Create Leave')) && (
+          <div className="self-end w-full">
+            <Button
+              name="Apply Leave"
+              type="button"
+              onClick={() => toggleLeaveFormDrawer(true)}
+              className=" bg-primary"
+            />
+          </div>
+        )}
       </div>
       <TakenLeaves
         leaves={leaveState.appliedLeaves}
@@ -183,6 +189,7 @@ const LeaveInfo: React.FC = () => {
         currentPage={currentPage}
         rowsPerPage={rowsPerPage}
       />
+      <LeaveForm isLeaveFormShowing={isLeaveFormShowing} toggleDrawer={toggleLeaveFormDrawer} />
       <CustomPagination
         rowsPerPage={leaveState?.pagination?.limit || 10}
         currentPage={leaveState?.pagination?.currentPage || 1}
@@ -190,8 +197,6 @@ const LeaveInfo: React.FC = () => {
         onChangePage={handlePageChange}
         onChangeRowsPerPage={handleRowsPerPageChange}
       />
-      <LeaveForm isLeaveFormShowing={isLeaveFormShowing} toggleLeaveFormDrawer={toggleLeaveFormDrawer} />
-    
     </div>
   );
 };

@@ -11,7 +11,7 @@ import Button from "@/components/common/Button";
 import DeleteDrawer from "./DeleteDrawer";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { resetPasswordFn, usersFn } from "@/utility/queryFetcher";
-import { formatTimestamp } from "@/utility/helper";
+import { formatTimestamp, toSentenceCase } from "@/utility/helper";
 import EditDrawer from "./EditDrawer";
 import ViewDrawer from "./UserTab/ViewDrawer";
 import { usePathname } from "next/navigation";
@@ -40,12 +40,11 @@ const UserTable = () => {
   useMenuList();
   useUserPermissions();
 
-
   const hasPermission = useHasPermission();
 
   // Check if user has any action permissions
   const hasAnyActionPermission = (): boolean => {
-    return hasPermission('Edit User') || hasPermission('Delete User') || hasPermission('View User Details');
+    return hasPermission(toSentenceCase('Edit User')) || hasPermission(toSentenceCase('Delete User')) || hasPermission(toSentenceCase('View User Details'));
   };
 
   useEffect(() => {
@@ -61,7 +60,7 @@ const UserTable = () => {
   const { data: userList, isLoading } = useQuery({
     queryKey: ["users", currentPage, rowsPerPage, searchQuery, searchBasis],
     queryFn: async () => {
-
+     
       const result = await usersFn(currentPage, rowsPerPage, searchQuery, searchBasis);
       return result;
     },
@@ -69,7 +68,6 @@ const UserTable = () => {
     staleTime: 0, // Always consider data stale to ensure fresh fetches
     enabled: showSearchBar, // Only enable when on users page
   });
-
 
 
   // Update total items when data changes
@@ -93,7 +91,7 @@ const UserTable = () => {
   // Handle search with debounce
   useEffect(() => {
     if (!showSearchBar) return; // Don't run if not on users page
-
+    
     const timeoutId = setTimeout(() => {
       if (searchQuery.trim() || searchBasis) {
         setCurrentPage(1);
@@ -107,7 +105,7 @@ const UserTable = () => {
   // Auto-refresh to detect blocked users
   useEffect(() => {
     if (!showSearchBar) return; // Don't run if not on users page
-
+    
     const intervalId = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     }, 30000); // Refresh every 30 seconds
@@ -136,7 +134,6 @@ const UserTable = () => {
     setSelected(row);
   };
   const handleViewClick = (row: any) => {
-    setSelected(row);
     setViewDrawer(true);
   };
 
@@ -174,40 +171,32 @@ const UserTable = () => {
       name: "S No",
       selector: (row: any) =>
         (currentPage - 1) * rowsPerPage + (userList?.data?.indexOf(row) + 1),
-      sortable: false,
-      width: "60px",
-      wrap: true,
-      maxWidth: "80px",
-      minWidth: "50px",
+      sortable: true,
+      width: "75px",
     },
     {
       name: "Role",
       selector: (row: any) => row.role.name || "",
       sortable: true,
-      wrap: true,
-      width: "100px",
-      maxWidth: "80px",
-      minWidth: "50px",
+      width: "130px",
     },
     {
       name: "Email",
       selector: (row: any) => row.email || "",
       sortable: true,
-      maxWidth: "200px",
-      width: "180px",
-      minWidth: "150px",
+      width: "160px",
     },
     {
       name: "Name",
       selector: (row: any) => row.name || "",
       sortable: true,
-      // width: "120px",
+      width: "120px",
     },
     {
       name: "Mobile",
       selector: (row: any) => row.mobile || "",
       sortable: true,
-      // width: "100px",
+      width: "100px",
     },
     {
       name: "Status",
@@ -227,19 +216,19 @@ const UserTable = () => {
         return isActive ? "Active" : "Inactive";
       },
       sortable: true,
-      // width: "90px",
+      width: "90px",
     },
     {
       name: "Date Created",
       selector: (row: any) => formatTimestamp(row.createdAt),
-      // sortable: true,
-      // width: "150px",
+      sortable: true,
+      width: "150px",
     },
     ...(hasAnyActionPermission() ? [{
       name: "Actions",
       cell: (row: any) => (
         <div className="flex gap-3">
-          {hasPermission('Edit User') && (
+          {hasPermission(toSentenceCase('Edit User')) && (
             <Tooltip
               title="Edit user">
               <button
@@ -255,7 +244,7 @@ const UserTable = () => {
           )}
 
 
-          {hasPermission('View User Details') && (
+          {hasPermission(toSentenceCase('View User Details')) && (
             <Tooltip title="User details">
               <button
                 onClick={() => {
@@ -270,7 +259,7 @@ const UserTable = () => {
           )}
 
 
-          {hasPermission('Delete User') && (
+          {hasPermission(toSentenceCase('Delete User')) && (
             <Tooltip title="Delete user">
 
               <button
@@ -283,7 +272,7 @@ const UserTable = () => {
 
           )}
 
-          {hasPermission('Reset Password') && (
+          {hasPermission(toSentenceCase('Reset Password')) && (
             <Tooltip title="Reset Password">
 
               <button
@@ -300,17 +289,17 @@ const UserTable = () => {
 
         </div>
       ),
-      // width: "120px"
+      width: "120px"
     }] : []),
   ];
 
   return (
-    <div className="w-full">
-      <div className="custom_tbl_container h-[74vh] w-full  ">
+    <>
+      <div className="custom_tbl_container h-[74vh]  w-[350px] md:w-full">
         {
           showSearchBar && (
             <div className=" grid grid-cols-2 md:flex items-center gap-4">
-              {hasPermission('View All Users') && (
+              {hasPermission(toSentenceCase('View All Users')) && (
                 <>
                   <select
                     value={searchBasis}
@@ -337,7 +326,7 @@ const UserTable = () => {
                   />
                 </>
               )}
-              {hasPermission('Create User') && (
+              {hasPermission(toSentenceCase('Create User')) && (
                 <Button
                   name="Create User"
                   type="submit"
@@ -345,7 +334,7 @@ const UserTable = () => {
                   className="w-full md:w-auto bg-primary"
                 />
               )}
-              {hasPermission('Create User') && (
+              {hasPermission(toSentenceCase('Create User')) && (
                 <Button
                   name="Create Bulk users"
                   type="submit"
@@ -353,7 +342,7 @@ const UserTable = () => {
                   className="w-full md:w-auto bg-primary"
                 />
               )}
-              {hasPermission('View All Users') && (
+              {hasPermission(toSentenceCase('View All Users')) && (
                 <Tooltip
                   title="Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore natus sed rerum temporibus ab, molestiae fuga ut saepe eaque maxime."
                   arrow
@@ -372,89 +361,89 @@ const UserTable = () => {
         <div className="mt-5 overflow-x-auto ">
 
           {/* {hasPermission('View All Users') && ( */}
-          <>
-            {isLoading ? (
-              <div className="flex items-center justify-center h-40">
-                <p>Loading...</p>
-              </div>
-            ) : (
-              <>
-                <div className="max-h-[59vh] w-full overflow-scroll">
-                  <DataTable
-                    columns={columns}
-                    data={userList?.data || []}
-                    pagination={false}
-                    className="custom_tbl  w-full"
-                    customStyles={{
-                      header: {
-                        style: {
-                          fontSize: "12px",
-                          minHeight: "30px",
-                          backgroundColor: "#F9FAFB", // Light mode header background
-                          color: "#1C243F", // Light mode header text
+            <>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-40">
+                 <p>Loading...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="max-h-[59vh] overflow-scroll">
+                    <DataTable
+                      columns={columns}
+                      data={userList?.data || []}
+                      pagination={false}
+                      className="custom_tbl "
+                      customStyles={{
+                        header: {
+                          style: {
+                            fontSize: "12px",
+                            minHeight: "30px",
+                            backgroundColor: "#F9FAFB", // Light mode header background
+                            color: "#1C243F", // Light mode header text
+                          },
                         },
-                      },
-                      headRow: {
-                        style: {
-                          fontSize: "12px",
-                          minHeight: "30px",
-                          backgroundColor: "#F9FAFB", // Light mode header row background
-                          borderBottomWidth: "1px",
-                          borderBottomColor: "#E2E8F0", // stroke
-                        },
-                      },
-                      headCells: {
-                        style: {
-                          fontWeight: 700,
-                          color: "#1C243F", // Light mode header cells text
-                          backgroundColor: "#F9FAFB", // Light mode header cells background
-                        },
-                      },
-                      cells: {
-                        style: {
-                          fontSize: "11px",
-                          fontWeight: 500,
-                          wordBreak: "break-word",
-                          overflowWrap: "break-word",
-                          height: "27px",
-                          color: "#1C243F", // Light mode cell text
-                          backgroundColor: "#FFFFFF", // Light mode cell background
-                        },
-                      },
-                      rows: {
-                        style: {
-                          fontSize: "11px",
-                          minHeight: "27px",
-                          "&:not(:last-of-type)": {
-                            borderBottomStyle: "solid",
+                        headRow: {
+                          style: {
+                            fontSize: "12px",
+                            minHeight: "30px",
+                            backgroundColor: "#F9FAFB", // Light mode header row background
                             borderBottomWidth: "1px",
                             borderBottomColor: "#E2E8F0", // stroke
                           },
-                          backgroundColor: "#FFFFFF", // Light mode row background
-                          color: "#1C243F", // Light mode row text
                         },
-                        highlightOnHoverStyle: {
-                          backgroundColor: "#F7F9FC", // gray-2
-                          color: "#1C243F",
-                          cursor: "pointer",
+                        headCells: {
+                          style: {
+                            fontWeight: 700,
+                            color: "#1C243F", // Light mode header cells text
+                            backgroundColor: "#F9FAFB", // Light mode header cells background
+                          },
                         },
-                      },
-                    }}
+                        cells: {
+                          style: {
+                            fontSize: "11px",
+                            fontWeight: 500,
+                            wordBreak: "break-word",
+                            overflowWrap: "break-word",
+                            height: "27px",
+                            color: "#1C243F", // Light mode cell text
+                            backgroundColor: "#FFFFFF", // Light mode cell background
+                          },
+                        },
+                        rows: {
+                          style: {
+                            fontSize: "11px",
+                            minHeight: "27px",
+                            "&:not(:last-of-type)": {
+                              borderBottomStyle: "solid",
+                              borderBottomWidth: "1px",
+                              borderBottomColor: "#E2E8F0", // stroke
+                            },
+                            backgroundColor: "#FFFFFF", // Light mode row background
+                            color: "#1C243F", // Light mode row text
+                          },
+                          highlightOnHoverStyle: {
+                            backgroundColor: "#F7F9FC", // gray-2
+                            color: "#1C243F",
+                            cursor: "pointer",
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+
+
+                  {/* Custom Pagination */}
+                  <CustomPagination
+                    rowsPerPage={rowsPerPage}
+                    currentPage={currentPage}
+                    rowCount={userList?.pagination.totalCount || 0}
+                    onChangePage={handlePageChange}
+                    onChangeRowsPerPage={handleRowsPerPageChange}
                   />
-                </div>
-
-
-                {/* Custom Pagination */}
-                <CustomPagination
-                  rowsPerPage={rowsPerPage}
-                  currentPage={currentPage}
-                  rowCount={userList?.pagination.totalCount || 0}
-                  onChangePage={handlePageChange}
-                  onChangeRowsPerPage={handleRowsPerPageChange}
-                />
-              </>
-            )}
-          </>
+                </>
+              )}
+            </>
           {/* )} */}
         </div>
       </div>
@@ -501,7 +490,7 @@ const UserTable = () => {
           toggleDrawer={toggleBulkUserDrawer}
         />
       )}
-    </div>
+    </>
   );
 };
 

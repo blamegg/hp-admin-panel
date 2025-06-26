@@ -12,6 +12,8 @@ import { AppliedLeave } from '@/redux/slice/takenLeaveSclice';
 import EditTakenLeave from './EditTakenLeaveDrawer';
 import { deleteLeaveFn } from '@/utility/queryFetcher';
 import DeleteTakenLeaveDrawer from './DeleteTakenLeaveDrawer';
+import { maxWidth, minWidth } from '@mui/system';
+import ViewTakenLeaveDrawer from './ViewTakenLeaveDrawer';
 
 interface LeaveType {
   _id: string;
@@ -19,7 +21,7 @@ interface LeaveType {
 }
 
 const StatusBadge = ({ status }: { status: string }) => {
-  const baseClasses = "px-1.5 py-1 text-xs font-medium rounded-full";
+  const baseClasses = "px-1.5 py-[3px]   rounded-full";
   let statusClasses = "";
 
   switch (status?.toLowerCase()) {
@@ -27,10 +29,10 @@ const StatusBadge = ({ status }: { status: string }) => {
       statusClasses = "bg-yellow-100 text-yellow-800";
       break;
     case 'approved':
-      statusClasses = "bg-green-100 text-green-800";
+      statusClasses = "bg-success text-white";
       break;
     case 'rejected':
-      statusClasses = "bg-red-100 text-red-800";
+      statusClasses = "bg-danger text-white";
       break;
     default:
       statusClasses = "bg-gray-100 text-gray-800";
@@ -54,6 +56,7 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
 
   const [isEditTakenLeaveDrawerShowing, setIsEditTakenLeaveDrawerShowing] = useState(false);
   const [isDeleteTakenLeaveDrawerShowing, setIsDeleteTakenLeaveDrawerShowing] = useState(false);
+  const [isViewTakenLeaveDrawerShowing, setIsViewTakenLeaveDrawerShowing] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState<AppliedLeave | null>(null);
 
   const toggleEditTakenLeaveDrawer = (value: boolean) => {
@@ -61,6 +64,9 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
   }
   const toggleDeleteTakenLeaveDrawer = (value: boolean) => {
     setIsDeleteTakenLeaveDrawerShowing(value);
+  }
+  const toggleViewTakenLeaveDrawer = (value: boolean) => {
+    setIsViewTakenLeaveDrawerShowing(value);
   }
 
   const columns = [
@@ -71,38 +77,69 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
       width: "60px",
     },
     {
+      name: "User Name",
+      cell: (row: AppliedLeave) => (
+        <div style={{ minWidth: "100px", maxWidth: "auto" }}>
+          {row?.user_details?.name || '-'}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
       name: "Leave Type",
-      selector: (row: AppliedLeave) => row.leave_type?.name || 'N/A',
+      cell: (row: AppliedLeave) => (
+        <div style={{ minWidth: "100px", maxWidth: "auto" }}>
+          {row.leave_type?.name || 'N/A'}
+        </div>
+      ),
       sortable: true,
-      width: "110px",
-    },
-    {
-      name: "From",
-      cell: (row: AppliedLeave) => `${formatDate(row?.start_date)}`,
-      sortable: true,
-      width: "120px",
-    },
-    {
-      name: "To",
-      cell: (row: AppliedLeave) => `${formatDate(row?.end_date)}`,
-      sortable: true,
-      width: "120px",
     },
     {
       name: "Mode",
-      selector: (row: AppliedLeave) => row.leave_mode,
+      cell: (row: AppliedLeave) => (
+        <div style={{ minWidth: "60px", maxWidth: "auto" }}>
+          {row.leave_mode}
+        </div>
+      ),
+      sortable: true,
+
+    },
+    {
+      name: "From",
+      cell: (row: AppliedLeave) => (
+        <div style={{ minWidth: "100px", maxWidth: "auto" }}>
+          {formatDate(row?.start_date)}
+        </div>
+      ),
       sortable: true,
     },
+    {
+      name: "To",
+      cell: (row: AppliedLeave) => (
+        <div style={{ minWidth: "120px", maxWidth: "auto" }}>
+          {`${formatDate(row?.end_date || "")}`}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Days",
+      cell: (row: AppliedLeave) => row?.leave_type?.total_days,
+      sortable: true,
+      width: "75px"
+    },
+
     {
       name: "Status",
-      cell: (row: AppliedLeave) => <StatusBadge status={row.status} />,
+      cell: (row: AppliedLeave) => (
+        <div style={{ minWidth: "100px", maxWidth: "auto" }}>
+          <StatusBadge status={row.status} />
+        </div>
+      )
+      ,
       sortable: true,
     },
-    {
-      name: "Description",
-      selector: (row: AppliedLeave) => row.description || '-',
-      sortable: true,
-    },
+
     {
       name: "Actions",
       cell: (row: any) => (
@@ -120,7 +157,18 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
             </button>
           </Tooltip>
 
-          <Tooltip title="Delete Leave">
+          <Tooltip title="View leave">
+            <button
+              onClick={() => {
+                setSelectedLeave(row)
+                toggleViewTakenLeaveDrawer(true)
+              }}
+              className="text-red-500 "
+            >
+              <FaEye className="" />
+            </button>
+          </Tooltip>
+          <Tooltip title="Delete leave">
             <button
               onClick={() => {
                 setSelectedLeave(row)
@@ -131,14 +179,6 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
               <FaTrash className="text-danger" />
             </button>
           </Tooltip>
-
-          <Tooltip title="Reset Password">
-            <button
-              // onClick={}
-            >
-              {row.isLocked && <TbLockOff className="w-4 h-4 text-danger" />}
-            </button>
-          </Tooltip>
         </div>
       ),
     }
@@ -146,70 +186,73 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
 
 
   return (
-    <div className="flex justify-center items-center h-full">
-      <DataTable
-        columns={columns}
-        data={leaves}
-        progressPending={loading}
-        progressComponent={<p>Loading...</p>}
-        highlightOnHover
-        striped
-        customStyles={{
-          header: {
-            style: {
-              fontSize: "12px",
-              minHeight: "30px",
-              backgroundColor: "#F9FAFB", // Light mode header background
-              color: "#1C243F", // Light mode header text
+    <div className="flex justify-center items-center w-full">
+      <div className='overflow-x-scroll w-full'>
+
+        <DataTable
+          columns={columns}
+          data={leaves}
+          progressPending={loading}
+          progressComponent={<p>Loading...</p>}
+          highlightOnHover
+          striped
+          customStyles={{
+            header: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                backgroundColor: "#F9FAFB", // Light mode header background
+                color: "#1C243F", // Light mode header text
+              },
             },
-          },
-          headRow: {
-            style: {
-              fontSize: "12px",
-              minHeight: "30px",
-              backgroundColor: "#F9FAFB", // Light mode header row background
-              borderBottomWidth: "1px",
-              borderBottomColor: "#E2E8F0", // stroke
-            },
-          },
-          headCells: {
-            style: {
-              fontWeight: 700,
-              color: "#1C243F", // Light mode header cells text
-              backgroundColor: "#F9FAFB", // Light mode header cells background
-            },
-          },
-          cells: {
-            style: {
-              fontSize: "11px",
-              fontWeight: 500,
-              wordBreak: "break-word",
-              overflowWrap: "break-word",
-              height: "27px",
-              color: "#1C243F", // Light mode cell text
-              backgroundColor: "#FFFFFF", // Light mode cell background
-            },
-          },
-          rows: {
-            style: {
-              fontSize: "11px",
-              minHeight: "27px",
-              "&:not(:last-of-type)": {
-                borderBottomStyle: "solid",
+            headRow: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                backgroundColor: "#F9FAFB", // Light mode header row background
                 borderBottomWidth: "1px",
                 borderBottomColor: "#E2E8F0", // stroke
               },
-              backgroundColor: "#FFFFFF", // Light mode row background
-              color: "#1C243F", // Light mode row text
             },
-            highlightOnHoverStyle: {
-              backgroundColor: "#F7F9FC", // gray-2
-              color: "#1C243F",
-              cursor: "pointer",
+            headCells: {
+              style: {
+                fontWeight: 700,
+                color: "#1C243F", // Light mode header cells text
+                backgroundColor: "#F9FAFB", // Light mode header cells background
+              },
             },
-          },
-        }}
-      />
+            cells: {
+              style: {
+                fontSize: "11px",
+                fontWeight: 500,
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                height: "27px",
+                color: "#1C243F", // Light mode cell text
+                backgroundColor: "transparent", // Allow row background to show through
+              },
+            },
+            rows: {
+              style: {
+                fontSize: "11px",
+                minHeight: "27px",
+                "&:not(:last-of-type)": {
+                  borderBottomStyle: "solid",
+                  borderBottomWidth: "1px",
+                  borderBottomColor: "#E2E8F0", // stroke
+                },
+                backgroundColor: "transprant", // Light mode row background
+                color: "#1C243F", // Light mode row text
+              },
+              highlightOnHoverStyle: {
+                backgroundColor: "#e4e7f7",
+                color: "white",
+                cursor: "pointer",
+              },
+            },
+          }}
+        />
+      </div>
       <EditTakenLeave
         toggleDrawer={toggleEditTakenLeaveDrawer}
         isEditTakenLeaveDrawerShowing={isEditTakenLeaveDrawerShowing}
@@ -218,6 +261,11 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
       <DeleteTakenLeaveDrawer
         toggleDrawer={toggleDeleteTakenLeaveDrawer}
         isDeleteTakenLeaveDrawerShowing={isDeleteTakenLeaveDrawerShowing}
+        selectedLeave={selectedLeave}
+      />
+      <ViewTakenLeaveDrawer
+        toggleDrawer={toggleViewTakenLeaveDrawer}
+        isViewTakenLeaveDrawerShowing={isViewTakenLeaveDrawerShowing}
         selectedLeave={selectedLeave}
       />
     </div>

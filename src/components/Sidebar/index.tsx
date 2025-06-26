@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useMenuList } from "@/hooks/useMenuList";
 import { useHasPermission } from '@/hooks/useUserPermissions';
 import { getIconComponent } from "@/utility/iconMap";
+import { toSentenceCase } from '@/utility/helper';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -29,8 +30,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   // Use the useMenuList hook to get dynamic menu data
   const { menuList, isLoading } = useMenuList();
 
-  console.log(menuList)
-
   // Get user data and permissions from Redux store
   const { user } = useSelector((state: RootState) => state.authReducer);
 
@@ -46,13 +45,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const hasPermissionSingle = useHasPermission();
   const hasPermission = (requiredPermissions: string[] | undefined): boolean => {
     if (!requiredPermissions || requiredPermissions.length === 0) return true;
-    return requiredPermissions.some((perm) => hasPermissionSingle(perm));
+    return requiredPermissions.some((perm) => hasPermissionSingle(toSentenceCase(perm)));
   };
 
   // Use dynamic menu from useMenuList hook, fallback to an empty array
   const dynamicMenuList = menuList && menuList.length > 0 ? [
     {
-      name: "MENU LIST",
       menuItems: menuList
         .filter((e: any) => hasPermission(e.requiredPermissions))
         .map((e: any) => {
@@ -132,7 +130,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               : "translate-x-full"
             } ${isTempPassword ? 'lg:top-0' : ''}`}
         >
-          <div className="grid h-[50px] place-items-center">
+          <div className="grid h-[50px] pl-4">
             <Link href="/dashboard" className="flex items-center justify-start gap-2 ">
               <Image width={30} height={30} src={logo.src} alt="Logo" priority />
               <h5 className="text-[17px] font-semibold text-white">
@@ -161,10 +159,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </button>
           </div>
 
-          <div className="no-scrollbar mt-5 flex flex-col overflow-y-auto duration-300 ease-linear">
-
-
-
+          <div className="no-scrollbar mt-1 flex flex-col overflow-y-auto duration-300 ease-linear">
             <nav>
               {isLoading ? (
                 <div className="px-4 py-3">
@@ -176,11 +171,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               ) : (
                 dynamicMenuList.map((group: any, groupIndex: number) => (
                   <div key={groupIndex}>
-                    <h3 className="ml-4 mr-4 text-sm text-[13px] font-semibold text-bodydark2">
-                      {group.name}
-                    </h3>
-
-                    <ul className="flex flex-col gap-1.5">
+                    <ul className="flex flex-col gap-0">
                       {group.menuItems?.map((menuItem: any, menuIndex: any) => (
                         <SidebarItem
                           key={menuIndex}

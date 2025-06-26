@@ -233,6 +233,7 @@ export const updatePermissionFn = async (payload: UpdatePermissionsInterFace) =>
     `${ApiEndpoints.permissions}/assign-menu-permission`,
     payload,
   );
+  console.log(response.data)
   return response.data;
 };
 
@@ -312,21 +313,19 @@ export const fetchTakenLeaveListFn = async (params: {
 
 // apply leave
 export const applyLeaveFn = async (payload: ApplyLeaveInterface) => {
+  console.log(payload, "Payload");
   const response = await apiClient.post(`${ApiEndpoints.leaves}`, payload);
   return response.data;
 }
 
 // Approve or Reject leave application
-export const approveRejectLeaveFn = async(leaveId:string, status:string)=>{
-
-  console.log(leaveId)
-  console.log(status)
-    const response = await apiClient.put(`${ApiEndpoints.leaves}/status/${leaveId}`, status);
+export const approveRejectLeaveFn = async(leaveId:string, payload:{status:string, reason: string})=>{
+  console.log(payload)
+    const response = await apiClient.put(`${ApiEndpoints.leaves}/status/${leaveId}`, payload);
     return response.data;
 }
 // delete Leave Application
 export const deleteLeaveFn = async(leaveId:string)=>{
-  console.log(leaveId)
-    const response = await apiClient.delete(`${ApiEndpoints.leaves}/status/${leaveId}`);
+    const response = await apiClient.delete(`${ApiEndpoints.leaves}/${leaveId}`);
     return response.data;
 }

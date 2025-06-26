@@ -13,6 +13,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa'
 import { useHasPermission } from '@/hooks/useUserPermissions'
 import CreateLeaveType from './CreateLeaveTypes'
 import EditLeaveTypes from './EditLeaveTypes'
+import { toSentenceCase } from '@/utility/helper'
 
 const LeaveTypes = () => {
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
@@ -139,7 +140,7 @@ const LeaveTypes = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
         />
-        {hasPermission('Create Leave Type') && (
+        {hasPermission(toSentenceCase('Create Leave Type')) && (
           <Button name='Create Leave' type="button" onClick={() => toggleCreateDrawer(true)} />
         )}
       </div>

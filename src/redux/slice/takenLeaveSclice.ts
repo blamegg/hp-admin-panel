@@ -6,12 +6,17 @@ export interface AppliedLeave {
   leave_type: any;
   leave_mode: string;
   start_date: string;
-  end_date?: string;
+  end_date?: string ;
   description?: string;
   half_day_session?: string;
   status: string;
   createdAt: string;
   updatedAt: string;
+  user_details: {
+    name:string;
+    _id:string;
+  };
+  reason?: string;
 }
 
 export interface Pagination {

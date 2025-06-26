@@ -25,6 +25,7 @@ import CreateRole from './CreateRole';
 import DeleteRole from './DeleteRole';
 import CustomPagination from '../CustomPagination';
 import { usePathname } from 'next/navigation';
+import { toSentenceCase } from '@/utility/helper';
 
 export default React.memo(function Roles() {
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -53,7 +54,7 @@ export default React.memo(function Roles() {
   const hasPermission = useHasPermission();
 
   const hasAnyActionPermission = React.useCallback(() => {
-    return hasPermission('View Role Details') || hasPermission('Delete Role') || hasPermission('Edit Role');
+    return hasPermission(toSentenceCase('View Role Details')) || hasPermission(toSentenceCase('Delete Role')) || hasPermission(toSentenceCase('Edit Role'));
   }, [hasPermission]);
 
   // Debounce search query to prevent excessive re-renders
@@ -206,12 +207,12 @@ export default React.memo(function Roles() {
       sortable: true,
       width: "200px",
     },
-    ...(hasAnyActionPermission() ? [
+    // ...(hasAnyActionPermission() ? [
          {
       name: "Actions",
       cell: (row: CurrentRoleDataInterFace) => (
         <div className="flex gap-3">
-          {hasPermission('Edit Role') && (
+          {/* {hasPermission('Edit Role') && ( */}
             <button
               onClick={() => {
                 dispatch(setSelectedRole(row));
@@ -221,8 +222,8 @@ export default React.memo(function Roles() {
             >
               <FaEdit />
             </button>
-          )}
-          {hasPermission('Delete Role') && (
+          {/* )} */}
+          {hasPermission(toSentenceCase('Delete Role')) && (
             <button
               onClick={() => handleDeleteClick(row)}
               className="text-red-500 hover:text-red-700"
@@ -230,7 +231,7 @@ export default React.memo(function Roles() {
               <FaTrash />
             </button>
           )}
-          {hasPermission('View Role Details') && (
+          {hasPermission(toSentenceCase('View Role Details')) && (
             <button
               onClick={() => {
                 handleViewClick(row);
@@ -245,7 +246,7 @@ export default React.memo(function Roles() {
       ),
       width: "160px",
     },
-    ]: [])
+    // ]: [])
   ];
 
 
@@ -269,14 +270,14 @@ export default React.memo(function Roles() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
         />
-        {hasPermission('Create Role') && (
+        {hasPermission(toSentenceCase('Create Role')) && (
           <Button
-          name="Create Role"
-          type="button"
-          onClick={() => toggleAddDrawer(true)}
-          className='w-full md:w-auto bg-primary'
+            name="Create Role"
+            type="button"
+            onClick={() => toggleAddDrawer(true)}
+            className="w-full md:w-auto bg-primary"
           />
-         )} 
+        )}
         <Tooltip
           title="Roles define what users can do and see within the system."
           arrow

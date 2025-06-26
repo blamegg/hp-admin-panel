@@ -9,6 +9,9 @@ import { MdDeleteOutline } from "react-icons/md";
 import { permissionsFn, createPermissionFn, updatePermissionFn, deletePermissionFn, } from '@/utility/queryFetcher';
 import EditPermissionModal from "./EditPermissionModal";
 import AddPermissionModal from "./AddPermissionModal";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserPermissions } from '@/redux/slice/authSlice';
+import { RootState } from '@/redux/store';
 
 
 // Define interfaces for your permission data and API response
@@ -41,6 +44,8 @@ const PermissionsPage = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [limit, setLimit] = React.useState(10);
   const [totalDocument, setTotalDocument] = useState(0);
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.authReducer.user);
 
   // Function to fetch permissions
   const fetchPermissions = async () => {
@@ -69,33 +74,33 @@ const PermissionsPage = () => {
   // Handlers for CRUD operations (you'll implement the actual API calls)
   const handleAddPermission = async (name: string, menuId: string, subMenuId: string | null, isActive: boolean) => {
     try {
-      await createPermissionFn({ name, menuId, subMenuId, isActive }); // This function needs to be implemented
-      fetchPermissions(); // Refresh the list after adding
-      setIsAddModalOpen(false); // Close modal
+      await createPermissionFn({ name, menuId, subMenuId, isActive });
+      fetchPermissions();
+      if (user?.role?._id) dispatch(fetchUserPermissions(user.role._id));
+      setIsAddModalOpen(false);
     } catch (err: any) {
       console.error('Failed to add permission:', err);
-      // Handle error (e.g., show a toast notification)
     }
   };
 
   const handleEditPermission = async (name: string, menuId: string, subMenuId: string | null, isActive: boolean, id: string) => {
     try {
-      await updatePermissionFn({ name, menuId, subMenuId, isActive }, id); // This function needs to be implemented
-      fetchPermissions(); // Refresh the list after editing
-      setIsEditModalOpen(false); // Close modal
+      await updatePermissionFn({ name, menuId, subMenuId, isActive }, id);
+      fetchPermissions();
+      if (user?.role?._id) dispatch(fetchUserPermissions(user.role._id));
+      setIsEditModalOpen(false);
     } catch (err: any) {
       console.error('Failed to edit permission:', err);
-      // Handle error
     }
   };
 
   const handleDeletePermission = async (id: string) => {
     try {
-      await deletePermissionFn(id); // This function needs to be implemented
-      fetchPermissions(); // Refresh the list after deleting
+      await deletePermissionFn(id);
+      fetchPermissions();
+      if (user?.role?._id) dispatch(fetchUserPermissions(user.role._id));
     } catch (err: any) {
       console.error('Failed to delete permission:', err);
-      
     }
   };
 

@@ -4,9 +4,10 @@ import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/takenLeaveSclice';
 import { AppDispatch } from '@/redux/store';
 import { approveRejectLeaveFn } from '@/utility/queryFetcher';
 import { Drawer } from '@mui/material'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface EditTakenLeaveProps {
   toggleDrawer: (open: boolean) => void;
@@ -17,34 +18,41 @@ interface EditTakenLeaveProps {
 const EditTakenLeave = ({ toggleDrawer, isEditTakenLeaveDrawerShowing, selectedLeave }: EditTakenLeaveProps) => {
 
   const dispatch = useDispatch<AppDispatch>();
+  const queryClient = useQueryClient();
 
-  const handleApproveLeave = async ()=>{
-    if(!selectedLeave){
-      return;
+  // State for status and reason
+  const [status, setStatus] = useState('');
+  const [reason, setReason] = useState('');
+
+  // Update state when selectedLeave changes
+  useEffect(() => {
+    if (selectedLeave) {
+      setStatus(selectedLeave.status || 'Pending');
+      setReason('');
     }
-    try {
-      await approveRejectLeaveFn(selectedLeave._id, 'Approved');
-      toast.success("Leave application approved")
+  }, [selectedLeave]);
+
+  const mutation = useMutation({
+    mutationFn: ({ id, status, reason }: { id: string, status: string, reason: string }) =>
+      approveRejectLeaveFn(id, { status, reason }),
+    onSuccess: () => {
+      toast.success(`Leave application ${status.toLowerCase()}`);
       dispatch(fetchTakenLeaves());
       toggleDrawer(false);
-    } catch (error:any) {
-      toast.error(error?.response?.data?.message)
+      queryClient.invalidateQueries(['takenLeaves']);
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "An error occurred");
     }
-  }
+  });
 
-  const hanldeRejectLeave = async ()=>{
-    if(!selectedLeave){
+  const handleSubmit = () => {
+    if (!selectedLeave || !status) {
+      toast.error("Please select a status.");
       return;
     }
-    try {
-      await approveRejectLeaveFn(selectedLeave._id, "Rejected");
-      toast.success("Leave application rejected")
-      dispatch(fetchTakenLeaves());
-      toggleDrawer(false);
-    } catch (error:any) {
-      toast.error(error?.response?.data?.message)
-    }
-  }
+    mutation.mutate({ id: selectedLeave._id, status, reason });
+  };
 
   return (
     <Drawer
@@ -52,54 +60,71 @@ const EditTakenLeave = ({ toggleDrawer, isEditTakenLeaveDrawerShowing, selectedL
       open={isEditTakenLeaveDrawerShowing}
       PaperProps={{
         sx: {
-          width: "30%"
+          width: { md: "30%" }
         }
       }}
     >
-      <ModalHeader text='Leave Details' toggleDrawer={() => toggleDrawer(false)} />
-      <div className="p-6 pt-4 pb-24">
+      <ModalHeader text='Leave Confirmation' toggleDrawer={() => toggleDrawer(false)} />
+      <div className="p-6 pt-4 ">
         {selectedLeave ? (
-          <div className="space-y-4 text-sm text-gray-700">
+          <div className="space-y-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-600 ">User name</span>
+              <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>{selectedLeave.user_details?.name || 'N/A'}</p>
+            </div>
             <div className='grid grid-cols-2 items-center gap-3'>
-              <div >
-                <span className="font-medium text-gray-600 ">Leave Type</span>
-                <p className='px-1 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>{selectedLeave.leave_type?.name || 'N/A'}</p>
+              <div>
+                <span className="font-medium text-gray-600 ">Leave type</span>
+                <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>{selectedLeave.leave_type?.name || 'N/A'}</p>
               </div>
-              <div >
+              <div>
                 <span className="font-medium text-gray-600 ">Mode</span>
-                <p className='px-1 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200 '>{selectedLeave.leave_mode}</p>
+                <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200 '>{selectedLeave.leave_mode}</p>
               </div>
             </div>
             <div className='grid grid-cols-2 items-center gap-3'>
-              <div >
+              <div>
                 <span className="font-medium text-gray-600">From</span>
-                <p className='px-1 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>
-                  {selectedLeave.start_date}
+                <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>
+                  {new Date(selectedLeave.start_date).toLocaleDateString()}
                 </p>
               </div>
               <div>
                 <span className="font-medium text-gray-600">To</span>
-                <p className='px-1 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>
-                  {selectedLeave.end_date}
+                <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>
+                  {new Date(selectedLeave.end_date || '').toLocaleDateString()}
                 </p>
               </div>
-            </div>
-            <div className='grid grid-cols-2 items-center gap-3'>
-              <div >
-                <span className="font-medium text-gray-600">Status:</span>
-                <p className='px-1 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>{selectedLeave.status}</p>
-              </div>
-              {selectedLeave.half_day_session && (
-                <div >
-                  <span className="font-medium text-gray-600">Half Day Session:</span>
-                  <p className='px-1 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>{selectedLeave.half_day_session}</p>
-                </div>
-              )}
             </div>
 
             <div>
               <span className="font-medium text-gray-600">Description:</span>
-              <p className="px-1 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200">{selectedLeave.description || '-'}</p>
+              <p className="px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200">{selectedLeave.description || '-'}</p>
+            </div>
+            <div>
+              <label htmlFor="status" className="font-medium text-gray-600">Status</label>
+              <select
+                id="status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full px-2 rounded-md shadow-sm py-1.5 mt-1  bg-blue-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="reason" className="font-medium text-gray-600">Reason</label>
+              <textarea
+                id="reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={4}
+                className="w-full px-2 rounded-md shadow-sm py-1 mt-1 bg-blue-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Enter reason..."
+              />
             </div>
           </div>
         ) : (
@@ -112,15 +137,10 @@ const EditTakenLeave = ({ toggleDrawer, isEditTakenLeaveDrawerShowing, selectedL
 
         <Button
           type="button"
-          name="Reject"
-          className="bg-danger text-white min-w-[100px] transition-colors duration-200"
-          onClick={hanldeRejectLeave}
-        />
-        <Button
-          type="button"
-          name="Approve"
+          name={mutation.isLoading ? "Submitting..." : "Submit"}
           className="bg-success text-white min-w-[100px] transition-colors duration-200"
-          onClick={handleApproveLeave}
+          onClick={handleSubmit}
+          disabled={mutation.isLoading}
         />
       </div>
     </Drawer>
