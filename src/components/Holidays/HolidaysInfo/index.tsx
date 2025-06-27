@@ -39,12 +39,14 @@ const HolidayInfo = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Holiday Calendar</h1>
-      <Calendar
-        onClickDay={handleDateClick}
-        className="rounded-lg shadow border"
-      />
+    <div className="w-screen h-screen p-0 m-0 flex flex-col bg-white">
+      <h1 className="text-2xl font-bold mb-4 p-4 bg-white shadow sticky top-0 z-10">Holiday Calendar</h1>
+      <div className="flex-1 flex items-center justify-center">
+        <Calendar
+          onClickDay={handleDateClick}
+          className="rounded-lg shadow border"
+        />
+      </div>
       <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)} PaperProps={{ sx: { width: '30%' } }}>
         <ModalHeader text="Create Holiday" toggleDrawer={() => setDrawerOpen(false)} />
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -66,7 +68,7 @@ const HolidayInfo = () => {
               value={holidayName}
               onChange={e => setHolidayName(e.target.value)}
               placeholder="Enter holiday name or description"
-              required
+              type="text"
             />
           </div>
           <div className="flex justify-end gap-2 border-t-2 border-gray pt-4">

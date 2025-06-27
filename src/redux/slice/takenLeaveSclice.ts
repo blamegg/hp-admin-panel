@@ -16,6 +16,7 @@ export interface AppliedLeave {
     name:string;
     _id:string;
   };
+  days_count:number
   reason?: string;
 }
 

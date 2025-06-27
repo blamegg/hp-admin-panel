@@ -5,6 +5,7 @@ import { twMerge } from "tailwind-merge";
 
 interface ButtonProps {
   name: string;
+  children?: React.ReactNode;
   onClick?: () => void;
   type: "submit" | "reset" | "button" | undefined;
   disabled?:boolean;
@@ -17,6 +18,7 @@ interface ButtonProps {
 
 const Button = ({
   name,
+  children,
   onClick,
   type,
   className,
@@ -41,7 +43,6 @@ const Button = ({
         loading && "cursor-not-allowed opacity-70",
         className,
       )}
-      // style={{backgroundColor:`${color}`}}
     >
       {loading ? (
         <>
@@ -55,10 +56,10 @@ const Button = ({
               borderTopColor: "#fff",
             }}
           ></span>
-          <span className="opacity-0">{name}</span>
+          <span className="opacity-0">{name || children}</span>
         </>
       ) : (
-        name
+         children || name
       )}
     </button>
   );

@@ -30,7 +30,6 @@ export const useHasPermission = () => {
     (state: RootState) => state.authReducer.permissions,
   );
 
-  console.log(permissions)
 
   const hasPermission = useMemo(() => {
     return (permissionKey: string): boolean => {

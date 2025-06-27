@@ -7,7 +7,10 @@ import messageReducer from "./slice/MessageSlice";
 import menuReducer from "./slice/menuList";
 import roleReducer from "./slice/roleSlice";
 import leaveReducer from "./slice/leaveTypesSlice";
-import takenLeaveReducer from './slice/takenLeaveSclice'
+import takenLeaveReducer from './slice/takenLeaveSclice';
+import leaveTypesList from './slice/leaveTypesListSlice';
+import leaveModes from './slice/leaveModeListSlice';
+
 
 const authPersistConfig = {
   key: "auth",
@@ -23,8 +26,10 @@ const store = configureStore({
     message: messageReducer,
     menu: menuReducer,
     role: roleReducer,
+    appliedLeaves: takenLeaveReducer,
+    leaveModes: leaveModes,
     leaveTypes: leaveReducer,
-    appliedLeaves: takenLeaveReducer
+    leaveTypesList: leaveTypesList
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -1,3 +1,4 @@
+import { AppliedLeave } from "@/redux/slice/takenLeaveSclice";
 import { apiClient, ApiEndpoints } from "./api";
 
 export interface CreatedBy {
@@ -125,6 +126,18 @@ export interface ApplyLeaveInterface {
   half_day_session?: string | null
 }
 
+// fetch leave mode list only to show in the dropwen while creating , updating the leaves
+export const fetchLeaveTypesListFn = async ()=>{
+  const response = await apiClient.get(ApiEndpoints.leaveTypeList);
+  return response.data;
+}
+
+// fetch leave mode list only to show in the dropwen while creating , updating the leaves
+export const fetchLeaveModeListFn = async ()=>{
+  const response = await apiClient.get(ApiEndpoints.leaveModeList);
+  return response.data;
+}
+
 
 
 // fetch menu list
@@ -139,7 +152,6 @@ export const dynamicMenuListFn = async () => {
   return response.data;
 };
 
-
 // fetch user list
 export const usersFn = async (page: number = 1, limit: number = 10, search?: string, searchBasis?: string) => {
   let url = `${ApiEndpoints.users}?page=${page}&limit=${limit}`;
@@ -152,7 +164,6 @@ export const usersFn = async (page: number = 1, limit: number = 10, search?: str
   return response.data;
 };
   
-
 // create user
 export const createUserFn = async (payload: any) => {
   const response = await apiClient.post(ApiEndpoints.users, payload);
@@ -184,14 +195,11 @@ export const updateUserFn = async (payload: any, userId: string) => {
   return response.data;
 };
 
-
-
 // delete user
 export const deleteUserFn = async (userId: string) => {
   const response = await apiClient.delete(`${ApiEndpoints.users}/${userId}`);
   return response.data;
 };
-
 
 // fetch roles
 export const rolesFn = async (page: number, limit: number) => {
@@ -270,6 +278,7 @@ export const fetchLeaveTypesFn = async ()=>{
   return response.data;
 }
 
+
 // delete leave
 export const deleteLeaveTypesFn = async (leaveId: string) => {
   const response = await apiClient.delete(`${ApiEndpoints.leaveType}/${leaveId}`);
@@ -307,7 +316,6 @@ export const fetchTakenLeaveListFn = async (params: {
     url += `?${queryParams.toString()}`;
   }
   const response = await apiClient.get(url);
-  console.log(response) 
   return response.data;
 };
 
@@ -320,10 +328,16 @@ export const applyLeaveFn = async (payload: ApplyLeaveInterface) => {
 
 // Approve or Reject leave application
 export const approveRejectLeaveFn = async(leaveId:string, payload:{status:string, reason: string})=>{
-  console.log(payload)
     const response = await apiClient.put(`${ApiEndpoints.leaves}/status/${leaveId}`, payload);
     return response.data;
 }
+
+// delete Leave Application
+export const updateAppliedLeaveFn = async(leaveId:string, payload: any)=>{
+    const response = await apiClient.put(`${ApiEndpoints.leaves}/${leaveId}`, payload);
+    return response.data;
+}
+
 // delete Leave Application
 export const deleteLeaveFn = async(leaveId:string)=>{
     const response = await apiClient.delete(`${ApiEndpoints.leaves}/${leaveId}`);

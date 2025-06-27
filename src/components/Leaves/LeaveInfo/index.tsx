@@ -3,19 +3,18 @@ import React, { useEffect, useState } from "react";
 import { FaCalendarAlt, FaCheck, FaClipboardList, FaHeartbeat } from "react-icons/fa";
 import LeaveForm from "./LeaveForm";
 import Button from "../../common/Button";
-import TakenLeaves from "./TakenLeaves";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
 import { fetchTakenLeaves } from "@/redux/slice/takenLeaveSclice";
 import { fetchLeaveType } from "@/redux/slice/leaveTypesSlice";
-import FilterDatePicker from "../../FormElements/DatePicker/FilterDatePicker";
 import Select from "../../common/Select";
 import Input from "../../common/Input";
 import CustomPagination from "@/components/CustomPagination";
-import EditTakenLeave from "./EditTakenLeaveDrawer";
 import { useHasPermission } from "@/hooks/useUserPermissions";
 import { toSentenceCase } from '@/utility/helper';
+import TakenLeaves from "./TakenLeaves";
+
 
 interface LeaveRecord {
   totalLeaves: number;
@@ -33,7 +32,6 @@ const leaveRecord: LeaveRecord = {
 
 const LeaveInfo: React.FC = () => {
   const [isLeaveFormShowing, setIsLeaveFormShowing] = useState(false);
-
   const [status, setStatus] = useState("");
   const [leaveTypeId, setLeaveTypeId] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -46,9 +44,9 @@ const LeaveInfo: React.FC = () => {
   const leaveState = useSelector((state: RootState) => state.appliedLeaves);
   const { leaveTypes } = useSelector((state: RootState) => state.leaveTypes);
 
+  console.log("state:< ", leaveState)
+
   const hasPermission = useHasPermission();
-
-
 
   const statusOptions = [
     { value: "Pending", label: "Pending" },
@@ -56,15 +54,17 @@ const LeaveInfo: React.FC = () => {
     { value: "Rejected", label: "Rejected" },
   ];
 
-  const leaveTypeOptions = leaveTypes.map(type => ({
-    value: type._id,
-    label: type.name,
-  }));
+
+  const leaveTypeOptions = Array.isArray(leaveTypes)
+    ? leaveTypes.map(type => ({
+        value: String(type._id),
+        label: String(type.name)
+      }))
+    : [];
 
   const toggleLeaveFormDrawer = (value: boolean) => {
     setIsLeaveFormShowing(value);
   }
-
 
   useEffect(() => {
     dispatch(fetchLeaveType());
@@ -136,67 +136,77 @@ const LeaveInfo: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 md:flex items-center gap-4  w-full mb-4 ">
-        <div className="w-full">
-          <Select
-            label="Status"
-            options={statusOptions}
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          />
-        </div>
-        <div className="w-full">
-          <Select
-            label="Leave type"
-            options={leaveTypeOptions}
-            value={leaveTypeId}
-            onChange={(e) => setLeaveTypeId(e.target.value)}
-          />
-        </div>
-        <div className="w-full">
-          <Input
-            label="Start date"
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            placeholder="Start Date"
-          />
-        </div>
 
-        <div className="w-full">
-          <Input
-            label="End date"
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            placeholder="End Date"
-          />
-        </div>
-        {hasPermission(toSentenceCase('Create Leave')) && (
-          <div className="self-end w-full">
-            <Button
-              name="Apply Leave"
-              type="button"
-              onClick={() => toggleLeaveFormDrawer(true)}
-              className=" bg-primary"
+      {/* Filter */}
+      {hasPermission("View leaves list") && (
+        <>
+          {hasPermission("View leaves list") && (
+            <div className="grid grid-cols-2 md:flex items-center gap-4  w-full mb-4 ">
+              <div className="w-full">
+                <Select
+                  label="Status"
+                  options={statusOptions}
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                />
+              </div>
+              <div className="w-full">
+                <Select
+                  label="Leave type"
+                  options={leaveTypeOptions}
+                  value={leaveTypeId}
+                  onChange={(e) => setLeaveTypeId(e.target.value)}
+                />
+              </div>
+              <div className="w-full">
+                <Input
+                  label="Start date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  placeholder="Start Date"
+                />
+              </div>
+
+              <div className="w-full">
+                <Input
+                  label="End date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  placeholder="End Date"
+                />
+              </div>
+              {hasPermission(toSentenceCase('Create Leave')) && (
+                <div className="self-end w-full">
+                  <Button
+                    name="Apply Leave"
+                    type="button"
+                    onClick={() => toggleLeaveFormDrawer(true)}
+                    className=" bg-primary"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          <div className="max-w-full overflow-x-auto">
+            <TakenLeaves
+              leaves={leaveState.appliedLeaves}
+              loading={leaveState.loading}
+              currentPage={currentPage}
+              rowsPerPage={rowsPerPage}
             />
           </div>
-        )}
-      </div>
-      <TakenLeaves
-        leaves={leaveState.appliedLeaves}
-        loading={leaveState.loading}
-        currentPage={currentPage}
-        rowsPerPage={rowsPerPage}
-      />
+          <CustomPagination
+            rowsPerPage={leaveState?.pagination?.limit || 10}
+            currentPage={leaveState?.pagination?.currentPage || 1}
+            rowCount={leaveState?.pagination?.total || 0}
+            onChangePage={handlePageChange}
+            onChangeRowsPerPage={handleRowsPerPageChange}
+          />
+        </>
+      )}
       <LeaveForm isLeaveFormShowing={isLeaveFormShowing} toggleDrawer={toggleLeaveFormDrawer} />
-      <CustomPagination
-        rowsPerPage={leaveState?.pagination?.limit || 10}
-        currentPage={leaveState?.pagination?.currentPage || 1}
-        rowCount={leaveState?.pagination?.total || 0}
-        onChangePage={handlePageChange}
-        onChangeRowsPerPage={handleRowsPerPageChange}
-      />
     </div>
   );
 };

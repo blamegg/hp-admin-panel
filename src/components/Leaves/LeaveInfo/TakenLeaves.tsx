@@ -1,24 +1,13 @@
-import { Card, Tooltip, Typography } from '@mui/material'
-import React, { useEffect, useState } from 'react'
-import Button from '../../common/Button';
-import { useSelector, useDispatch } from 'react-redux';
-import { AppDispatch, RootState } from '@/redux/store';
-import Loader from '../../common/Loader';
-import { fetchTakenLeaves } from '@/redux/slice/takenLeaveSclice';
+import { Tooltip } from '@mui/material'
+import React, { useState } from 'react'
 import DataTable from "react-data-table-component";
 import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
-import { TbLockOff } from 'react-icons/tb';
 import { AppliedLeave } from '@/redux/slice/takenLeaveSclice';
-import EditTakenLeave from './EditTakenLeaveDrawer';
-import { deleteLeaveFn } from '@/utility/queryFetcher';
+import EditTakenLeave from './ApproveTakenLeaveDrawer';
 import DeleteTakenLeaveDrawer from './DeleteTakenLeaveDrawer';
-import { maxWidth, minWidth } from '@mui/system';
 import ViewTakenLeaveDrawer from './ViewTakenLeaveDrawer';
+import UpdateTakenLeaveDrawer from './UpdateTakenLeaveDrawer';
 
-interface LeaveType {
-  _id: string;
-  name: string;
-}
 
 const StatusBadge = ({ status }: { status: string }) => {
   const baseClasses = "px-1.5 py-[3px]   rounded-full";
@@ -26,7 +15,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 
   switch (status?.toLowerCase()) {
     case 'pending':
-      statusClasses = "bg-yellow-100 text-yellow-800";
+      statusClasses = "bg-warning text-white ";
       break;
     case 'approved':
       statusClasses = "bg-success text-white";
@@ -53,10 +42,10 @@ interface TakenLeavesProps {
 }
 
 const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage, rowsPerPage }) => {
-
   const [isEditTakenLeaveDrawerShowing, setIsEditTakenLeaveDrawerShowing] = useState(false);
   const [isDeleteTakenLeaveDrawerShowing, setIsDeleteTakenLeaveDrawerShowing] = useState(false);
-  const [isViewTakenLeaveDrawerShowing, setIsViewTakenLeaveDrawerShowing] = useState(false);
+  const [isViewDrawerOpen, setIsViewDrawerOpen] = useState(false);
+  const [isUpdateDrawerOpen, setIsUpdateDrawerOpen] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState<AppliedLeave | null>(null);
 
   const toggleEditTakenLeaveDrawer = (value: boolean) => {
@@ -65,10 +54,19 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
   const toggleDeleteTakenLeaveDrawer = (value: boolean) => {
     setIsDeleteTakenLeaveDrawerShowing(value);
   }
-  const toggleViewTakenLeaveDrawer = (value: boolean) => {
-    setIsViewTakenLeaveDrawerShowing(value);
-  }
 
+  const handleOpenViewDrawer = (leave: AppliedLeave) => {
+    setSelectedLeave(leave);
+    setIsViewDrawerOpen(true);
+  };
+
+  const handleUpdate = (leave: AppliedLeave) => {
+    setSelectedLeave(leave);
+    setIsViewDrawerOpen(false);
+    setIsUpdateDrawerOpen(true);
+  };
+
+  
   const columns = [
     {
       name: "S No",
@@ -89,7 +87,7 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
       name: "Leave Type",
       cell: (row: AppliedLeave) => (
         <div style={{ minWidth: "100px", maxWidth: "auto" }}>
-          {row.leave_type?.name || 'N/A'}
+          {typeof row.leave_type === 'object' ? row.leave_type.name : row.leave_type || 'N/A'}
         </div>
       ),
       sortable: true,
@@ -102,29 +100,21 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
         </div>
       ),
       sortable: true,
-
     },
     {
-      name: "From",
-      cell: (row: AppliedLeave) => (
-        <div style={{ minWidth: "100px", maxWidth: "auto" }}>
-          {formatDate(row?.start_date)}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "To",
+      name: "Dates",
       cell: (row: AppliedLeave) => (
         <div style={{ minWidth: "120px", maxWidth: "auto" }}>
-          {`${formatDate(row?.end_date || "")}`}
+          {row.leave_mode === 'Multi-Days' && Array.isArray((row as any).dates) && (row as any).dates.length > 0
+            ? 'Multi'
+            : formatDate(row?.start_date)}
         </div>
       ),
       sortable: true,
     },
     {
       name: "Days",
-      cell: (row: AppliedLeave) => row?.leave_type?.total_days,
+      cell: (row: AppliedLeave) => row?.days_count,
       sortable: true,
       width: "75px"
     },
@@ -145,7 +135,7 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
       cell: (row: any) => (
         <div className="flex gap-3">
           <Tooltip
-            title="Edit Leave">
+            title="Approve Leave">
             <button
               onClick={() => {
                 setSelectedLeave(row);
@@ -160,8 +150,7 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
           <Tooltip title="View leave">
             <button
               onClick={() => {
-                setSelectedLeave(row)
-                toggleViewTakenLeaveDrawer(true)
+                handleOpenViewDrawer(row);
               }}
               className="text-red-500 "
             >
@@ -264,9 +253,15 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
         selectedLeave={selectedLeave}
       />
       <ViewTakenLeaveDrawer
-        toggleDrawer={toggleViewTakenLeaveDrawer}
-        isViewTakenLeaveDrawerShowing={isViewTakenLeaveDrawerShowing}
         selectedLeave={selectedLeave}
+        isViewTakenLeaveDrawerShowing={isViewDrawerOpen}
+        toggleDrawer={setIsViewDrawerOpen}
+        onUpdate={handleUpdate}
+      />
+      <UpdateTakenLeaveDrawer
+        selectedLeave={selectedLeave}
+        isUpdateDrawerShowing={isUpdateDrawerOpen}
+        toggleDrawer={setIsUpdateDrawerOpen}
       />
     </div>
   );

@@ -14,7 +14,9 @@ export const ApiEndpoints = {
   users: "/api/v1/users",
   roles: "/api/v1/roles",
   leaves:"/api/v1/leaves",
+  leaveModeList:"/api/v1/leaves/leave-modes",
   leaveType:"/api/v1/leaveTypes",
+  leaveTypeList:"/api/v1/leaveTypes/leave-type-dropdown",
   permissions: `/api/v1/rolePermissionMenu`,
   changePassword: "/api/v1/change-password",
 };
