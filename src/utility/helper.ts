@@ -30,9 +30,11 @@ export function formatTimestamp(timestamp: string) {
 
 // set token
 export function setTokenCookie(token: string) {
+  console.log("Setting token cookie:", token ? "token exists" : "no token");
   Cookies.set("token", token, {
     expires: 1,
     sameSite: "strict",
+    secure: process.env.NODE_ENV === "production", // Only secure in production
   });
 }
 

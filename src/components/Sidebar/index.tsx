@@ -68,6 +68,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     },
   ] : [];
 
+  // console.log("dynamica menu list: ", dynamicMenuList)
+
 
   // Navigation function to change password page
   const handleChangePassword = () => {

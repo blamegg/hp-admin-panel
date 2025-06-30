@@ -49,10 +49,12 @@ export const Signin = () => {
   );
 
   useEffect(() => {
-    if (user) {
+    console.log("Signin useEffect triggered:", { user, loginStatus });
+    if (user && loginStatus === "success") {
+      console.log("Navigating to dashboard...");
       router.push("/dashboard");
     }
-  }, [router, user]);
+  }, [router, user, loginStatus]);
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -72,7 +74,6 @@ export const Signin = () => {
       toastMessage = result.message || "Login successful!";
       if (typeof toastMessage !== "string") toastMessage = "unknown error";
       toast.success(toastMessage);
-      router.push("/dashboard");
       reset();
     } catch (error: any) {
       toastMessage = error || "Login failed. Please try again.";

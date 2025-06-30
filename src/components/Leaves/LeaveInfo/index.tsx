@@ -14,6 +14,7 @@ import CustomPagination from "@/components/CustomPagination";
 import { useHasPermission } from "@/hooks/useUserPermissions";
 import { toSentenceCase } from '@/utility/helper';
 import TakenLeaves from "./TakenLeaves";
+import useDebounce from '@/hooks/useDebounce';
 
 
 interface LeaveRecord {
@@ -38,6 +39,13 @@ const LeaveInfo: React.FC = () => {
   const [endDate, setEndDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const debouncedStatus = useDebounce(status, 500);
+  const debouncedLeaveTypeId = useDebounce(leaveTypeId, 500);
+  const debouncedStartDate = useDebounce(startDate, 500);
+  const debouncedEndDate = useDebounce(endDate, 500);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -78,18 +86,20 @@ const LeaveInfo: React.FC = () => {
       end_date?: string;
       page?: number;
       limit?: number;
+      name?: string;
     } = {
       page: currentPage,
       limit: rowsPerPage,
     };
 
-    if (status) searchParams.status = status;
-    if (leaveTypeId) searchParams.leave_type = leaveTypeId;
-    if (startDate) searchParams.start_date = startDate;
-    if (endDate) searchParams.end_date = endDate;
+    if (debouncedStatus) searchParams.status = debouncedStatus;
+    if (debouncedLeaveTypeId) searchParams.leave_type = debouncedLeaveTypeId;
+    if (debouncedStartDate) searchParams.start_date = debouncedStartDate;
+    if (debouncedEndDate) searchParams.end_date = debouncedEndDate;
+    if (debouncedSearchQuery) searchParams.name = debouncedSearchQuery;
 
     dispatch(fetchTakenLeaves(searchParams));
-  }, [dispatch, status, leaveTypeId, startDate, endDate, currentPage, rowsPerPage]);
+  }, [dispatch, debouncedStatus, debouncedLeaveTypeId, debouncedStartDate, debouncedEndDate, debouncedSearchQuery, currentPage, rowsPerPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -141,7 +151,16 @@ const LeaveInfo: React.FC = () => {
       {hasPermission("View leaves list") && (
         <>
           {hasPermission("View leaves list") && (
-            <div className="grid grid-cols-2 md:flex items-center gap-4  w-full mb-4 ">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 items-center gap-4 w-full mb-4">
+              <div className="w-full">
+                <Input
+                    label="Search by name"
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by name"
+                />
+              </div>
               <div className="w-full">
                 <Select
                   label="Status"
@@ -212,3 +231,5 @@ const LeaveInfo: React.FC = () => {
 };
 
 export default LeaveInfo;
+
+

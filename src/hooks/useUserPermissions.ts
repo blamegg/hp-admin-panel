@@ -24,22 +24,9 @@ export const useUserPermissions = () => {
 
 // Reusable hook to get hasPermission function
 export const useHasPermission = () => {
-
-
-  const permissions = useSelector(
-    (state: RootState) => state.authReducer.permissions,
-  );
-
-
-  const hasPermission = useMemo(() => {
-    return (permissionKey: string): boolean => {
-      if (!permissions || !Array.isArray(permissions)) {
-        return false;
-      }
-      return permissions.includes(permissionKey);
-    };
-  }, [permissions]);
+  const permissions = useSelector((state: RootState) => state?.authReducer?.permissions);
+  // console.log(permissions)
+  const hasPermission = (permissionKey: string): boolean => permissions.includes(permissionKey)
 
   return hasPermission;
-};
-
+}; 

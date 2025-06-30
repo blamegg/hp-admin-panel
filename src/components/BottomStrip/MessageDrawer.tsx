@@ -1,10 +1,10 @@
 "use client";
 import { Drawer } from "@mui/material";
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDirection } from "@/context/DirectionContext";
 import ModalHeader from "../common/ModalHeader";
 import WriteMessage from "../Message/WriteMessage";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import MessageList from "../Message/MessageList";
 import MessageBox from "../Message/MessageBox";
@@ -35,12 +35,11 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
     null,
   );
   const messageEndRef = useRef<HTMLDivElement | null>(null);
-  const dispatch = useDispatch();
-
-  // Memoize the selector to prevent unnecessary rerenders
- const messages = useSelector((state: RootState) => state.messageReducer?.messages || []);
-
-
+  const userMessages = useSelector(
+    (state: RootState) =>
+      state.message.users.find((user) => user.userId === selectedUser?.userId)
+        ?.messages || [],
+  );
 
   useEffect(() => {
     if (!!!isDrawerOpen) {
@@ -59,7 +58,7 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, selectedUser]);
+  }, [userMessages, selectedUser]);
 
   const handleCloseDrawer = () => {
     toggleDrawer(false);
@@ -96,8 +95,8 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
           )}
 
           <div className="mt-5 max-h-[calc(100vh-220px)] overflow-y-scroll px-2">
-            {selectedUser && Array.isArray(messages) &&
-              messages.map((msg, index) => (
+            {selectedUser &&
+              userMessages.map((msg, index) => (
                 <MessageBox
                   key={index}
                   role={msg.role}
@@ -107,9 +106,7 @@ const MessageDrawer = ({ isDrawerOpen, toggleDrawer }: UserDrawerProps) => {
                 >
                   {msg.message}
                 </MessageBox>
-              ))
-            }
-
+              ))}
             <div ref={messageEndRef} />
           </div>
 

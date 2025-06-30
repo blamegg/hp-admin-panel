@@ -20,6 +20,7 @@ import { TbLockOff } from "react-icons/tb";
 import { toast } from "sonner";
 import { useMenuList } from "@/hooks/useMenuList";
 import { useUserPermissions, useHasPermission } from '@/hooks/useUserPermissions';
+import useDebounce from "@/hooks/useDebounce";
 
 
 const UserTable = () => {
@@ -36,6 +37,8 @@ const UserTable = () => {
   const [selected, setSelected] = useState(null);
   const pathname = usePathname();
   const [showSearchBar, setShowSearchBar] = useState(false);
+  
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   useMenuList();
   useUserPermissions();
@@ -58,10 +61,10 @@ const UserTable = () => {
 
   // Use server-side pagination with search
   const { data: userList, isLoading } = useQuery({
-    queryKey: ["users", currentPage, rowsPerPage, searchQuery, searchBasis],
+    queryKey: ["users", currentPage, rowsPerPage, debouncedSearchQuery, searchBasis],
     queryFn: async () => {
      
-      const result = await usersFn(currentPage, rowsPerPage, searchQuery, searchBasis);
+      const result = await usersFn(currentPage, rowsPerPage, debouncedSearchQuery, searchBasis);
       return result;
     },
     refetchOnWindowFocus: false,
@@ -86,10 +89,10 @@ const UserTable = () => {
   // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, searchBasis]);
+  }, [debouncedSearchQuery, searchBasis]);
 
   // Handle search with debounce
-  useEffect(() => {
+  /* useEffect(() => {
     if (!showSearchBar) return; // Don't run if not on users page
     
     const timeoutId = setTimeout(() => {
@@ -100,7 +103,7 @@ const UserTable = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, searchBasis, queryClient, showSearchBar]);
+  }, [searchQuery, searchBasis, queryClient, showSearchBar]); */
 
   // Auto-refresh to detect blocked users
   useEffect(() => {

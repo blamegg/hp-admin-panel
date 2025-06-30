@@ -81,7 +81,7 @@ const DeleteLeave = ({ open, toggleDrawer, direction, selected, setSelected, fet
             <div className="rounded-full border-[3px] border-black bg-[#FCFCFC] p-2">
               <AiOutlineDelete className="text-red-600 text-[50px] text-companyRed" />
             </div>
-            <h2 className="mt-2 text-xl font-semibold">You are about to delete a leave</h2>
+            <h2 className="mt-2 text-xl font-semibold text-center">You are about to delete a leave</h2>
             <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
               Are you sure you want to delete '{selected?.name}' leave?
             </h3>

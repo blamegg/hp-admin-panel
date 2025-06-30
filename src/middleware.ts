@@ -7,6 +7,7 @@ export function middleware(request: NextRequest) {
 
   // Define public paths that do not require authentication
   const isPublicPath = 
+    path === '/' ||
     path === '/auth/signin' ||
     path === '/auth/signup' ||
     path === '/forgotPassword' ||

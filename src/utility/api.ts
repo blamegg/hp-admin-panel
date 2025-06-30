@@ -8,17 +8,17 @@ export const apiClient = api.create({
 
 export const ApiEndpoints = {
   menus:"/api/v1/menus",
+  permissions: `/api/v1/rolePermissionMenu`,
   login: "/api/v1/login",
   register: "/api/v1/signup",
   logout: "/api/v1/logout",
+  changePassword: "/api/v1/change-password",
   users: "/api/v1/users",
   roles: "/api/v1/roles",
   leaves:"/api/v1/leaves",
-  leaveModeList:"/api/v1/leaves/leave-modes",
   leaveType:"/api/v1/leaveTypes",
-  leaveTypeList:"/api/v1/leaveTypes/leave-type-dropdown",
-  permissions: `/api/v1/rolePermissionMenu`,
-  changePassword: "/api/v1/change-password",
+  holidays:"/api/v1/holidays",
+  holidayTypes: "/api/v1/holidayTypes",
 };
 
 apiClient.interceptors.request.use(

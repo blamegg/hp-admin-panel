@@ -5,18 +5,23 @@ export interface AppliedLeave {
   _id: string;
   leave_type: any;
   leave_mode: string;
-  start_date: string;
-  end_date?: string ;
+  start_date?: string | null;
+  end_date?: string | null;
+  dates?: string[];
   description?: string;
+  half_day?: boolean;
   half_day_session?: string;
   status: string;
   createdAt: string;
   updatedAt: string;
+  created_by: string;
+  updated_by: string;
+  deleted: boolean;
   user_details: {
-    name:string;
-    _id:string;
+    name: string;
+    _id: string;
   };
-  days_count:number
+  days_count: number;
   reason?: string;
 }
 

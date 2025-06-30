@@ -126,20 +126,92 @@ export interface ApplyLeaveInterface {
   half_day_session?: string | null
 }
 
-// fetch leave mode list only to show in the dropwen while creating , updating the leaves
+export interface HolidayTypesInterface{
+  name:string,
+  description?:string
+}
+
+// -------------------------------------------------- Leaves ---------------------------------------------------- 
+
+// fetch leave Type
+export const fetchLeaveTypesFn = async ()=>{
+  const response = await apiClient.get(ApiEndpoints.leaveType);
+  return response.data;
+}
+
+// create a new leave Type
+export const createLeaveTypesFn = async (payload: CreateLeaveTypesInterface)=>{
+  const response = await apiClient.post(ApiEndpoints.leaveType, payload);
+  return response.data;
+}
+
+// update a leave Type
+export const updateLeaveTypesFn = async (leaveId:string, payload: {
+  name?: string;
+  description?: string;
+  half_day_allowed?:boolean;
+  paid?:boolean;
+})=>{
+  const response = await apiClient.put(`${ApiEndpoints.leaveType}/${leaveId}`, payload);
+  return response.data
+}
+
+// delete a leave Type
+export const deleteLeaveTypeFn = async (leaveId: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.leaveType}/${leaveId}`);
+  return response.data;
+}
+
+// leave types dropdown list
 export const fetchLeaveTypesListFn = async ()=>{
-  const response = await apiClient.get(ApiEndpoints.leaveTypeList);
+  const response = await apiClient.get(`${ApiEndpoints.leaves}/leave-modes`);
   return response.data;
 }
 
 // fetch leave mode list only to show in the dropwen while creating , updating the leaves
 export const fetchLeaveModeListFn = async ()=>{
-  const response = await apiClient.get(ApiEndpoints.leaveModeList);
+  const response = await apiClient.get(`${ApiEndpoints.leaveType}/leave-type-dropdown`);
   return response.data;
 }
 
+// -------------------------------------------------- Holiday Types ---------------------------------------------------- 
 
+// fetch all Holiday Types
+export const fetchHolidayTypesFn = async (page: number = 1, limit: number = 10, search?: string) => {
+  let url = `${ApiEndpoints.holidayTypes}?page=${page}&limit=${limit}`;
+  if (search && search.trim()) {
+    url += `&name=${encodeURIComponent(search.trim())}`;
+  }
+  const response = await apiClient.get(url);
+  return response.data;
+};
 
+// fetch all Holiday Types List
+export const fetchHolidayTypesListFn = async () => {
+  const response = await apiClient.get(`${ApiEndpoints.holidayTypes}/holiday-type-dropdown`);
+  return response.data;
+};
+
+// create a new Holiday Types
+export const createHolidayTypeFn = async (payload: { name: string; description?: string }) => {
+  console.log(payload, "Apicall")
+  const response = await apiClient.post(ApiEndpoints.holidayTypes, payload);
+  return response.data;
+};
+
+// update a Holiday Type
+export const updateHolidayTypeFn = async (id: string, payload: { name?: string; description?: string }) => {
+  const response = await apiClient.put(`${ApiEndpoints.holidayTypes}/${id}`, payload);
+  return response.data;
+};
+
+// delete a Holiday Type
+export const deleteHolidayTypeFn = async (id: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.holidayTypes}/${id}`);
+  return response.data;
+};
+
+// ---------------------------------- Menu----------------------------------------------------------
 // fetch menu list
 export const menuListFn = async () => {
 
@@ -151,6 +223,8 @@ export const dynamicMenuListFn = async () => {
   const response = await apiClient.get(`${ApiEndpoints.menus}/role`);
   return response.data;
 };
+
+// -------------------------------User-----------------------------------------------------------------
 
 // fetch user list
 export const usersFn = async (page: number = 1, limit: number = 10, search?: string, searchBasis?: string) => {
@@ -201,6 +275,7 @@ export const deleteUserFn = async (userId: string) => {
   return response.data;
 };
 
+// -------------------------------Roles----------------------------------------------------------
 // fetch roles
 export const rolesFn = async (page: number, limit: number) => {
   const response = await apiClient.get(`${ApiEndpoints.roles}?page=${page}&limit=${limit}`);
@@ -209,6 +284,7 @@ export const rolesFn = async (page: number, limit: number) => {
 
 // create role
 export const createRoleFn = async (payload: { name: string, rank: number }) => {
+  console.log(payload, "Apicall")
   const response = await apiClient.post(ApiEndpoints.roles, payload);
   return response.data;
 };
@@ -228,6 +304,8 @@ export const deleteRoleFn = async (roleId: string) => {
   return response.data;
 };
 
+// ---------------------------Permissions------------------------------------------------------
+
 // fetch permissions
 export const permissionsFn = async (roleId: string) => {
   console.log("roleId", roleId)
@@ -235,7 +313,7 @@ export const permissionsFn = async (roleId: string) => {
   return response.data;
 };
 
-// update permission
+// update permission permission
 export const updatePermissionFn = async (payload: UpdatePermissionsInterFace) => {
   const response = await apiClient.post(
     `${ApiEndpoints.permissions}/assign-menu-permission`,
@@ -245,7 +323,7 @@ export const updatePermissionFn = async (payload: UpdatePermissionsInterFace) =>
   return response.data;
 };
 
-// update menu order
+// update permission menu order
 export const updateMenuOrderFn = async (payload: { orders: { id: string; order: number }[] }) => {
   const response = await apiClient.post(
     `${ApiEndpoints.menus}/update-order`,
@@ -254,6 +332,7 @@ export const updateMenuOrderFn = async (payload: { orders: { id: string; order: 
   return response.data;
 };
 
+// ----------------------Password-----------------------------------------------------------
 // change password
 export const changePasswordFn = async (payload: { oldPassword: string; newPassword: string }) => {
   const response = await apiClient.post(`${ApiEndpoints.users}/change-password`, payload);
@@ -266,18 +345,12 @@ export const resetPasswordFn = async (id:string)=>{
   return response.data;
 }
 
+// -----------------------------LeaveType---------------------------------------------------------
 // Create leave Type
 export const createLeaveTypeFn = async (payload: CreateLeaveTypesInterface)=>{
   const response = await apiClient.post(`${ApiEndpoints.leaveType}`, payload);
   return response.data;
 }
-
-// fetch leave Type
-export const fetchLeaveTypesFn = async ()=>{
-  const response = await apiClient.get(ApiEndpoints.leaveType);
-  return response.data;
-}
-
 
 // delete leave
 export const deleteLeaveTypesFn = async (leaveId: string) => {
@@ -342,4 +415,17 @@ export const updateAppliedLeaveFn = async(leaveId:string, payload: any)=>{
 export const deleteLeaveFn = async(leaveId:string)=>{
     const response = await apiClient.delete(`${ApiEndpoints.leaves}/${leaveId}`);
     return response.data;
+}
+
+// create holiday
+export const createHolidayFn = async (payload: any) => {
+  console.log(payload, "payload")
+    const response = await apiClient.post(ApiEndpoints.holidays, payload);
+    return response.data;
+};
+
+// create holiday types 
+export const createHolidayTypesFn = async (payload:HolidayTypesInterface)=>{
+  const response = await apiClient.post(ApiEndpoints.holidayTypes, payload);
+  return response.data
 }

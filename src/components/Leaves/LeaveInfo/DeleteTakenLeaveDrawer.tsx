@@ -1,3 +1,4 @@
+'use client'
 import ModalHeader from '@/components/common/ModalHeader'
 import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/takenLeaveSclice';
 import { Drawer } from '@mui/material'
@@ -6,6 +7,8 @@ import Button from '../../common/Button';
 import { deleteLeaveFn } from '@/utility/queryFetcher';
 import { useDispatch } from 'react-redux';
 import { toast } from 'sonner';
+import { AiOutlineDelete } from 'react-icons/ai';
+import { ImSpinner2 } from 'react-icons/im';
 
 interface DeleteTakenLeaveProps {
   toggleDrawer: (open: boolean) => void;
@@ -23,6 +26,7 @@ const DeleteTakenLeaveDrawer = ({ toggleDrawer, isDeleteTakenLeaveDrawerShowing,
     try {
       await deleteLeaveFn(selectedLeave._id);
       toast.success('Leave deleted successfully');
+      // @ts-ignore
       dispatch(fetchTakenLeaves());
       toggleDrawer(false);
     } catch (error: any) {
@@ -32,76 +36,58 @@ const DeleteTakenLeaveDrawer = ({ toggleDrawer, isDeleteTakenLeaveDrawerShowing,
     }
   };
 
+  const handleClose = () => {
+    toggleDrawer(false);
+  };
+
   return (
-    <Drawer anchor='right' open={isDeleteTakenLeaveDrawerShowing} PaperProps={{ sx: { width: "30%" } }}>
-      <ModalHeader text='Delete Leave Application' toggleDrawer={() => toggleDrawer(false)} />
-      <div className="p-6">
-        <h2 className="text-lg font-semibold mb-4 text-danger">Are you sure you want to delete this leave?</h2>
-        {selectedLeave ? (
-          <div className="space-y-3 text-sm mb-6">
-            <div>
-              <span className="font-medium text-gray-600 ">User name</span>
-              <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>{selectedLeave.user_details?.name || 'N/A'}</p>
-            </div>
-            <div className='grid grid-cols-2 items-center gap-3'>
-              <div>
-                <span className="font-medium text-gray-600 ">Leave type</span>
-                <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>{selectedLeave.leave_type?.name || 'N/A'}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600 ">Mode</span>
-                <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200 '>{selectedLeave.leave_mode}</p>
-              </div>
-            </div>
-            <div className='grid grid-cols-2 items-center gap-3'>
-              <div>
-                <span className="font-medium text-gray-600">From</span>
-                <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>
-                  {new Date(selectedLeave.start_date).toLocaleDateString()}
-                </p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">To</span>
-                <p className='px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200'>
-                  {new Date(selectedLeave.end_date || '').toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-            <div>
-              <span className="font-medium text-gray-600">Description:</span>
-              <p className="px-2 bg-white rounded-md shadow-sm py-1 mt-1 border border-blue-200">{selectedLeave.description || '-'}</p>
-            </div>
-            <div>
-              <span className="font-medium text-gray-600">Status:</span>
-              <p className={`px-2 rounded-md shadow-sm py-1 mt-1 text-white 
-                ${selectedLeave.status?.toLowerCase() === "approved"
-                  ? "bg-success"
-                  : selectedLeave.status?.toLowerCase() === "rejected"
-                    ? "bg-danger"
-                    : "bg-blue-100 text-gray-800 border border-blue-200"
-                }
-              `}>
-                {selectedLeave.status || '-'}
-              </p>
-            </div>
-            {selectedLeave.reason &&
-              ["approved", "rejected"].includes((selectedLeave.status || '').toLowerCase()) && (
-                <div>
-                  <span className={`font-medium ${selectedLeave.status?.toLowerCase() === "approved" ? "text-success" : " text-danger"}`}>Reason:</span>
-                  <p
-                    className={`px-2 rounded-md shadow-sm py-1 mt-1 text-white ${selectedLeave.status?.toLowerCase() === "approved" ? "bg-success" : "bg-danger"
-                      }`}
-                  >
-                    {selectedLeave.reason}
-                  </p>
+    <Drawer 
+        anchor='right' 
+        open={isDeleteTakenLeaveDrawerShowing} 
+        onClose={handleClose}
+        PaperProps={{ sx: { width: "30%" } }}
+    >
+        <div role="presentation">
+            <ModalHeader text="Delete Confirmation" toggleDrawer={handleClose} />
+
+            <div className="relative flex flex-col items-center justify-center px-7 pb-7 h-[calc(100vh-60px)]">
+            {loading && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-75">
+                <ImSpinner2 className="animate-spin text-5xl text-red-500" />
+                <h3 className="mt-3 text-lg font-semibold text-red-500">
+                    Deleting...
+                </h3>
                 </div>
-              )}
-          </div>
-        ) : null}
-      </div>
-        <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
-          <Button type="button" name="Cancel" className="bg-graydark" onClick={() => toggleDrawer(false)} />
-          <Button type="button" name={loading ? "Deleting..." : "Delete"} className="bg-danger" onClick={handleDelete} disabled={loading} />
+            )}
+            <>
+                <div className="rounded-full border-[3px] border-black bg-[#FCFCFC] p-2">
+                    <AiOutlineDelete className="text-red-600 text-[50px]" />
+                </div>
+                <h2 className="mt-2 text-xl font-semibold text-center">
+                    You are about to delete a Leave Application
+                </h2>
+                <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
+                    Are you sure you want to delete this leave for <strong className="text-black dark:text-white">{selectedLeave?.user_details?.name || 'this user'}</strong>?
+                </h3>
+                
+                <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
+                <Button 
+                    type="button" 
+                    name="Close" 
+                    className="mr-4 bg-graydark"  
+                    onClick={handleClose} 
+                    disabled={loading}
+                />
+                <Button
+                    type="button"
+                    name="Confirm"
+                    onClick={handleDelete}
+                    className="bg-danger"
+                    disabled={loading}
+                />
+                </div>
+            </>
+            </div>
         </div>
     </Drawer>
   )

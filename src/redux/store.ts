@@ -8,8 +8,12 @@ import menuReducer from "./slice/menuList";
 import roleReducer from "./slice/roleSlice";
 import leaveReducer from "./slice/leaveTypesSlice";
 import takenLeaveReducer from './slice/takenLeaveSclice';
-import leaveTypesList from './slice/leaveTypesListSlice';
+import leaveTypesListReducer from "./slice/leaveTypesListSlice";
 import leaveModes from './slice/leaveModeListSlice';
+import holidayTypesReducer from "./slice/holidayTypesSlice";
+import holidayTypesListReducer from './slice/holidayTypesListSlice';
+import leaveModeListReducer from "./slice/leaveModeListSlice";
+import holidayReducer from "./slice/holidaySlice";
 
 
 const authPersistConfig = {
@@ -29,7 +33,11 @@ const store = configureStore({
     appliedLeaves: takenLeaveReducer,
     leaveModes: leaveModes,
     leaveTypes: leaveReducer,
-    leaveTypesList: leaveTypesList
+    leaveTypesList: leaveTypesListReducer,
+    holidayTypes: holidayTypesReducer,
+    holidayTypesList: holidayTypesListReducer,
+    leaveModeList: leaveModeListReducer,
+    holidays: holidayReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

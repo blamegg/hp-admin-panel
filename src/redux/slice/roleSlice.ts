@@ -17,18 +17,28 @@ const initialState: RoleState = {
 interface FetchRolesArgs {
   page: number;
   limit: number;
+  search?: string;
+  basis?: string;
 }
 
 // fetch roles
-export const rolesFn = async (page: number, limit: number) => {
-  const response = await apiClient.get(`${ApiEndpoints.roles}?page=${page}&limit=${limit}`);
+export const rolesFn = async (page: number, limit: number, search?: string, basis?: string) => {
+  let url = `${ApiEndpoints.roles}?page=${page}&limit=${limit}`;
+  if (search && basis) {
+    url += `&${basis}=${search}`;
+  }
+  const response = await apiClient.get(url);
   return response.data;
 };
 
 export const fetchRoleFn = createAsyncThunk(
   `${ApiEndpoints.roles}`,
-  async ({ page, limit }: FetchRolesArgs) => {
-    const response = await apiClient.get(`${ApiEndpoints.roles}?page=${page}&limit=${limit}`);
+  async ({ page, limit, search, basis }: FetchRolesArgs) => {
+    let url = `${ApiEndpoints.roles}?page=${page}&limit=${limit}`;
+    if (search && basis) {
+        url += `&${basis}=${search}`;
+    }
+    const response = await apiClient.get(url);
     return response.data;
   },
 );

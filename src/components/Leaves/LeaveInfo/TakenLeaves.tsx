@@ -30,9 +30,18 @@ const StatusBadge = ({ status }: { status: string }) => {
   return <span className={`${baseClasses} ${statusClasses}`}>{status}</span>;
 };
 
-const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', {
-  year: 'numeric', month: 'short', day: 'numeric'
-});
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return 'N/A';
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric'
+    });
+  } catch (error) {
+    return dateString; // Return original string if parsing fails
+  }
+};
 
 interface TakenLeavesProps {
   leaves: AppliedLeave[];
@@ -55,6 +64,8 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
     setIsDeleteTakenLeaveDrawerShowing(value);
   }
 
+
+
   const handleOpenViewDrawer = (leave: AppliedLeave) => {
     setSelectedLeave(leave);
     setIsViewDrawerOpen(true);
@@ -65,6 +76,8 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
     setIsViewDrawerOpen(false);
     setIsUpdateDrawerOpen(true);
   };
+
+  console.log("leaves:", leaves)
 
   
   const columns = [
@@ -103,13 +116,40 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
     },
     {
       name: "Dates",
-      cell: (row: AppliedLeave) => (
-        <div style={{ minWidth: "120px", maxWidth: "auto" }}>
-          {row.leave_mode === 'Multi-Days' && Array.isArray((row as any).dates) && (row as any).dates.length > 0
-            ? 'Multi'
-            : formatDate(row?.start_date)}
-        </div>
-      ),
+      cell: (row: AppliedLeave) => {
+        const formatDates = (dates: string[]) => {
+          if (!dates || dates.length === 0) return 'N/A';
+          if (dates.length === 1) return formatDate(dates[0]);
+          if (dates.length === 2) return `${formatDate(dates[0])} - ${formatDate(dates[1])}`;
+          return `${formatDate(dates[0])} +${dates.length - 1} more`;
+        };
+
+        if (row.leave_mode === 'Multi-Days' && Array.isArray(row.dates) && row.dates.length > 0) {
+          return (
+            <div style={{ minWidth: "120px", maxWidth: "auto" }}>
+              {formatDates(row.dates)}
+            </div>
+          );
+        } else if (row.start_date && row.end_date && row.start_date !== row.end_date) {
+          return (
+            <div style={{ minWidth: "120px", maxWidth: "auto" }}>
+              {formatDate(row.start_date)} - {formatDate(row.end_date)}
+            </div>
+          );
+        } else if (row.start_date) {
+          return (
+            <div style={{ minWidth: "120px", maxWidth: "auto" }}>
+              {formatDate(row.start_date)}
+            </div>
+          );
+        } else {
+          return (
+            <div style={{ minWidth: "120px", maxWidth: "auto" }}>
+              N/A
+            </div>
+          );
+        }
+      },
       sortable: true,
     },
     {
@@ -118,7 +158,16 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
       sortable: true,
       width: "75px"
     },
-
+    {
+      name: "Half Day",
+      cell: (row: AppliedLeave) => (
+        <div style={{ minWidth: "80px", maxWidth: "auto" }}>
+          {row.half_day ? 'Yes' : 'No'}
+        </div>
+      ),
+      sortable: true,
+      width: "80px"
+    },
     {
       name: "Status",
       cell: (row: AppliedLeave) => (

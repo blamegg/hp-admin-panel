@@ -56,7 +56,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleDrawer 
     const dates = watch('dates');
 
     const leaveTypes = useSelector((state: RootState) => state.leaveTypesList.LeaveTypesList);
-    const leaveModes = useSelector((state: RootState) => state.leaveModes.LeaveModes);
+    const leaveModes = useSelector((state: RootState) => state.leaveModeList.LeaveModes);
 
     useEffect(() => {
         dispatch(fetchLeaveTypesList())
@@ -175,12 +175,12 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleDrawer 
 
     const leaveTypeOptions = Array.isArray(leaveTypes)
         ? leaveTypes.map((type) => ({
-            value: String(type._id),
-            label: String(type.name)
+            value: String(type),
+            label: String(type)
         }))
         : [];
 
-
+        console.log("mode:",leaveModes)
     return (
         <div className="flex justify-center items-center">
             <Drawer anchor="right" open={isLeaveFormShowing} onClose={() => toggleDrawer(false)} PaperProps={{ sx: { width: "30%" } }}>
@@ -199,7 +199,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleDrawer 
                             <div className="w-full mt-2 md:mt-0">
                                 <Select
                                     label="Leave Mode"
-                                    options={leaveModes.map(mode =>({vlaue:mode, label:mode}))}
+                                    options={leaveModes}
                                     register={register("leave_mode")}
                                     error={errors.leave_mode?.message}
                                 />
@@ -216,6 +216,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleDrawer 
                                     <div>
                                         <Input
                                             type="date"
+                                            label=""
                                             value={singleDateInput}
                                             onChange={e => setSingleDateInput(e.target.value)}
                                             placeholder="Select a date"

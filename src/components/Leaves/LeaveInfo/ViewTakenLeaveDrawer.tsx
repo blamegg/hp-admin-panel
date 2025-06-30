@@ -12,6 +12,19 @@ interface ViewTakenLeaveProps {
     onUpdate?: (leave: AppliedLeave) => void;
 }
 
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return 'N/A';
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric'
+    });
+  } catch (error) {
+    return dateString; // Return original string if parsing fails
+  }
+};
+
 const ViewTakenLeaveDrawer = ({ selectedLeave, isViewTakenLeaveDrawerShowing, toggleDrawer, onUpdate }: ViewTakenLeaveProps) => {
 
     return (
@@ -41,24 +54,24 @@ const ViewTakenLeaveDrawer = ({ selectedLeave, isViewTakenLeaveDrawerShowing, to
                         {/* Date logic for different leave modes */}
                         {selectedLeave.leave_mode === 'Day-Range' && (
                           <div className='grid grid-cols-2 items-center gap-3'>
-                            <DetailItem label="From" value={selectedLeave.start_date} />
-                            <DetailItem label="To" value={selectedLeave.end_date} />
+                            <DetailItem label="From" value={formatDate(selectedLeave.start_date)} />
+                            <DetailItem label="To" value={formatDate(selectedLeave.end_date)} />
                           </div>
                         )}
                         {selectedLeave.leave_mode === 'Full-Day' && (
-                          <DetailItem label="Date" value={selectedLeave.start_date} />
+                          <DetailItem label="Date" value={formatDate(selectedLeave.start_date)} />
                         )}
                         {selectedLeave.leave_mode === 'Half-Day' && (
                           <>
-                            <DetailItem label="Date" value={selectedLeave.start_date} />
+                            <DetailItem label="Date" value={formatDate(selectedLeave.start_date)} />
                             <DetailItem label="Session" value={selectedLeave.half_day_session} />
                           </>
                         )}
-                        {selectedLeave.leave_mode === 'Multi-Days' && Array.isArray((selectedLeave as any).dates) && (selectedLeave as any).dates.length > 0 && (
+                        {selectedLeave.leave_mode === 'Multi-Days' && Array.isArray(selectedLeave.dates) && selectedLeave.dates.length > 0 && (
                           <div>
-                            <label className="block font-medium text-gray-600 text-sm mb-1">Selected Dates: {((selectedLeave as any).dates.length)}</label>
+                            <label className="block font-medium text-gray-600 text-sm mb-1">Selected Dates: {selectedLeave.dates.length}</label>
                             <div className="flex flex-wrap gap-2 max-h-[120px] overflow-scroll">
-                              {(selectedLeave as any).dates.map((date: string, idx: number) => (
+                              {selectedLeave.dates.map((date: string, idx: number) => (
                                 <span
                                   key={idx}
                                   className="flex items-center gap-1 bg-green-100 border border-green-300 rounded px-2 py-1 text-sm text-green-800"
@@ -69,6 +82,10 @@ const ViewTakenLeaveDrawer = ({ selectedLeave, isViewTakenLeaveDrawerShowing, to
                             </div>
                           </div>
                         )}
+                        <div className='grid grid-cols-2 items-center gap-3'>
+                          <DetailItem label="Days Count" value={selectedLeave.days_count?.toString()} />
+                          <DetailItem label="Half Day" value={selectedLeave.half_day ? 'Yes' : 'No'} />
+                        </div>
                         <DetailItem label="Description" value={selectedLeave.description || '-'} />
                         <DetailItem
                             label="Status:"
