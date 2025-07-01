@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import CheckboxFour from '../../Checkboxes/CheckboxFour';
 import Textarea from '../../common/Input/Textarea';
 import { Controller } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface EditLeaveTypeInterface {
   open: boolean;
@@ -22,40 +23,36 @@ interface EditLeaveTypeInterface {
 
 const EditLeaveTypes = ({ open, toggleDrawer, direction, selected, setSelected, fetchLeaveTypes }: EditLeaveTypeInterface) => {
   const { register, handleSubmit, reset, formState: { errors }, control } = useForm({ defaultValues: selected });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (selected) {
       reset(selected);
     }
   }, [selected, reset]);
 
-  const onSubmit = async (data: any) => {
-    if (!selected) return;
-    setLoading(true);
-    setError(null);
-    try {
-      await updateLeaveTypeFn(data, selected._id);
-      setSuccess(true);
-      toast.success(`Leave ${data.name} updated successfully.`);
+  const updateLeaveTypeMutation = useMutation({
+    mutationFn: (data: any) => updateLeaveTypeFn(data, selected._id),
+    onSuccess: (data, variables) => {
+      toast.success(`Leave ${variables.name} updated successfully.`);
       fetchLeaveTypes();
-      setTimeout(() => {
-        handleClose();
-      }, 1200);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to update leave');
-    } finally {
-      setLoading(false);
+      handleClose();
+    },
+    onError: (error: any) => {
+      let errorMessage = error?.response?.data?.message || error?.message || 'Failed to update leave';
+      toast.error(errorMessage);
     }
+  });
+
+  const onSubmit = (data: any) => {
+    if (!selected) return;
+    updateLeaveTypeMutation.mutate(data);
   };
 
   const handleClose = () => {
     toggleDrawer(false);
     setSelected(null);
-    setSuccess(false);
-    setError(null);
+    reset();
   };
 
   return (
@@ -75,8 +72,17 @@ const EditLeaveTypes = ({ open, toggleDrawer, direction, selected, setSelected, 
               type="text"
               label='Name'
               register={register('name')}
-              error={typeof errors.description?.message === 'string' ? errors.description.message : undefined}
+              error={typeof errors.name?.message === 'string' ? errors.name.message : undefined}
               placeholder='Create leave' />
+          </div>
+          <div className='mt-3'>
+            <Input
+              type="number"
+              label='Total days allowed'
+              register={register('total_days_allowed', { valueAsNumber: true })}
+              error={typeof errors.total_days_allowed?.message === 'string' ? errors.total_days_allowed.message : undefined}
+              placeholder='Enter number of days'
+            />
           </div>
           <div className='mt-3'>
             <Controller
@@ -116,10 +122,9 @@ const EditLeaveTypes = ({ open, toggleDrawer, direction, selected, setSelected, 
             />
           </div>
         </div>
-        {error && <div className="text-red-500 mt-2">{error}</div>}
         <div className="flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray">
           <Button name='Close' type='button' className='bg-graydark' onClick={handleClose} />
-          <Button name={loading ? 'Updating...' : 'Update'} type='submit' className='bg-success' disabled={loading} />
+          <Button name={updateLeaveTypeMutation.isPending ? 'Updating...' : 'Update'} type='submit' className='bg-success' disabled={updateLeaveTypeMutation.isPending} />
         </div>
       </form>
     </Drawer>

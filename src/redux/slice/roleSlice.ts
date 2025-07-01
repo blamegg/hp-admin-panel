@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CurrentRoleDataInterFace, RolesInterFace } from "@/utility/queryFetcher";
+import { CurrentRoleDataInterFace } from "@/utility/queryFetcher";
 import { apiClient, ApiEndpoints } from "@/utility/api";
 
 interface RoleState {

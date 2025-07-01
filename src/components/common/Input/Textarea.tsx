@@ -23,7 +23,7 @@ const Textarea: React.FC<TextareaProps> = ({
   rows = 4,
 }) => (
   <>
-    <label className="block text-sm font-medium text-black dark:text-white" htmlFor={id}>
+    <label className="block text-xs font-medium text-black dark:text-white" htmlFor={id}>
       {label}
     </label>
     <textarea

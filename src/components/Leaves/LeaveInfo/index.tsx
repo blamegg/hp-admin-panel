@@ -111,10 +111,10 @@ const LeaveInfo: React.FC = () => {
   };
 
   return (
-    <div className="w-[350px] md:w-full pb-4 md:pb-0">
-      <div className="grid lg:grid-cols-4 grid-cols-2 gap-6 w-full mb-4">
+    <div className="w-[350px] md:w-full pb-0  md:pb-0">
+      <div className="grid lg:grid-cols-4 grid-cols-2 gap-6 w-full mb-2">
         {/* Total Leaves */}
-        <div className="flex items-center  bg-white rounded-sm px-2 py-2">
+        <div className="flex items-center  bg-white rounded-sm px-2 py-1">
           <FaClipboardList size={25} className="text-blue-600 mr-2" />
           <div className="flex flex-col justify-center">
             <p className=" text-blue-800 font-semibold text-xs">Total Leaves</p>
@@ -122,7 +122,7 @@ const LeaveInfo: React.FC = () => {
           </div>
         </div>
         {/* Leaves Taken */}
-        <div className="flex items-center h-full bg-white rounded-sm px-2 py-2">
+        <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
           <FaCheck size={25} className="text-green-600 mr-2" />
           <div className="flex flex-col justify-center">
             <p className="text-green-800 font-semibold text-xs">Leaves Taken</p>
@@ -130,7 +130,7 @@ const LeaveInfo: React.FC = () => {
           </div>
         </div>
         {/* Sick Leaves */}
-        <div className="flex items-center h-full bg-white rounded-sm px-2 py-2">
+        <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
           <FaHeartbeat size={25} className="text-red-600 mr-2" />
           <div className="flex flex-col justify-center">
             <p className=" text-red-800 font-semibold text-xs">Sick Leaves</p>
@@ -138,7 +138,7 @@ const LeaveInfo: React.FC = () => {
           </div>
         </div>
         {/* Remaining Leaves */}
-        <div className="flex items-center h-full bg-white rounded-sm px-2 py-2">
+        <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
           <FaCalendarAlt size={25} className="text-gray-600 mr-2" />
           <div className="flex flex-col justify-center">
             <p className=" text-gray-800 font-semibold text-xs">Remaining Leaves</p>
@@ -208,7 +208,7 @@ const LeaveInfo: React.FC = () => {
               )}
             </div>
           )}
-          <div className="max-w-full overflow-x-auto">
+          <div className="max-w-full overflow-x-auto mb-0">
             <TakenLeaves
               leaves={leaveState.appliedLeaves}
               loading={leaveState.loading}

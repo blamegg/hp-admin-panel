@@ -37,7 +37,7 @@ const UserTable = () => {
   const [selected, setSelected] = useState(null);
   const pathname = usePathname();
   const [showSearchBar, setShowSearchBar] = useState(false);
-  
+
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   useMenuList();
@@ -63,7 +63,7 @@ const UserTable = () => {
   const { data: userList, isLoading } = useQuery({
     queryKey: ["users", currentPage, rowsPerPage, debouncedSearchQuery, searchBasis],
     queryFn: async () => {
-     
+
       const result = await usersFn(currentPage, rowsPerPage, debouncedSearchQuery, searchBasis);
       return result;
     },
@@ -108,7 +108,7 @@ const UserTable = () => {
   // Auto-refresh to detect blocked users
   useEffect(() => {
     if (!showSearchBar) return; // Don't run if not on users page
-    
+
     const intervalId = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     }, 30000); // Refresh every 30 seconds
@@ -364,89 +364,91 @@ const UserTable = () => {
         <div className="mt-5 overflow-x-auto ">
 
           {/* {hasPermission('View All Users') && ( */}
-            <>
-              {isLoading ? (
-                <div className="flex items-center justify-center h-40">
-                 <p>Loading...</p>
-                </div>
-              ) : (
-                <>
-                  <div className="max-h-[59vh] overflow-scroll">
-                    <DataTable
-                      columns={columns}
-                      data={userList?.data || []}
-                      pagination={false}
-                      className="custom_tbl "
-                      customStyles={{
-                        header: {
-                          style: {
-                            fontSize: "12px",
-                            minHeight: "30px",
-                            backgroundColor: "#F9FAFB", // Light mode header background
-                            color: "#1C243F", // Light mode header text
-                          },
+          <>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-40">
+                <p>Loading...</p>
+              </div>
+            ) : (
+              <>
+                <div className="max-h-[59vh] overflow-scroll">
+                  <DataTable
+                    columns={columns}
+                    data={userList?.data || []}
+                    pagination={false}
+                    className="custom_tbl "
+                    highlightOnHover
+                    customStyles={{
+                      header: {
+                        style: {
+                          fontSize: "12px",
+                          minHeight: "30px",
+                          backgroundColor: "#F9FAFB", // Light mode header background
+                          color: "#1C243F", // Light mode header text
                         },
-                        headRow: {
-                          style: {
-                            fontSize: "12px",
-                            minHeight: "30px",
-                            backgroundColor: "#F9FAFB", // Light mode header row background
+                      },
+                      headRow: {
+                        style: {
+                          fontSize: "12px",
+                          minHeight: "30px",
+                          backgroundColor: "#F9FAFB", // Light mode header row background
+                          borderBottomWidth: "1px",
+                          borderBottomColor: "#E2E8F0", // stroke
+                        },
+                      },
+                      headCells: {
+                        style: {
+                          fontWeight: 700,
+                          color: "#1C243F", // Light mode header cells text
+                          backgroundColor: "#F9FAFB", // Light mode header cells background
+                        },
+                      },
+                      cells: {
+                        style: {
+                          fontSize: "11px",
+                          fontWeight: 500,
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
+                          height: "27px",
+                          color: "#1C243F", // Light mode cell text
+                          backgroundColor: "transparent", // Allow row background to show through
+                        },
+                      },
+                      rows: {
+                        style: {
+                          fontSize: "11px",
+                          minHeight: "27px",
+                          "&:not(:last-of-type)": {
+                            borderBottomStyle: "solid",
                             borderBottomWidth: "1px",
-                            borderBottomColor: "#E2E8F0", // stroke
+                            borderBottomColor: "#E2E8f0",
                           },
+                          backgroundColor: "transprant",
+                          color: "#1C243F",
                         },
-                        headCells: {
-                          style: {
-                            fontWeight: 700,
-                            color: "#1C243F", // Light mode header cells text
-                            backgroundColor: "#F9FAFB", // Light mode header cells background
-                          },
+                        highlightOnHoverStyle: {
+                          backgroundColor: "#e4e7f7",
+                          color: "white",
+                          cursor: "pointer",
                         },
-                        cells: {
-                          style: {
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            wordBreak: "break-word",
-                            overflowWrap: "break-word",
-                            height: "27px",
-                            color: "#1C243F", // Light mode cell text
-                            backgroundColor: "#FFFFFF", // Light mode cell background
-                          },
-                        },
-                        rows: {
-                          style: {
-                            fontSize: "11px",
-                            minHeight: "27px",
-                            "&:not(:last-of-type)": {
-                              borderBottomStyle: "solid",
-                              borderBottomWidth: "1px",
-                              borderBottomColor: "#E2E8F0", // stroke
-                            },
-                            backgroundColor: "#FFFFFF", // Light mode row background
-                            color: "#1C243F", // Light mode row text
-                          },
-                          highlightOnHoverStyle: {
-                            backgroundColor: "#F7F9FC", // gray-2
-                            color: "#1C243F",
-                            cursor: "pointer",
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-
-
-                  {/* Custom Pagination */}
-                  <CustomPagination
-                    rowsPerPage={rowsPerPage}
-                    currentPage={currentPage}
-                    rowCount={userList?.pagination.totalCount || 0}
-                    onChangePage={handlePageChange}
-                    onChangeRowsPerPage={handleRowsPerPageChange}
+                      },
+                    }}
                   />
-                </>
-              )}
-            </>
+                </div>
+
+
+                {/* Custom Pagination */}
+                <CustomPagination
+                  rowsPerPage={rowsPerPage}
+                  currentPage={currentPage}
+                  rowCount={userList?.pagination.totalCount || 0}
+                  onChangePage={handlePageChange}
+                  
+                  onChangeRowsPerPage={handleRowsPerPageChange}
+                />
+              </>
+            )}
+          </>
           {/* )} */}
         </div>
       </div>

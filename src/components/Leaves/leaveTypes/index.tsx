@@ -31,6 +31,7 @@ const LeaveTypes = () => {
   const dispatch = useDispatch();
   const hasPermission = useHasPermission();
 
+  console.log(leaveTypes, "leaveTypes")
 
   const fetchLeaveTypes = React.useCallback(() => {
     // dispatch(setLeavesLoading());
@@ -100,6 +101,12 @@ const LeaveTypes = () => {
       width: '160px',
     },
     {
+      name: 'Day Allowed',
+      selector: (row: any) => (row.total_days_allowed),
+      sortable: true,
+      width: '160px',
+    },
+    {
       name: 'Status',
       selector: (row: any) => (row.status ? 'Yes' : 'No'),
       sortable: true,
@@ -141,7 +148,7 @@ const LeaveTypes = () => {
           className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
         />
         {hasPermission(toSentenceCase('Create Leave Type')) && (
-          <Button name='Create Leave' type="button" onClick={() => toggleCreateDrawer(true)} />
+          <Button name='Create leave type' type="button" onClick={() => toggleCreateDrawer(true)} />
         )}
       </div>
 

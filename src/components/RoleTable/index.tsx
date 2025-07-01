@@ -296,6 +296,7 @@ export default React.memo(function Roles() {
           pagination
           paginationPerPage={rowsPerPage}
           paginationTotalRows={totalDocuments}
+          highlightOnHover
           paginationComponent={() => (
             <CustomPagination
               rowsPerPage={rowsPerPage}
@@ -306,13 +307,13 @@ export default React.memo(function Roles() {
             />
           )}
           className="custom_tbl"
-          customStyles={{
+      customStyles={{
             header: {
               style: {
                 fontSize: "12px",
                 minHeight: "30px",
-                backgroundColor: "#F9FAFB",
-                color: "#1C243F", 
+                backgroundColor: "#F9FAFB", // Light mode header background
+                color: "#1C243F", // Light mode header text
               },
             },
             headRow: {
@@ -339,7 +340,7 @@ export default React.memo(function Roles() {
                 overflowWrap: "break-word",
                 height: "27px",
                 color: "#1C243F", // Light mode cell text
-                backgroundColor: "#FFFFFF", // Light mode cell background
+                backgroundColor: "transparent", // Allow row background to show through
               },
             },
             rows: {
@@ -349,17 +350,17 @@ export default React.memo(function Roles() {
                 "&:not(:last-of-type)": {
                   borderBottomStyle: "solid",
                   borderBottomWidth: "1px",
-                  borderBottomColor: "#E2E8F0", // stroke
+                  borderBottomColor: "#E2E8f0", 
                 },
-                backgroundColor: "#FFFFFF", // Light mode row background
-                color: "#1C243F", // Light mode row text
+                backgroundColor: "transprant", 
+                color: "#1C243F", 
               },
               highlightOnHoverStyle: {
-                backgroundColor: "#F7F9FC", // gray-2
-                color: "#1C243F",
+                backgroundColor: "#e4e7f7",
+                color: "white",
                 cursor: "pointer",
               },
-            },  
+            },
           }}
         />
       </div>

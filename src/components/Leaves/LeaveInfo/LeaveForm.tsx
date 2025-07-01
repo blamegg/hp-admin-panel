@@ -16,6 +16,7 @@ import { fetchTakenLeaves } from "@/redux/slice/takenLeaveSclice";
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { fetchLeaveTypesList } from "@/redux/slice/leaveTypesListSlice";
 import { fetchLeaveModeList } from "@/redux/slice/leaveModeListSlice";
+import MultipleDatePicker from '@/components/FormElements/DatePicker/MultipleDatePicker';
 
 const LEAVE_MODES = [
     { value: "Half-Day", label: "Half-Day" },
@@ -175,12 +176,18 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleDrawer 
 
     const leaveTypeOptions = Array.isArray(leaveTypes)
         ? leaveTypes.map((type) => ({
-            value: String(type),
-            label: String(type)
+            value: type._id,
+            label: type.name
         }))
         : [];
 
-        console.log("mode:",leaveModes)
+    const leaveModeOptions = leaveModes.map(mode=> ({
+        value:String(mode),
+        label:String(mode)
+    }))
+
+    console.log("mode:", leaveModes)
+    console.log("types:", leaveTypes)
     return (
         <div className="flex justify-center items-center">
             <Drawer anchor="right" open={isLeaveFormShowing} onClose={() => toggleDrawer(false)} PaperProps={{ sx: { width: "30%" } }}>
@@ -199,7 +206,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleDrawer 
                             <div className="w-full mt-2 md:mt-0">
                                 <Select
                                     label="Leave Mode"
-                                    options={leaveModes}
+                                    options={leaveModeOptions}
                                     register={register("leave_mode")}
                                     error={errors.leave_mode?.message}
                                 />
@@ -210,67 +217,11 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleDrawer 
                         {leave_mode === "Multi-Days" ? (
                             <div className="w-full">
                                 <label className="block font-medium text-gray-700 mb-1">Select Dates *</label>
-
-                                {/* Single Date Input */}
-                                <div className="grid grid-cols-2 gap-10 mb-3">
-                                    <div>
-                                        <Input
-                                            type="date"
-                                            label=""
-                                            value={singleDateInput}
-                                            onChange={e => setSingleDateInput(e.target.value)}
-                                            placeholder="Select a date"
-                                        />
-                                    </div>
-                                    <Button
-                                        type="button"
-                                        name="Add date"
-                                        onClick={() => {
-                                            if (singleDateInput) {
-                                                handleAddSingleDate(singleDateInput);
-                                                setSingleDateInput("");
-                                            }
-                                        }}
-                                        disabled={!singleDateInput}
-                                    >
-                                    </Button>
-                                </div>
-
-                                {dates && dates.length > 0 && (
-                                    <div className="mb-3">
-                                        <div className="flex items-start justify-start gap-4 mb-2">
-                                            <label className="block font-medium text-gray-600 text-sm">Selected Dates: ( {dates.length} )</label>
-                                            {dates.length <= 1 ? <></> :
-                                                <Button
-                                                    name=" Clear All"
-                                                    type="button"
-                                                    onClick={() => setValue('dates', [])}
-                                                    className="bg-danger text-white text-xs"
-                                                >
-
-                                                </Button>
-                                            }
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {dates.map((date: string, idx: number) => (
-                                                <div
-                                                    key={idx}
-                                                    className="flex items-center gap-1 bg-green-100 border border-green-300 rounded px-2 py-1 text-sm"
-                                                >
-                                                    <span className="text-green-800">{date}</span>
-                                                    <Button
-                                                        name=''
-                                                        type="button"
-                                                        onClick={() => handleRemoveSelectedDate(date)}
-                                                        className="text-red-500 bg-transparent px-0 hover:text-red-700 text-xs"
-                                                    >
-                                                        <FaTrash />
-                                                    </Button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                <MultipleDatePicker
+                                    label=""
+                                    selectedDates={(dates || []).map(date => new Date(date))}
+                                    onChange={newDates => setValue('dates', newDates.map(d => d.toISOString().split('T')[0]))}
+                                />
                                 {errors.dates?.message && (
                                     <p className="text-red-500 text-xs mt-1">{errors.dates.message as string}</p>
                                 )}

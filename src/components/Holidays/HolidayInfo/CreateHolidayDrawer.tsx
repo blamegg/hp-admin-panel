@@ -6,7 +6,7 @@ import Select from '@/components/common/Select';
 import Input from '@/components/common/Input';
 import ModalHeader from '@/components/common/ModalHeader';
 import { useDispatch, useSelector } from 'react-redux';
-import { createHoliday } from '@/redux/slice/holidaySlice';
+import { createHoliday, fetchHolidays } from '@/redux/slice/holidaySlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { toast } from 'sonner';
 import MultipleDatePicker from '@/components/FormElements/DatePicker/MultipleDatePicker';
@@ -27,6 +27,7 @@ interface CreateHolidayDrawerProps {
 const CreateHolidayDrawer: React.FC<CreateHolidayDrawerProps> = ({ open, onClose, selectedDateRange, holidayTypes }) => {
     const dispatch = useDispatch<AppDispatch>();
     const { loading } = useSelector((state: RootState) => state.holidays);
+    const [createLoading, setCreateLoading] = useState(false);
 
     const [holidayType, setHolidayType] = useState('');
     const [title, setTitle] = useState('');
@@ -38,32 +39,28 @@ const CreateHolidayDrawer: React.FC<CreateHolidayDrawerProps> = ({ open, onClose
             setHolidayType(holidayTypes[0]?._id || '');
             setTitle('');
             setDescription('');
-            // Set initial dates from the selected range
-            const range = [];
-            let currentDate = new Date(selectedDateRange.start);
-            while (currentDate <= selectedDateRange.end) {
-                range.push(new Date(currentDate));
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-            setDates(range);
+            // Only select the start date by default
+            setDates([new Date(selectedDateRange.start)]);
         }
     }, [open, selectedDateRange, holidayTypes]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (dates.length > 0 && title && holidayType) {
+            setCreateLoading(true);
             const newHoliday = {
                 title: title,
                 description: description,
-                dates: dates.map(date => date.toISOString().split('T')[0]),
+                dates: dates.map(date => 
+                    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+                ),
                 holiday_type: holidayType,
             };
-            
             const result = await dispatch(createHoliday(newHoliday));
-
+            setCreateLoading(false);
             if (createHoliday.fulfilled.match(result)) {
                 toast.success("Holiday created successfully!");
+                dispatch(fetchHolidays());
                 onClose();
             } else if (createHoliday.rejected.match(result)) {
                 const errorMessage = typeof result.payload === 'string' ? result.payload : 'An unknown error occurred';
@@ -126,10 +123,10 @@ const CreateHolidayDrawer: React.FC<CreateHolidayDrawerProps> = ({ open, onClose
                 <Button
                     type="submit"
                     form="create-holiday-form"
-                    name={loading ? 'Creating...' : 'Create'}
+                    name={createLoading ? 'Creating...' : 'Create'}
                     className="bg-primary text-white min-w-[100px]"
-                    disabled={loading}
-                    loading={loading}
+                    disabled={createLoading}
+                    loading={createLoading}
                 />
             </div>
         </Drawer>

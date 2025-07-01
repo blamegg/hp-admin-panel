@@ -21,7 +21,7 @@ const CheckboxFour: React.FC<CheckboxFourProps> = ({
     <div>
       <label
         htmlFor={id}
-        className={`flex cursor-pointer select-none items-center text-sm font-medium text-black dark:text-white ${className}`}
+        className={`flex  cursor-pointer select-none items-center text-xs font-medium text-black dark:text-white ${className}`}
       >
         <div className="relative">
           <input
@@ -33,10 +33,10 @@ const CheckboxFour: React.FC<CheckboxFourProps> = ({
             disabled={disabled}
           />
           <div
-            className={`mr-2 flex h-5 w-5 items-center justify-center rounded-full border ${checked ? "border-primary" : ""}`}
+            className={`mr-2 flex h-3 w-3 items-center justify-center rounded-full  border bg-gray ${checked ? "border-primary" : ""}`}
           >
             <span
-              className={`h-2.5 w-2.5 rounded-full bg-transparent ${checked ? "!bg-primary" : ""}`}
+              className={`h-full w-full rounded-full bg-transparent ${checked ? "!bg-primary" : ""}`}
             >
               {" "}
             </span>

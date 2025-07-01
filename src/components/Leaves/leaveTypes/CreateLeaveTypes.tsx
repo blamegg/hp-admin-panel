@@ -22,10 +22,10 @@ interface CreateLeaveInferFace {
 
 const CreateLeaveType = ({ open, toggleDrawer, direction, fetchLeaveTypes }: CreateLeaveInferFace) => {
 
-    const { register, handleSubmit, reset, formState: { errors }, control } = useForm({
+    const { register, handleSubmit, reset, formState: { errors }, control } = useForm<CreateLeaveFormInput>({
         resolver: zodResolver(leaveSchema),
         mode: "onSubmit",
-        defaultValues: { name: "", paid: false, half_day_allowed: false, description: "" }
+        defaultValues: { name: "", paid: false, half_day_allowed: false, description: "", total_days_allowed: undefined }
     })
     const handleClose = () => {
         toggleDrawer(false);
@@ -78,6 +78,15 @@ const CreateLeaveType = ({ open, toggleDrawer, direction, fetchLeaveTypes }: Cre
                             placeholder='Create leave' />
                     </div>
                     <div className='mt-3'>
+                        <Input
+                            type="number"
+                            label='Total days allowed'
+                            register={register('total_days_allowed', { valueAsNumber: true })}
+                            error={errors.total_days_allowed?.message}
+                            placeholder='Enter number of days'
+                        />
+                    </div>
+                    <div className='mt-3'>
                         <Controller
                             name="paid"
                             control={control}
@@ -85,7 +94,7 @@ const CreateLeaveType = ({ open, toggleDrawer, direction, fetchLeaveTypes }: Cre
                                 <CheckboxFour
                                     label="Paid"
                                     id="paid"
-                                    checked={field.value}
+                                    checked={field.value ?? false}
                                     onChange={() => field.onChange(!field.value)}
                                 />
                             )}
@@ -99,7 +108,7 @@ const CreateLeaveType = ({ open, toggleDrawer, direction, fetchLeaveTypes }: Cre
                                 <CheckboxFour
                                     label="Half day"
                                     id="half-day"
-                                    checked={field.value}
+                                    checked={field.value ?? false}
                                     onChange={() => field.onChange(!field.value)}
                                 />
                             )}

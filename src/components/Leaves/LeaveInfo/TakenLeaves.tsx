@@ -224,7 +224,7 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
 
 
   return (
-    <div className="flex justify-center items-center w-full">
+    <div className="flex justify-center items-center w-full ">
       <div className='overflow-x-scroll w-full'>
 
         <DataTable
@@ -277,10 +277,10 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
                 "&:not(:last-of-type)": {
                   borderBottomStyle: "solid",
                   borderBottomWidth: "1px",
-                  borderBottomColor: "#E2E8F0", // stroke
+                  borderBottomColor: "#E2E8f0", 
                 },
-                backgroundColor: "transprant", // Light mode row background
-                color: "#1C243F", // Light mode row text
+                backgroundColor: "transprant", 
+                color: "#1C243F", 
               },
               highlightOnHoverStyle: {
                 backgroundColor: "#e4e7f7",

@@ -114,6 +114,7 @@ export interface CreateLeaveTypesInterface{
   description?: string;
   half_day_allowed?:boolean;
   paid?:boolean;
+  total_days_allowed?: number;
 }
 
 export interface ApplyLeaveInterface {
@@ -130,6 +131,15 @@ export interface HolidayTypesInterface{
   name:string,
   description?:string
 }
+
+export interface HolidaysInterface{
+    _id: string;
+    title: string;
+    description?: string;
+    dates: string[]; 
+    holiday_type: string;  
+}
+
 
 // -------------------------------------------------- Leaves ---------------------------------------------------- 
 
@@ -152,6 +162,7 @@ export const updateLeaveTypesFn = async (leaveId:string, payload: {
   half_day_allowed?:boolean;
   paid?:boolean;
 })=>{
+  console.log(payload, "api payload")
   const response = await apiClient.put(`${ApiEndpoints.leaveType}/${leaveId}`, payload);
   return response.data
 }
@@ -162,54 +173,17 @@ export const deleteLeaveTypeFn = async (leaveId: string) => {
   return response.data;
 }
 
-// leave types dropdown list
+// fetch leave types dropdown list only
 export const fetchLeaveTypesListFn = async ()=>{
-  const response = await apiClient.get(`${ApiEndpoints.leaves}/leave-modes`);
-  return response.data;
-}
-
-// fetch leave mode list only to show in the dropwen while creating , updating the leaves
-export const fetchLeaveModeListFn = async ()=>{
   const response = await apiClient.get(`${ApiEndpoints.leaveType}/leave-type-dropdown`);
   return response.data;
 }
 
-// -------------------------------------------------- Holiday Types ---------------------------------------------------- 
-
-// fetch all Holiday Types
-export const fetchHolidayTypesFn = async (page: number = 1, limit: number = 10, search?: string) => {
-  let url = `${ApiEndpoints.holidayTypes}?page=${page}&limit=${limit}`;
-  if (search && search.trim()) {
-    url += `&name=${encodeURIComponent(search.trim())}`;
-  }
-  const response = await apiClient.get(url);
+// fetch leave mode dropdown list only 
+export const fetchLeaveModeListFn = async ()=>{
+  const response = await apiClient.get(`${ApiEndpoints.leaves}/leave-modes`);
   return response.data;
-};
-
-// fetch all Holiday Types List
-export const fetchHolidayTypesListFn = async () => {
-  const response = await apiClient.get(`${ApiEndpoints.holidayTypes}/holiday-type-dropdown`);
-  return response.data;
-};
-
-// create a new Holiday Types
-export const createHolidayTypeFn = async (payload: { name: string; description?: string }) => {
-  console.log(payload, "Apicall")
-  const response = await apiClient.post(ApiEndpoints.holidayTypes, payload);
-  return response.data;
-};
-
-// update a Holiday Type
-export const updateHolidayTypeFn = async (id: string, payload: { name?: string; description?: string }) => {
-  const response = await apiClient.put(`${ApiEndpoints.holidayTypes}/${id}`, payload);
-  return response.data;
-};
-
-// delete a Holiday Type
-export const deleteHolidayTypeFn = async (id: string) => {
-  const response = await apiClient.delete(`${ApiEndpoints.holidayTypes}/${id}`);
-  return response.data;
-};
+}
 
 // ---------------------------------- Menu----------------------------------------------------------
 // fetch menu list
@@ -360,6 +334,7 @@ export const deleteLeaveTypesFn = async (leaveId: string) => {
 
 // update leave
 export const updateLeaveTypeFn = async (payload: any, leaveId: string) => {
+  console.log(payload, "payload")
   const response = await apiClient.put(`${ApiEndpoints.leaveType}/${leaveId}`, payload);
   return response.data;
 };
@@ -417,15 +392,78 @@ export const deleteLeaveFn = async(leaveId:string)=>{
     return response.data;
 }
 
+// --------------------------------------------- Holidays -----------------------------------------
 // create holiday
 export const createHolidayFn = async (payload: any) => {
-  console.log(payload, "payload")
     const response = await apiClient.post(ApiEndpoints.holidays, payload);
     return response.data;
 };
 
-// create holiday types 
-export const createHolidayTypesFn = async (payload:HolidayTypesInterface)=>{
+// fetch all holidays
+export const fetchHolidaysFn = async () => {
+    const response = await apiClient.get(ApiEndpoints.holidays);
+    return response.data;
+};
+
+// fetch holiday by id
+export const getHolidayByIdFn = async (id: string) => {
+  const response = await apiClient.get(`${ApiEndpoints.holidays}/${id}`);
+  return response.data;
+};
+
+// fetch holiday by id
+export const updateHolidayFn = async (payload:HolidaysInterface) => {
+  const response = await apiClient.put(`${ApiEndpoints.holidays}/${payload._id}`, payload);
+  return response.data;
+};
+
+// delete holiday
+export const deleteHolidayFn = async (holidayId: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.holidays}/${holidayId}`);
+  return response.data;
+};
+
+// -------------------------------------------------- Holiday Types ---------------------------------------------------- 
+
+// // create holiday types 
+// export const createHolidayTypesFn = async (payload:HolidayTypesInterface)=>{
+//   const response = await apiClient.post(ApiEndpoints.holidayTypes, payload);
+//   return response.data
+// }
+
+// create a new Holiday Types
+export const createHolidayTypeFn = async (payload: { name: string; description?: string }) => {
+  console.log(payload, "Apicall")
   const response = await apiClient.post(ApiEndpoints.holidayTypes, payload);
-  return response.data
-}
+  return response.data;
+};
+
+// fetch all Holiday Types
+export const fetchHolidayTypesFn = async (page: number = 1, limit: number = 10, search?: string) => {
+  let url = `${ApiEndpoints.holidayTypes}?page=${page}&limit=${limit}`;
+  if (search && search.trim()) {
+    url += `&name=${encodeURIComponent(search.trim())}`;
+  }
+  const response = await apiClient.get(url);
+  return response.data;
+};
+
+// fetch all Holiday Types List
+export const fetchHolidayTypesListFn = async () => {
+  const response = await apiClient.get(`${ApiEndpoints.holidayTypes}/holiday-type-dropdown`);
+  return response.data;
+};
+
+// update a Holiday Type
+export const updateHolidayTypeFn = async (id: string, payload: { name?: string; description?: string }) => {
+  const response = await apiClient.put(`${ApiEndpoints.holidayTypes}/${id}`, payload);
+  return response.data;
+};
+
+// delete a Holiday Type
+export const deleteHolidayTypeFn = async (id: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.holidayTypes}/${id}`);
+  return response.data;
+};
+
+
