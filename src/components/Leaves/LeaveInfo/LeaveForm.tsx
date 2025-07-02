@@ -111,8 +111,6 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleDrawer 
     };
 
     const onSubmit = async (data: LeaveFormInputs) => {
-        console.log("Form data:", data);
-        console.log("Form errors:", errors);
 
         // Check if form has validation errors
         if (Object.keys(errors).length > 0) {
@@ -186,8 +184,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ isLeaveFormShowing, toggleDrawer 
         label:String(mode)
     }))
 
-    console.log("mode:", leaveModes)
-    console.log("types:", leaveTypes)
+
     return (
         <div className="flex justify-center items-center">
             <Drawer anchor="right" open={isLeaveFormShowing} onClose={() => toggleDrawer(false)} PaperProps={{ sx: { width: "30%" } }}>

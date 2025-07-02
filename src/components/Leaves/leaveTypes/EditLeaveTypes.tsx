@@ -56,13 +56,13 @@ const EditLeaveTypes = ({ open, toggleDrawer, direction, selected, setSelected, 
   };
 
   return (
-    <Drawer open={open} onClose={handleClose} 
-    anchor={direction === 'ltr' ? 'right' : 'left'}
-    PaperProps={{
-      sx:{
-        width: "30%"
-      }
-    }}
+    <Drawer open={open} onClose={handleClose}
+      anchor={direction === 'ltr' ? 'right' : 'left'}
+      PaperProps={{
+        sx: {
+          width: "30%"
+        }
+      }}
     >
       <ModalHeader text="Edit Leave" toggleDrawer={toggleDrawer} />
       <form onSubmit={handleSubmit(onSubmit)} >
@@ -84,34 +84,52 @@ const EditLeaveTypes = ({ open, toggleDrawer, direction, selected, setSelected, 
               placeholder='Enter number of days'
             />
           </div>
-          <div className='mt-3'>
-            <Controller
-              name="paid"
-              control={control}
-              render={({ field }) => (
-                <CheckboxFour
-                  label="Paid"
-                  id="paid"
-                  checked={field.value}
-                  onChange={() => field.onChange(!field.value)}
-                />
-              )}
-            />
+          <div className='mt-3 flex justify-start gap-4 items-center'>
+
+            <div className=''>
+              <Controller
+                name="paid"
+                control={control}
+                render={({ field }) => (
+                  <CheckboxFour
+                    label="Paid"
+                    id="paid"
+                    checked={field.value}
+                    onChange={() => field.onChange(!field.value)}
+                  />
+                )}
+              />
+            </div>
+            <div className=''>
+              <Controller
+                name="monthly"
+                control={control}
+                render={({ field }) => (
+                  <CheckboxFour
+                    label="Monthly"
+                    id="monthly"
+                    checked={field.value}
+                    onChange={() => field.onChange(!field.value)}
+                  />
+                )}
+              />
+            </div>
+            <div className=''>
+              <Controller
+                name="half_day_allowed"
+                control={control}
+                render={({ field }) => (
+                  <CheckboxFour
+                    label="Half day"
+                    id="half-day"
+                    checked={field.value}
+                    onChange={() => field.onChange(!field.value)}
+                  />
+                )}
+              />
+            </div>
           </div>
-          <div className='mt-3'>
-            <Controller
-              name="half_day_allowed"
-              control={control}
-              render={({ field }) => (
-                <CheckboxFour
-                  label="Half day"
-                  id="half-day"
-                  checked={field.value}
-                  onChange={() => field.onChange(!field.value)}
-                />
-              )}
-            />
-          </div>
+
           <div className='mt-3'>
             <Textarea
               label="Description"

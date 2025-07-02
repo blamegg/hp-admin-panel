@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
-import { CurrentRoleDataInterFace, menuDataInterface, RolesInterFace2, updateRoleAndRankFn } from "@/utility/queryFetcher";
+import { CurrentRoleDataInterFace, menuDataInterface, RolesInterFace2, updateRoleAndRankFn, menuListFn } from "@/utility/queryFetcher";
+import { useQuery } from '@tanstack/react-query';
 import ModalHeader from "../common/ModalHeader";
 import Permissions from "./PermissionDrawer";
 import { Box, } from "@mui/system";
@@ -16,7 +17,6 @@ interface EditRoleDrawerProps {
   isDrawerOpen: boolean;
   toggleDrawer: (open: boolean) => void;
   selectedRole: CurrentRoleDataInterFace | null;
-  permissionsMenuList: RolesInterFace2 | null;
   fetchRoles: () => void;
 }
 
@@ -25,11 +25,15 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
   isDrawerOpen,
   toggleDrawer,
   selectedRole,
-  permissionsMenuList,
   fetchRoles
 }) => {
   const [roleName, setRoleName] = useState<string>('');
   const [rank, setRank] = useState<string>('');
+  const { data: permissionsMenuList } = useQuery({
+    queryKey: ['permissionsMenuList'],
+    queryFn: menuListFn,
+    enabled: isDrawerOpen,
+  });
 
   useEffect(() => {
     if (selectedRole) {
@@ -154,5 +158,4 @@ const EditRole: React.FC<EditRoleDrawerProps> = ({
   );
 };
 
-export default EditRole;
-EditRole; 
+export default EditRole; 

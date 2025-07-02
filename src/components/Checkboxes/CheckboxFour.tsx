@@ -33,7 +33,7 @@ const CheckboxFour: React.FC<CheckboxFourProps> = ({
             disabled={disabled}
           />
           <div
-            className={`mr-2 flex h-3 w-3 items-center justify-center rounded-full  border bg-gray ${checked ? "border-primary" : ""}`}
+            className={`mr-1 flex h-3 w-3 items-center justify-center rounded-full  border bg-gray ${checked ? "border-primary" : ""}`}
           >
             <span
               className={`h-full w-full rounded-full bg-transparent ${checked ? "!bg-primary" : ""}`}

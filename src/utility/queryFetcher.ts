@@ -293,7 +293,6 @@ export const updatePermissionFn = async (payload: UpdatePermissionsInterFace) =>
     `${ApiEndpoints.permissions}/assign-menu-permission`,
     payload,
   );
-  console.log(response.data)
   return response.data;
 };
 
@@ -465,5 +464,11 @@ export const deleteHolidayTypeFn = async (id: string) => {
   const response = await apiClient.delete(`${ApiEndpoints.holidayTypes}/${id}`);
   return response.data;
 };
+
+// fetch leaves summary
+export const fetchLeavesSummaryFn = async () => {
+  const response = await apiClient.get(ApiEndpoints.leavesSummary);
+  return response.data;
+}
 
 

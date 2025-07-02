@@ -28,8 +28,8 @@ const DeleteHolidayDrawer: React.FC<DeleteHolidayDrawerProps> = ({
     setLoading(true);
     try {
       await dispatch(deleteHoliday(holiday._id)).unwrap();
-      toast.success('Holiday deleted successfully!');
       dispatch(fetchHolidays());
+      toast.success('Holiday deleted successfully!');
       onClose();
     } catch (error: any) {
       console.log(error)

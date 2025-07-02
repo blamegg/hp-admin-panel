@@ -14,6 +14,7 @@ import { useHasPermission } from '@/hooks/useUserPermissions'
 import CreateLeaveType from './CreateLeaveTypes'
 import EditLeaveTypes from './EditLeaveTypes'
 import { toSentenceCase } from '@/utility/helper'
+import PermissionDenied from '@/components/common/PermissionDenied'
 
 const LeaveTypes = () => {
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
@@ -31,7 +32,6 @@ const LeaveTypes = () => {
   const dispatch = useDispatch();
   const hasPermission = useHasPermission();
 
-  console.log(leaveTypes, "leaveTypes")
 
   const fetchLeaveTypes = React.useCallback(() => {
     // dispatch(setLeavesLoading());
@@ -86,41 +86,54 @@ const LeaveTypes = () => {
       name: 'Leave Name',
       selector: (row: any) => row.name,
       sortable: true,
-      width: '200px',
     },
     {
       name: 'Paid',
       selector: (row: any) => (row.paid ? 'Yes' : 'No'),
       sortable: true,
-      width: '120px',
     },
     {
-      name: 'Half Day Allowed',
+      name: 'Half Day',
       selector: (row: any) => (row.half_day_allowed ? 'Yes' : 'No'),
       sortable: true,
-      width: '160px',
     },
     {
-      name: 'Day Allowed',
+      name: 'Days',
       selector: (row: any) => (row.total_days_allowed),
       sortable: true,
-      width: '160px',
+    },
+    {
+      name: 'Monthly/Yearly',
+      selector: (row: any) => (row.monthly ? 'Monthly ' : 'Yearly'),
+      sortable: true,
     },
     {
       name: 'Status',
-      selector: (row: any) => (row.status ? 'Yes' : 'No'),
+      selector: (row: any) => (row.status ? 'Active' : 'Inactive'),
       sortable: true,
-      width: '160px',
     },
     {
       name: 'Actions',
       cell: (row: any) => (
         <div className="flex gap-3">
-          <button onClick={() => { setSelected(row); setIsEditDrawerOpen(true); }} className="text-blue-500 hover:text-blue-700"><FaEdit /></button>
-          <button onClick={() => { setSelected(row); setIsDeleteDrawerOpen(true); }} className="text-red-500 hover:text-red-700"><FaTrash /></button>
+          {hasPermission('Edit leave type') && (
+            <button
+              onClick={() => { setSelected(row); setIsEditDrawerOpen(true); }}
+              className="text-blue-500 hover:text-blue-700"
+            >
+              <FaEdit />
+            </button>
+          )}
+          {hasPermission('Delete leave type') && (
+            <button
+              onClick={() => { setSelected(row); setIsDeleteDrawerOpen(true); }}
+              className="text-danger"
+            >
+              <FaTrash />
+            </button>
+          )}
         </div>
       ),
-      width: '120px',
     },
   ];
 
@@ -132,102 +145,109 @@ const LeaveTypes = () => {
 
   return (
     <div>
-      <div className="flex gap-2 mb-4">
-        <select
-          value={searchBasis}
-          onChange={(e) => setSearchBasis(e.target.value)}
-          className="rounded bg-[#eff4fb] border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
-        >
-          <option value="name">Leave Name</option>
-        </select>
-        <input
-          type="text"
-          placeholder={`Search by ${searchBasis}...`}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
-        />
-        {hasPermission(toSentenceCase('Create Leave Type')) && (
-          <Button name='Create leave type' type="button" onClick={() => toggleCreateDrawer(true)} />
-        )}
-      </div>
-
-      <div className="mt-5 overflow-x-auto">
-        <DataTable
-          columns={columns}
-          data={filteredLeaves}
-          progressPending={loading}
-          pagination
-          paginationPerPage={rowsPerPage}
-          paginationTotalRows={total}
-          paginationComponent={() => (
-            <CustomPagination
-              rowsPerPage={rowsPerPage}
-              currentPage={currentPage}
-              rowCount={total}
-              onChangePage={handlePageChange}
-              onChangeRowsPerPage={handleRowsPerPageChange}
+      {hasPermission('View leave types') ? (
+        <>
+          <div className="flex gap-2 mb-4">
+            <select
+              value={searchBasis}
+              onChange={(e) => setSearchBasis(e.target.value)}
+              className="rounded bg-[#eff4fb] border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+            >
+              <option value="name">Leave Name</option>
+            </select>
+            <input
+              type="text"
+              placeholder={`Search by ${searchBasis}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
             />
-          )}
-          className="custom_tbl"
-          customStyles={{
-            header: {
-              style: {
-                fontSize: "12px",
-                minHeight: "30px",
-                backgroundColor: "#F9FAFB",
-                color: "#1C243F",
-              },
-            },
-            headRow: {
-              style: {
-                fontSize: "12px",
-                minHeight: "30px",
-                backgroundColor: "#F9FAFB", // Light mode header row background
-                borderBottomWidth: "1px",
-                borderBottomColor: "#E2E8F0", // stroke
-              },
-            },
-            headCells: {
-              style: {
-                fontWeight: 700,
-                color: "#1C243F", // Light mode header cells text
-                backgroundColor: "#F9FAFB", // Light mode header cells background
-              },
-            },
-            cells: {
-              style: {
-                fontSize: "11px",
-                fontWeight: 500,
-                wordBreak: "break-word",
-                overflowWrap: "break-word",
-                height: "27px",
-                color: "#1C243F", // Light mode cell text
-                backgroundColor: "#FFFFFF", // Light mode cell background
-              },
-            },
-            rows: {
-              style: {
-                fontSize: "11px",
-                minHeight: "27px",
-                "&:not(:last-of-type)": {
-                  borderBottomStyle: "solid",
-                  borderBottomWidth: "1px",
-                  borderBottomColor: "#E2E8F0", // stroke
-                },
-                backgroundColor: "#FFFFFF", // Light mode row background
-                color: "#1C243F", // Light mode row text
-              },
-              highlightOnHoverStyle: {
-                backgroundColor: "#F7F9FC", // gray-2
-                color: "#1C243F",
-                cursor: "pointer",
-              },
-            },
-          }}
-        />
-      </div>
+            {hasPermission('Create leave type') && (
+              <Button name='Create leave type' type="button" onClick={() => toggleCreateDrawer(true)} />
+            )}
+          </div>
 
+          <div className="mt-5 overflow-x-auto">
+            <DataTable
+              columns={columns}
+              data={filteredLeaves}
+              progressPending={loading}
+              pagination
+              paginationPerPage={rowsPerPage}
+              paginationTotalRows={total}
+              paginationComponent={() => (
+                <CustomPagination
+                  rowsPerPage={rowsPerPage}
+                  currentPage={currentPage}
+                  rowCount={total}
+                  onChangePage={handlePageChange}
+                  onChangeRowsPerPage={handleRowsPerPageChange}
+                />
+              )}
+              className="custom_tbl"
+              customStyles={{
+                header: {
+                  style: {
+                    fontSize: "12px",
+                    minHeight: "30px",
+                    backgroundColor: "#F9FAFB",
+                    color: "#1C243F",
+                  },
+                },
+                headRow: {
+                  style: {
+                    fontSize: "12px",
+                    minHeight: "30px",
+                    backgroundColor: "#F9FAFB", // Light mode header row background
+                    borderBottomWidth: "1px",
+                    borderBottomColor: "#E2E8F0", // stroke
+                  },
+                },
+                headCells: {
+                  style: {
+                    fontWeight: 700,
+                    color: "#1C243F", // Light mode header cells text
+                    backgroundColor: "#F9FAFB", // Light mode header cells background
+                  },
+                },
+                cells: {
+                  style: {
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                    height: "27px",
+                    color: "#1C243F", // Light mode cell text
+                    backgroundColor: "#FFFFFF", // Light mode cell background
+                  },
+                },
+                rows: {
+                  style: {
+                    fontSize: "11px",
+                    minHeight: "27px",
+                    "&:not(:last-of-type)": {
+                      borderBottomStyle: "solid",
+                      borderBottomWidth: "1px",
+                      borderBottomColor: "#E2E8F0", // stroke
+                    },
+                    backgroundColor: "#FFFFFF", // Light mode row background
+                    color: "#1C243F", // Light mode row text
+                  },
+                  highlightOnHoverStyle: {
+                    backgroundColor: "#F7F9FC", // gray-2
+                    color: "#1C243F",
+                    cursor: "pointer",
+                  },
+                },
+              }}
+            />
+          </div>
+        </>
+      ) : 
+      (
+        <PermissionDenied />
+      )
+      }
       <CreateLeaveType direction={direction} open={isCreateDrawerOpen} toggleDrawer={toggleCreateDrawer} fetchLeaveTypes={fetchLeaveTypes} />
       <EditLeaveTypes direction={direction} open={isEditDrawerOpen} toggleDrawer={toggleEditLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeaveTypes={fetchLeaveTypes} />
       <DeleteLeave direction={direction} open={isDeleteDrawerOpen} toggleDrawer={toggleDeleteLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeaveTypes={fetchLeaveTypes} />

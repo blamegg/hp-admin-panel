@@ -181,25 +181,21 @@ const UserTable = () => {
       name: "Role",
       selector: (row: any) => row.role.name || "",
       sortable: true,
-      width: "130px",
     },
     {
       name: "Email",
       selector: (row: any) => row.email || "",
       sortable: true,
-      width: "160px",
     },
     {
       name: "Name",
       selector: (row: any) => row.name || "",
       sortable: true,
-      width: "120px",
     },
     {
       name: "Mobile",
       selector: (row: any) => row.mobile || "",
       sortable: true,
-      width: "100px",
     },
     {
       name: "Status",
@@ -219,13 +215,11 @@ const UserTable = () => {
         return isActive ? "Active" : "Inactive";
       },
       sortable: true,
-      width: "90px",
     },
     {
       name: "Date Created",
       selector: (row: any) => formatTimestamp(row.createdAt),
       sortable: true,
-      width: "150px",
     },
     ...(hasAnyActionPermission() ? [{
       name: "Actions",
@@ -251,6 +245,7 @@ const UserTable = () => {
             <Tooltip title="User details">
               <button
                 onClick={() => {
+                  setSelected(row);
                   handleViewClick(row);
                   toggleViewDrawer(true);
                 }}
@@ -292,7 +287,6 @@ const UserTable = () => {
 
         </div>
       ),
-      width: "120px"
     }] : []),
   ];
 

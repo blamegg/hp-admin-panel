@@ -1,4 +1,4 @@
-import { fetchTakenLeaveListFn } from "@/utility/queryFetcher";
+import { fetchTakenLeaveListFn, fetchLeavesSummaryFn } from "@/utility/queryFetcher";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface AppliedLeave {
@@ -40,18 +40,24 @@ export interface AppliedLeavesResponse {
   leaves: AppliedLeave[];
 }
 
-interface AppliedLeaveState {
+interface TakenLeaveState {
   appliedLeaves: AppliedLeave[];
   pagination: Pagination | null;
   loading: boolean;
   error: string | null;
+  summary: any;
+  summaryLoading: boolean;
+  summaryError: string | null;
 }
 
-const initialState: AppliedLeaveState = {
+const initialState: TakenLeaveState = {
   appliedLeaves: [],
   pagination: null,
   loading: false,
   error: null,
+  summary: null,
+  summaryLoading: false,
+  summaryError: null,
 };
 
 interface FetchLeaveParams {
@@ -77,10 +83,32 @@ export const fetchTakenLeaves = createAsyncThunk<
   }
 });
 
-const appliedLeaveSlice = createSlice({
+export const fetchLeavesSummary = () => async (dispatch: any) => {
+  dispatch(setSummaryLoading(true));
+  try {
+    const data = await fetchLeavesSummaryFn();
+    dispatch(setSummary(data));
+    dispatch(setSummaryLoading(false));
+  } catch (error: any) {
+    dispatch(setSummaryError(error?.message || 'Failed to fetch summary'));
+    dispatch(setSummaryLoading(false));
+  }
+};
+
+const takenLeaveSlice = createSlice({
   name: "appliedLeaves",
   initialState,
-  reducers: {},
+  reducers: {
+    setSummary(state, action) {
+      state.summary = action.payload;
+    },
+    setSummaryLoading(state, action) {
+      state.summaryLoading = action.payload;
+    },
+    setSummaryError(state, action) {
+      state.summaryError = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTakenLeaves.pending, (state) => {
@@ -99,7 +127,8 @@ const appliedLeaveSlice = createSlice({
   },
 });
 
-export default appliedLeaveSlice.reducer;
+export const { setSummary, setSummaryLoading, setSummaryError } = takenLeaveSlice.actions;
+export default takenLeaveSlice.reducer;
 
 
 

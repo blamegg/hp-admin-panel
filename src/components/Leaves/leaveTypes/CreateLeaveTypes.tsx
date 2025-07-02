@@ -25,7 +25,7 @@ const CreateLeaveType = ({ open, toggleDrawer, direction, fetchLeaveTypes }: Cre
     const { register, handleSubmit, reset, formState: { errors }, control } = useForm<CreateLeaveFormInput>({
         resolver: zodResolver(leaveSchema),
         mode: "onSubmit",
-        defaultValues: { name: "", paid: false, half_day_allowed: false, description: "", total_days_allowed: undefined }
+        defaultValues: { name: "", paid: true , half_day_allowed: false, description: "", total_days_allowed: undefined }
     })
     const handleClose = () => {
         toggleDrawer(false);
@@ -86,33 +86,50 @@ const CreateLeaveType = ({ open, toggleDrawer, direction, fetchLeaveTypes }: Cre
                             placeholder='Enter number of days'
                         />
                     </div>
-                    <div className='mt-3'>
-                        <Controller
-                            name="paid"
-                            control={control}
-                            render={({ field }) => (
-                                <CheckboxFour
-                                    label="Paid"
-                                    id="paid"
-                                    checked={field.value ?? false}
-                                    onChange={() => field.onChange(!field.value)}
-                                />
-                            )}
-                        />
-                    </div>
-                    <div className='mt-3'>
-                        <Controller
-                            name="half_day_allowed"
-                            control={control}
-                            render={({ field }) => (
-                                <CheckboxFour
-                                    label="Half day"
-                                    id="half-day"
-                                    checked={field.value ?? false}
-                                    onChange={() => field.onChange(!field.value)}
-                                />
-                            )}
-                        />
+                    <div className='mt-3 flex justify-start gap-4 items-center'>
+                        <div className=''>
+                            <Controller
+                                name="paid"
+                                control={control}
+                                render={({ field }) => (
+                                    <CheckboxFour
+                                        label="Paid"
+                                        id="paid"
+                                        checked={field.value ?? false}
+                                        onChange={() => field.onChange(!field.value)}
+                                        
+                                    />
+                                )}
+                            />
+                        </div>
+                        <div className=''>
+                            <Controller
+                                name="monthly"
+                                control={control}
+                                render={({ field }) => (
+                                    <CheckboxFour
+                                        label="Monthly"
+                                        id="monthly"
+                                        checked={field.value ?? false}
+                                        onChange={() => field.onChange(!field.value)}
+                                    />
+                                )}
+                            />
+                        </div>
+                        <div className=''>
+                            <Controller
+                                name="half_day_allowed"
+                                control={control}
+                                render={({ field }) => (
+                                    <CheckboxFour
+                                        label="Half day"
+                                        id="half-day"
+                                        checked={field.value ?? false}
+                                        onChange={() => field.onChange(!field.value)}
+                                    />
+                                )}
+                            />
+                        </div>
                     </div>
                     <div className='mt-3'>
                         <Textarea

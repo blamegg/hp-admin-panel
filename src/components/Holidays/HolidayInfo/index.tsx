@@ -15,6 +15,9 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import { toast } from 'sonner';
 import HolidayDetailsDrawer from './HolidayDetailsDrawer';
 import { FaEye } from 'react-icons/fa6';
+import { color } from '@mui/system';
+import { useHasPermission } from '@/hooks/useUserPermissions';
+import PermissionDenied from '@/components/common/PermissionDenied';
 
 const localizer = momentLocalizer(moment);
 
@@ -30,17 +33,18 @@ export interface HolidayEvent {
 
 const HolidayInfo = () => {
   const [selectedDateRange, setSelectedDateRange] = useState<{ start: Date; end: Date } | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [createHolidayDrawerOpen, setCreateHolidayDrawerOpen] = useState(false);
   const [events, setEvents] = useState<HolidayEvent[]>([]);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [deleteDrawerOpen, setDeleteDrawerOpen] = useState(false);
   const [selectedHoliday, setSelectedHoliday] = useState<HolidayEvent | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
   const holidayTypes = useSelector((state: RootState) => state.holidayTypesList.holidayTypesList?.data) || [];
   const { holidays, error, loading } = useSelector((state: RootState) => state.holidays);
+  const hasPermission = useHasPermission();
+
   // holiday types
   useEffect(() => {
     dispatch(fetchHolidayTypesList())
@@ -51,6 +55,8 @@ const HolidayInfo = () => {
   useEffect(() => {
     dispatch(fetchHolidays())
   }, [dispatch])
+
+  console.log(holidays, "HOlidays");
 
   // Map fetched holidays to calendar events
   useEffect(() => {
@@ -79,39 +85,50 @@ const HolidayInfo = () => {
 
   // Custom event component for calendar
   const EventComponent = ({ event }: { event: HolidayEvent }) => {
+    const [isHoverd, setIsHovered] = useState(false);
+
     return (
-      <div>
-        <div className='bg-success rounded ps-1 mb-1'>
+      <div className='flex items-center border flex-col gap-[2px]'
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className='bg-success rounded px-3 mb-1'>
           <span className='text-xs' >{event.title}</span>
         </div>
-        <div className='text-sm flex justify-end items-center gap-2 py-1'>
-            <FaEdit
-              className="cursor-pointer text-primary hover:text-blue-700"
-              onClick={e => {
-                e.stopPropagation();
-                console.log(event)
-
-                setSelectedHoliday(event);
-                setEditDrawerOpen(true);
-              }}
-            />
-            <FaEye
-            className='cursor-pointer text-black'
-              onClick={e => {
-                e.stopPropagation();
-                setSelectedHoliday(event);
-                setDetailsDrawerOpen(true);
-              }}
-             />
-            <FaTrash
-              className="cursor-pointer text-danger "
-              onClick={e => {
-                e.stopPropagation();
-                setSelectedHoliday(event);
-                setDeleteDrawerOpen(true);
-              }}
-            />
-        </div>
+        {isHoverd && (
+          <div className='text-sm flex justify-end items-center gap-2'>
+            {hasPermission('Edit holiday') && (
+              <FaEdit
+                className="cursor-pointer text-primary hover:text-blue-700"
+                onClick={e => {
+                  e.stopPropagation();
+                  setSelectedHoliday(event);
+                  setEditDrawerOpen(true);
+                }}
+              />
+            )}
+            {hasPermission('View holiday details') && (
+              <FaEye
+                className='cursor-pointer text-black'
+                onClick={e => {
+                  e.stopPropagation();
+                  setSelectedHoliday(event);
+                  setDetailsDrawerOpen(true);
+                }}
+              />
+            )}
+            {hasPermission('Delete holiday') && (
+              <FaTrash
+                className="cursor-pointer text-danger "
+                onClick={e => {
+                  e.stopPropagation();
+                  setSelectedHoliday(event);
+                  setDeleteDrawerOpen(true);
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -119,6 +136,7 @@ const HolidayInfo = () => {
 
   // Show details drawer for existing holiday
   const handleDateClick = (slot: SlotInfo) => {
+    if (!hasPermission('Create holiday')) return;
     const foundHoliday = events.find(event => event.start.toDateString() === slot.start.toDateString());
 
     if (foundHoliday) {
@@ -127,7 +145,7 @@ const HolidayInfo = () => {
       return;
     }
     setSelectedDateRange({ start: slot.start, end: slot.end });
-    setDrawerOpen(true);
+    setCreateHolidayDrawerOpen(true);
   };
 
   const addEvent = (event: HolidayEvent) => {
@@ -153,37 +171,47 @@ const HolidayInfo = () => {
   };
 
   const dayPropGetter = (date: Date) => {
-    const day = date.getDay(); // 0 = Sunday, 6 = Saturday
+    const day = date.getDay();
 
     if (day === 0 || day === 6) {
       return {
-        className: 'text-red-500 font-semibold', // Tailwind class for red text
+        className: 'weekend-cell',
       };
     }
-
 
     return {};
   };
 
 
+
   return (
     <div className="p-4">
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        selectable
-        style={{ height: 450 }}
-        onSelectSlot={handleDateClick}
-        eventPropGetter={eventPropGetter}
-        dayPropGetter={dayPropGetter}
-        components={{ event: EventComponent }}
-      />
+      {hasPermission('View holidays') ? (<>
+        <div className="no-time-gutter p-4" style={{ height: 'calc(100vh - 160px)' }}>
+          <Calendar
+            localizer={localizer}
+            views={["month", "week", 'day']}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            selectable
+            style={{ height: "100%" }}
+            onSelectSlot={handleDateClick}
+            eventPropGetter={eventPropGetter}
+            dayPropGetter={dayPropGetter}
+            components={{
+              event: EventComponent,
+            }}
+          />
+        </div>
+      </>) : (
+        <PermissionDenied />
+      )}
+
 
       <CreateHolidayDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
+        open={createHolidayDrawerOpen}
+        onClose={() => setCreateHolidayDrawerOpen(false)}
         selectedDateRange={selectedDateRange}
         addEvent={addEvent}
         holidayTypes={holidayTypes}

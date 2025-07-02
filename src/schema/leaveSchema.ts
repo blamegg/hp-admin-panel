@@ -5,7 +5,8 @@ export const leaveSchema = z.object({
   description: z.string().optional(),
   half_day_allowed: z.boolean().optional(),
   paid:z.boolean().optional(),
-  total_days_allowed: z.number().min(1, "Leave days is required")
+  total_days_allowed: z.number().min(1, "Leave days is required"),
+  monthly:z.boolean().optional()
 })
 
 export const leaveFormSchema = z.object({

@@ -7,6 +7,7 @@ import EditTakenLeave from './ApproveTakenLeaveDrawer';
 import DeleteTakenLeaveDrawer from './DeleteTakenLeaveDrawer';
 import ViewTakenLeaveDrawer from './ViewTakenLeaveDrawer';
 import UpdateTakenLeaveDrawer from './UpdateTakenLeaveDrawer';
+import { useHasPermission } from '@/hooks/useUserPermissions';
 
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -56,6 +57,7 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
   const [isViewDrawerOpen, setIsViewDrawerOpen] = useState(false);
   const [isUpdateDrawerOpen, setIsUpdateDrawerOpen] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState<AppliedLeave | null>(null);
+  const hasPermission = useHasPermission();
 
   const toggleEditTakenLeaveDrawer = (value: boolean) => {
     setIsEditTakenLeaveDrawerShowing(value);
@@ -77,114 +79,101 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
     setIsUpdateDrawerOpen(true);
   };
 
-  console.log("leaves:", leaves)
 
   
-  const columns = [
-    {
-      name: "S No",
-      cell: (row: AppliedLeave, index: number) => (currentPage - 1) * rowsPerPage + index + 1,
-      sortable: false,
-      width: "60px",
-    },
-    {
-      name: "User Name",
-      cell: (row: AppliedLeave) => (
-        <div style={{ minWidth: "100px", maxWidth: "auto" }}>
-          {row?.user_details?.name || '-'}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Leave Type",
-      cell: (row: AppliedLeave) => (
-        <div style={{ minWidth: "100px", maxWidth: "auto" }}>
-          {typeof row.leave_type === 'object' ? row.leave_type.name : row.leave_type || 'N/A'}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Mode",
-      cell: (row: AppliedLeave) => (
-        <div style={{ minWidth: "60px", maxWidth: "auto" }}>
-          {row.leave_mode}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Dates",
-      cell: (row: AppliedLeave) => {
-        const formatDates = (dates: string[]) => {
-          if (!dates || dates.length === 0) return 'N/A';
-          if (dates.length === 1) return formatDate(dates[0]);
-          if (dates.length === 2) return `${formatDate(dates[0])} - ${formatDate(dates[1])}`;
-          return `${formatDate(dates[0])} +${dates.length - 1} more`;
-        };
+const columns = [
+  {
+    name: "S No",
+    cell: (row: AppliedLeave, index: number) => (
+      <div>
+        {(currentPage - 1) * rowsPerPage + index + 1}
+      </div>
+    ),
+    sortable: false,
+    width: "60px",
+  },
+  {
+    name: "User Name",
+    cell: (row: AppliedLeave) => (
+      <div>
+        {row?.user_details?.name || '-'}
+      </div>
+    ),
+    sortable: true,
+  },
+  {
+    name: "Leave Type",
+    cell: (row: AppliedLeave) => (
+      <div>
+        {typeof row.leave_type === 'object' ? row.leave_type.name : row.leave_type || 'N/A'}
+      </div>
+    ),
+    sortable: true,
+  },
+  {
+    name: "Mode",
+    cell: (row: AppliedLeave) => (
+      <div>
+        {row.leave_mode}
+      </div>
+    ),
+    sortable: true,
+  },
+  {
+    name: "Dates",
+    cell: (row: AppliedLeave) => {
+      const formatDates = (dates: string[]) => {
+        if (!dates || dates.length === 0) return 'N/A';
+        if (dates.length === 1) return formatDate(dates[0]);
+        if (dates.length === 2) return `${formatDate(dates[0])} - ${formatDate(dates[1])}`;
+        return `${formatDate(dates[0])} +${dates.length - 1} more`;
+      };
 
-        if (row.leave_mode === 'Multi-Days' && Array.isArray(row.dates) && row.dates.length > 0) {
-          return (
-            <div style={{ minWidth: "120px", maxWidth: "auto" }}>
-              {formatDates(row.dates)}
-            </div>
-          );
-        } else if (row.start_date && row.end_date && row.start_date !== row.end_date) {
-          return (
-            <div style={{ minWidth: "120px", maxWidth: "auto" }}>
-              {formatDate(row.start_date)} - {formatDate(row.end_date)}
-            </div>
-          );
-        } else if (row.start_date) {
-          return (
-            <div style={{ minWidth: "120px", maxWidth: "auto" }}>
-              {formatDate(row.start_date)}
-            </div>
-          );
-        } else {
-          return (
-            <div style={{ minWidth: "120px", maxWidth: "auto" }}>
-              N/A
-            </div>
-          );
-        }
-      },
-      sortable: true,
+      if (row.leave_mode === 'Multi-Days' && Array.isArray(row.dates) && row.dates.length > 0) {
+        return <div>{formatDates(row.dates)}</div>;
+      } else if (row.start_date && row.end_date && row.start_date !== row.end_date) {
+        return <div>{formatDate(row.start_date)} - {formatDate(row.end_date)}</div>;
+      } else if (row.start_date) {
+        return <div>{formatDate(row.start_date)}</div>;
+      } else {
+        return <div>N/A</div>;
+      }
     },
-    {
-      name: "Days",
-      cell: (row: AppliedLeave) => row?.days_count,
-      sortable: true,
-      width: "75px"
-    },
-    {
-      name: "Half Day",
-      cell: (row: AppliedLeave) => (
-        <div style={{ minWidth: "80px", maxWidth: "auto" }}>
-          {row.half_day ? 'Yes' : 'No'}
-        </div>
-      ),
-      sortable: true,
-      width: "80px"
-    },
-    {
-      name: "Status",
-      cell: (row: AppliedLeave) => (
-        <div style={{ minWidth: "100px", maxWidth: "auto" }}>
-          <StatusBadge status={row.status} />
-        </div>
-      )
-      ,
-      sortable: true,
-    },
-
-    {
-      name: "Actions",
-      cell: (row: any) => (
-        <div className="flex gap-3">
-          <Tooltip
-            title="Approve Leave">
+    sortable: true,
+  },
+  {
+    name: "Days",
+    cell: (row: AppliedLeave) => (
+      <div>
+        {row?.days_count}
+      </div>
+    ),
+    sortable: true,
+  },
+  {
+    name: <div className="truncate w-[100px]">Half Day</div>,
+    cell: (row: AppliedLeave) => (
+      <div>
+        {row.half_day ? 'Yes' : 'No'}
+      </div>
+    ),
+    sortable: true,
+  },
+  {
+    name: "Status",
+    cell: (row: AppliedLeave) => (
+      <div>
+        <StatusBadge status={row.status} />
+      </div>
+    ),
+    sortable: true,
+  },
+  {
+    name: "Actions",
+    cell: (row: AppliedLeave) => (
+      <div className="flex gap-3">
+        {hasPermission('Edit leave') && (
+          <Tooltip title="Approve Leave">
             <button
               onClick={() => {
                 setSelectedLeave(row);
@@ -195,37 +184,41 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
               <FaEdit />
             </button>
           </Tooltip>
-
+        )}
+        {hasPermission('View leave details') && (
           <Tooltip title="View leave">
             <button
-              onClick={() => {
-                handleOpenViewDrawer(row);
-              }}
-              className="text-red-500 "
+              onClick={() => handleOpenViewDrawer(row)}
+              className="text-red-500"
             >
-              <FaEye className="" />
+              <FaEye />
             </button>
           </Tooltip>
+        )}
+        {hasPermission('Delete leave') && (
           <Tooltip title="Delete leave">
             <button
               onClick={() => {
-                setSelectedLeave(row)
-                toggleDeleteTakenLeaveDrawer(true)
+                setSelectedLeave(row);
+                toggleDeleteTakenLeaveDrawer(true);
               }}
-              className="text-red-500 hover:text-red-700"
+              className="text-danger"
             >
-              <FaTrash className="text-danger" />
+              <FaTrash />
             </button>
           </Tooltip>
-        </div>
-      ),
-    }
-  ];
+        )}
+      </div>
+    ),
+  }
+];
+
+
 
 
   return (
-    <div className="flex justify-center items-center w-full ">
-      <div className='overflow-x-scroll w-full'>
+    <div className="flex justify-center items-center ">
+      <div className='overflow-x-scroll w-full '>
 
         <DataTable
           columns={columns}

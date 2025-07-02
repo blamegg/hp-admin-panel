@@ -16,6 +16,8 @@ import { HolidayType } from '@/redux/slice/holidayTypesSlice';
 import useDebounce from '@/hooks/useDebounce';
 import { toast } from 'sonner';
 import { Tooltip } from '@mui/material';
+import { useHasPermission } from '@/hooks/useUserPermissions';
+import PermissionDenied from '@/components/common/PermissionDenied';
 
 const HolidayTypes = () => {
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
@@ -31,6 +33,7 @@ const HolidayTypes = () => {
 
   const dispatch = useDispatch<AppDispatch>();
   const { holidayTypes, loading, error, total } = useSelector((state: RootState) => state.holidayTypes);
+  const hasPermission = useHasPermission();
 
   useEffect(() => {
     dispatch(fetchHolidayTypes({ page: currentPage, limit: rowsPerPage, search: debouncedSearchQuery }));
@@ -77,6 +80,7 @@ const HolidayTypes = () => {
       name: 'Holiday Type Name',
       selector: (row: HolidayType) => row.name,
       sortable: true,
+      width: '300px'
     },
     {
       name: 'Description',
@@ -87,15 +91,21 @@ const HolidayTypes = () => {
       name: 'Actions',
       cell: (row: HolidayType) => (
         <div className="flex gap-3">
-          <Tooltip title="Edit Holiday">
-          <button onClick={() => { setSelected(row); toggleEditDrawer(true); }} className="text-blue-500 hover:text-blue-700"><FaEdit /></button>
-          </Tooltip>
-          <Tooltip title="View Holiday">
-          <button onClick={() => { setSelected(row); toggleViewDrawer(true); }} className="text-gray-500 hover:text-gray-700"><FaEye /></button>
-          </Tooltip>
-          <Tooltip title="Delete Holiday">
-          <button onClick={() => { setSelected(row); toggleDeleteDrawer(true); }} className="text-danger "><FaTrash /></button>
-          </Tooltip>
+          {hasPermission('Edit holiday type') && (
+            <Tooltip title="Edit holiday type">
+              <button onClick={() => { setSelected(row); toggleEditDrawer(true); }} className="text-blue-500 hover:text-blue-700"><FaEdit /></button>
+            </Tooltip>
+          )}
+          {hasPermission('View holiday type details') && (
+            <Tooltip title="View holiday type">
+              <button onClick={() => { setSelected(row); toggleViewDrawer(true); }} className="text-gray-500 hover:text-gray-700"><FaEye /></button>
+            </Tooltip>
+          )}
+          {hasPermission('Delete holiday type') && (
+            <Tooltip title="Delete holiday type">
+              <button onClick={() => { setSelected(row); toggleDeleteDrawer(true); }} className="text-danger "><FaTrash /></button>
+            </Tooltip>
+          )}
         </div>
       ),
       width: '120px',
@@ -108,95 +118,105 @@ const HolidayTypes = () => {
 
   return (
     <div className='rounded-lg'>
-      <div className='flex justify-between items-center lg:w-1/3 mb-5'>
-        <div>
-          <Input
-            label=""
-            type="text"
-            placeholder="Search by name..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full max-w-xs"
-          />
-        </div>
-        <Button name='Create Holiday Type' type="button" onClick={() => toggleCreateDrawer(true)} />
-      </div>
 
-      <DataTable
-        columns={columns}
-        data={holidayTypes}
-        progressPending={loading}
-        pagination
-        paginationServer
-        paginationTotalRows={total}
-        onChangePage={handlePageChange}
-        onChangeRowsPerPage={handleRowsPerPageChange}
-        paginationComponent={() => (
-          <CustomPagination
-            currentPage={currentPage}
-            rowsPerPage={rowsPerPage}
-            rowCount={total}
+      {hasPermission('View holiday types') ? (
+        <>
+          <div className='flex justify-start gap-4 items-center lg:w-1/3 mb-5'>
+            <div>
+              <Input
+                label=""
+                type="text"
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full max-w-xs"
+              />
+            </div>
+            {hasPermission('Create holiday type') && (
+              <Button name='Create Holiday Type' type="button" onClick={() => toggleCreateDrawer(true)} />
+            )}
+          </div>
+
+          <DataTable
+            columns={columns}
+            data={holidayTypes}
+            progressPending={loading}
+            pagination
+            paginationServer
+            paginationTotalRows={total}
             onChangePage={handlePageChange}
             onChangeRowsPerPage={handleRowsPerPageChange}
-          />
-        )}
-        className="custom_tbl"
-        customStyles={{
-          header: {
-            style: {
-              fontSize: "12px",
-              minHeight: "30px",
-              backgroundColor: "#F9FAFB", // Light mode header background
-              color: "#1C243F", // Light mode header text
-            },
-          },
-          headRow: {
-            style: {
-              fontSize: "12px",
-              minHeight: "30px",
-              backgroundColor: "#F9FAFB", // Light mode header row background
-              borderBottomWidth: "1px",
-              borderBottomColor: "#E2E8F0", // stroke
-            },
-          },
-          headCells: {
-            style: {
-              fontWeight: 700,
-              color: "#1C243F", // Light mode header cells text
-              backgroundColor: "#F9FAFB", // Light mode header cells background
-            },
-          },
-          cells: {
-            style: {
-              fontSize: "11px",
-              fontWeight: 500,
-              wordBreak: "break-word",
-              overflowWrap: "break-word",
-              height: "27px",
-              color: "#1C243F", // Light mode cell text
-              backgroundColor: "#FFFFFF", // Light mode cell background
-            },
-          },
-          rows: {
-            style: {
-              fontSize: "11px",
-              minHeight: "27px",
-              "&:not(:last-of-type)": {
-                borderBottomStyle: "solid",
-                borderBottomWidth: "1px",
-                borderBottomColor: "#E2E8F0", // stroke
+            paginationComponent={() => (
+              <CustomPagination
+                currentPage={currentPage}
+                rowsPerPage={rowsPerPage}
+                rowCount={total}
+                onChangePage={handlePageChange}
+                onChangeRowsPerPage={handleRowsPerPageChange}
+              />
+            )}
+            className="custom_tbl"
+            customStyles={{
+              header: {
+                style: {
+                  fontSize: "12px",
+                  minHeight: "30px",
+                  backgroundColor: "#F9FAFB", // Light mode header background
+                  color: "#1C243F", // Light mode header text
+                },
               },
-              backgroundColor: "#FFFFFF", // Light mode row background
-              color: "#1C243F", // Light mode row text
-            },
-            highlightOnHoverStyle: {
-              backgroundColor: "#F7F9FC", // gray-2
-              color: "#1C243F",
-              cursor: "pointer",
-            },
-          },
-        }}
-      />
+              headRow: {
+                style: {
+                  fontSize: "12px",
+                  minHeight: "30px",
+                  backgroundColor: "#F9FAFB", // Light mode header row background
+                  borderBottomWidth: "1px",
+                  borderBottomColor: "#E2E8F0", // stroke
+                },
+              },
+              headCells: {
+                style: {
+                  fontWeight: 700,
+                  color: "#1C243F", // Light mode header cells text
+                  backgroundColor: "#F9FAFB", // Light mode header cells background
+                },
+              },
+              cells: {
+                style: {
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  height: "27px",
+                  color: "#1C243F", // Light mode cell text
+                  backgroundColor: "#FFFFFF", // Light mode cell background
+                },
+              },
+              rows: {
+                style: {
+                  fontSize: "11px",
+                  minHeight: "27px",
+                  "&:not(:last-of-type)": {
+                    borderBottomStyle: "solid",
+                    borderBottomWidth: "1px",
+                    borderBottomColor: "#E2E8F0", // stroke
+                  },
+                  backgroundColor: "#FFFFFF", // Light mode row background
+                  color: "#1C243F", // Light mode row text
+                },
+                highlightOnHoverStyle: {
+                  backgroundColor: "#F7F9FC", // gray-2
+                  color: "#1C243F",
+                  cursor: "pointer",
+                },
+              },
+            }}
+          />
+        </>
+
+      ) : (
+        <PermissionDenied />
+      )}
 
       <CreateHolidayType
         open={isCreateDrawerOpen}

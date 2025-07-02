@@ -14,6 +14,7 @@ import holidayTypesReducer from "./slice/holidayTypesSlice";
 import holidayTypesListReducer from './slice/holidayTypesListSlice';
 import leaveModeListReducer from "./slice/leaveModeListSlice";
 import holidayReducer from "./slice/holidaySlice";
+import permissionReducer from './slice/permissionSlice';
 
 
 const authPersistConfig = {
@@ -38,6 +39,7 @@ const store = configureStore({
     holidayTypesList: holidayTypesListReducer,
     leaveModeList: leaveModeListReducer,
     holidays: holidayReducer,
+    permission: permissionReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

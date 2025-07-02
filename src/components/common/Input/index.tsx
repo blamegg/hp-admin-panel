@@ -48,7 +48,7 @@ const Input = ({
 
   return (
     <>
-      <label className="block text-xs font-medium text-black dark:text-white mb-1 ">
+      <label className="block text-xs font-medium text-black dark:text-white mb-[2px] ">
         {label}
       </label>
       <input

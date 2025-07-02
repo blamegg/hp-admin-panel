@@ -31,6 +31,9 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
+import { fetchUserPermissions } from '@/redux/slice/permissionSlice';
 
 interface PermissionDrawerProps {
   permissionsMenuList: RolesInterFace2 | null;
@@ -223,6 +226,8 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
   const [selectedPermissionsId, setSelectedPermissionsId] = useState<string[]>([]);
   const [orderedPermissions, setOrderedPermissions] = useState<menuDataInterface[]>([]);
 
+  const dispatch = useDispatch<AppDispatch>();
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -351,7 +356,6 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
   };
 
   const handleUpdatePermission = async () => {
-
     if (!currentRole) return;
     const formattedPermissions: UpdatePermissionsInterFace = {
       role_id: currentRole._id,
@@ -387,6 +391,9 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       await updatePermissionFn(formattedPermissions);
       toast.success("Permissions updated successfully");
       fetchRoles();
+      if (currentRole && currentRole._id) {
+        dispatch(fetchUserPermissions(currentRole._id));
+      }
       toggleDrawer(false)
     } catch (error: any) {
       let errorMessage = error?.response?.data?.message;
@@ -434,17 +441,16 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       <FormControl
         fullWidth
         sx={{
-          maxHeight:{xs:"220px", lg:"430px"},
+          height: { xs: "310px", sm: "250px", md: "400px", lg: "430px" }, // ← Use `height` instead of `maxHeight`
           mb: 2,
           mt: { xs: 1, md: 3 },
           display: "grid",
           gridTemplateColumns: "1fr",
-          overflow: "scroll",
-          paddingLeft: "25px",
-          paddingRight: "25px",
-          overflowY: 'scroll',
+          overflowY: 'auto',             // ← Better UX (scroll only when needed)
+          px: "25px",                    // ← Shortcut for paddingLeft + paddingRight
         }}
       >
+
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -469,16 +475,16 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
           </SortableContext>
         </DndContext>
       </FormControl>
-        <div className='grid grid-cols-2 sm:flex justify-between items-center gap-2 absolute bottom-0 py-1 lg:py-3 w-full px-3 bg-white'>
-          <div className='flex flex-col-reverse md:flex md:flex-row gap-3 items-center'>
-            <Button type="button" name="Reset Order" className="bg-graydark hover:bg-gray-600 w-full md:w-auto" onClick={handleResetOrder} />
-            <Button type="button" name="Save Order" className="bg-success w-full md:w-auto" onClick={handleSaveOrder} />
-          </div>
-          <div className="flex flex-col-reverse md:flex md:flex-row gap-2">
-            <Button type="button" name="Close" className="bg-graydark w-full md:w-auto" onClick={() => toggleDrawer(false)} />
-            <Button type="button" name="Update" className="bg-success w-full md:w-auto" onClick={handleUpdatePermission} />
-          </div>
+      <div className='grid grid-cols-2 sm:flex justify-between items-center gap-2 absolute bottom-0 py-1 lg:py-3 w-full px-3 bg-white'>
+        <div className='flex flex-col-reverse md:flex md:flex-row gap-3 items-center'>
+          <Button type="button" name="Reset Order" className="bg-graydark hover:bg-gray-600 w-full md:w-auto" onClick={handleResetOrder} />
+          <Button type="button" name="Save Order" className="bg-success w-full md:w-auto" onClick={handleSaveOrder} />
         </div>
+        <div className="flex flex-col-reverse md:flex md:flex-row gap-2">
+          <Button type="button" name="Close" className="bg-graydark w-full md:w-auto" onClick={() => toggleDrawer(false)} />
+          <Button type="button" name="Update" className="bg-success w-full md:w-auto" onClick={handleUpdatePermission} />
+        </div>
+      </div>
     </div>
   );
 };

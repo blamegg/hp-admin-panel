@@ -21,6 +21,7 @@ const ViewDrawer = ({
     setSelected,
 }: any) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
     const {
         register,
         handleSubmit,
@@ -39,6 +40,8 @@ const ViewDrawer = ({
             });
         }
     }, [selected, reset]);
+
+
 
     const onSubmit = (data: ViewUserFormInputs) => {
     };

@@ -6,7 +6,7 @@ import Button from "../../common/Button";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
-import { fetchTakenLeaves } from "@/redux/slice/takenLeaveSclice";
+import { fetchTakenLeaves, fetchLeavesSummary } from "@/redux/slice/takenLeaveSclice";
 import { fetchLeaveType } from "@/redux/slice/leaveTypesSlice";
 import Select from "../../common/Select";
 import Input from "../../common/Input";
@@ -15,6 +15,7 @@ import { useHasPermission } from "@/hooks/useUserPermissions";
 import { toSentenceCase } from '@/utility/helper';
 import TakenLeaves from "./TakenLeaves";
 import useDebounce from '@/hooks/useDebounce';
+import PermissionDenied from "@/components/common/PermissionDenied";
 
 
 interface LeaveRecord {
@@ -51,8 +52,8 @@ const LeaveInfo: React.FC = () => {
 
   const leaveState = useSelector((state: RootState) => state.appliedLeaves);
   const { leaveTypes } = useSelector((state: RootState) => state.leaveTypes);
+  const summary = useSelector((state: RootState) => state.appliedLeaves.summary);
 
-  console.log("state:< ", leaveState)
 
   const hasPermission = useHasPermission();
 
@@ -65,9 +66,9 @@ const LeaveInfo: React.FC = () => {
 
   const leaveTypeOptions = Array.isArray(leaveTypes)
     ? leaveTypes.map(type => ({
-        value: String(type._id),
-        label: String(type.name)
-      }))
+      value: String(type._id),
+      label: String(type.name)
+    }))
     : [];
 
   const toggleLeaveFormDrawer = (value: boolean) => {
@@ -76,7 +77,11 @@ const LeaveInfo: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchLeaveType());
+    dispatch(fetchLeavesSummary());
   }, [dispatch]);
+
+  
+  console.log('Leaves Summary:', summary);
 
   useEffect(() => {
     const searchParams: {
@@ -112,53 +117,53 @@ const LeaveInfo: React.FC = () => {
 
   return (
     <div className="w-[350px] md:w-full pb-0  md:pb-0">
-      <div className="grid lg:grid-cols-4 grid-cols-2 gap-6 w-full mb-2">
-        {/* Total Leaves */}
-        <div className="flex items-center  bg-white rounded-sm px-2 py-1">
-          <FaClipboardList size={25} className="text-blue-600 mr-2" />
-          <div className="flex flex-col justify-center">
-            <p className=" text-blue-800 font-semibold text-xs">Total Leaves</p>
-            <p className="text-blue-900 font-semibold text-xs">{leaveRecord.totalLeaves} Days</p>
-          </div>
-        </div>
-        {/* Leaves Taken */}
-        <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
-          <FaCheck size={25} className="text-green-600 mr-2" />
-          <div className="flex flex-col justify-center">
-            <p className="text-green-800 font-semibold text-xs">Leaves Taken</p>
-            <p className="text-green-900 font-semibold text-xs">{leaveRecord.leavesTaken} Days</p>
-          </div>
-        </div>
-        {/* Sick Leaves */}
-        <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
-          <FaHeartbeat size={25} className="text-red-600 mr-2" />
-          <div className="flex flex-col justify-center">
-            <p className=" text-red-800 font-semibold text-xs">Sick Leaves</p>
-            <p className="text-red-900 font-semibold text-xs">{leaveRecord.sickLeaves} Days</p>
-          </div>
-        </div>
-        {/* Remaining Leaves */}
-        <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
-          <FaCalendarAlt size={25} className="text-gray-600 mr-2" />
-          <div className="flex flex-col justify-center">
-            <p className=" text-gray-800 font-semibold text-xs">Remaining Leaves</p>
-            <p className="text-gray-900 font-semibold text-xs">{leaveRecord.remainingLeaves} Days</p>
-          </div>
-        </div>
-      </div>
 
       {/* Filter */}
-      {hasPermission("View leaves list") && (
+      {hasPermission("View leaves list") ? (
         <>
-          {hasPermission("View leaves list") && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 items-center gap-4 w-full mb-4">
+          <div className="grid lg:grid-cols-4 grid-cols-2 gap-x-4 gap-y-2 w-full mb-2">
+            {/* Total Leaves */}
+            <div className="flex items-center  bg-white rounded-sm px-2 py-1">
+              <FaClipboardList size={25} className="text-blue-600 mr-2" />
+              <div className="flex flex-col justify-center">
+                <p className=" text-blue-800 font-semibold text-xs">Total Leaves</p>
+                <p className="text-blue-900 font-semibold text-xs">{leaveRecord.totalLeaves} Days</p>
+              </div>
+            </div>
+            {/* Leaves Taken */}
+            <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
+              <FaCheck size={25} className="text-green-600 mr-2" />
+              <div className="flex flex-col justify-center">
+                <p className="text-green-800 font-semibold text-xs">Leaves Taken</p>
+                <p className="text-green-900 font-semibold text-xs">{leaveRecord.leavesTaken} Days</p>
+              </div>
+            </div>
+            {/* Sick Leaves */}
+            <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
+              <FaHeartbeat size={25} className="text-red-600 mr-2" />
+              <div className="flex flex-col justify-center">
+                <p className=" text-red-800 font-semibold text-xs">Sick Leaves</p>
+                <p className="text-red-900 font-semibold text-xs">{leaveRecord.sickLeaves} Days</p>
+              </div>
+            </div>
+            {/* Remaining Leaves */}
+            <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
+              <FaCalendarAlt size={25} className="text-gray-600 mr-2" />
+              <div className="flex flex-col justify-center">
+                <p className=" text-gray-800 font-semibold text-xs">Remaining Leaves</p>
+                <p className="text-gray-900 font-semibold text-xs">{leaveRecord.remainingLeaves} Days</p>
+              </div>
+            </div>
+          </div>
+          <>
+            <div className="grid items-center gap-x-4 gap-y-2 grid-cols-2  md:flex   w-full mb-4">
               <div className="w-full">
                 <Input
-                    label="Search by name"
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by name"
+                  label="Search by name"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name"
                 />
               </div>
               <div className="w-full">
@@ -196,7 +201,7 @@ const LeaveInfo: React.FC = () => {
                   placeholder="End Date"
                 />
               </div>
-              {hasPermission(toSentenceCase('Create Leave')) && (
+              {hasPermission(toSentenceCase('Create leave')) && (
                 <div className="self-end w-full">
                   <Button
                     name="Apply Leave"
@@ -207,25 +212,32 @@ const LeaveInfo: React.FC = () => {
                 </div>
               )}
             </div>
-          )}
-          <div className="max-w-full overflow-x-auto mb-0">
-            <TakenLeaves
-              leaves={leaveState.appliedLeaves}
-              loading={leaveState.loading}
-              currentPage={currentPage}
-              rowsPerPage={rowsPerPage}
-            />
-          </div>
-          <CustomPagination
-            rowsPerPage={leaveState?.pagination?.limit || 10}
-            currentPage={leaveState?.pagination?.currentPage || 1}
-            rowCount={leaveState?.pagination?.total || 0}
-            onChangePage={handlePageChange}
-            onChangeRowsPerPage={handleRowsPerPageChange}
-          />
+
+            <div className="max-w-full overflow-x-auto mb-0">
+              <TakenLeaves
+                leaves={leaveState.appliedLeaves}
+                loading={leaveState.loading}
+                currentPage={currentPage}
+                rowsPerPage={rowsPerPage}
+              />
+            </div>
+            <div className="mb-8 md:mb-auto">
+              <CustomPagination
+                rowsPerPage={leaveState?.pagination?.limit || 10}
+                currentPage={leaveState?.pagination?.currentPage || 1}
+                rowCount={leaveState?.pagination?.total || 0}
+                onChangePage={handlePageChange}
+                onChangeRowsPerPage={handleRowsPerPageChange}
+              />
+            </div>
+          </>
+          <LeaveForm isLeaveFormShowing={isLeaveFormShowing} toggleDrawer={toggleLeaveFormDrawer} />
         </>
-      )}
-      <LeaveForm isLeaveFormShowing={isLeaveFormShowing} toggleDrawer={toggleLeaveFormDrawer} />
+      ) :
+        (
+          <PermissionDenied />
+        )
+      }
     </div>
   );
 };

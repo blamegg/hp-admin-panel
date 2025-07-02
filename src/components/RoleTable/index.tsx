@@ -18,7 +18,6 @@ import { useHasPermission } from '@/hooks/useUserPermissions';
 import EditRoleDrawer from './EditRoleDrawer';
 import ViewRoleDrawer from './ViewRoleDrawer';
 import { FaEye, FaEdit, FaTrash, FaRegQuestionCircle } from 'react-icons/fa';
-import { toast } from 'sonner';
 import { Tooltip } from "@mui/material";
 import Button from "@/components/common/Button";
 import CreateRole from './CreateRole';
@@ -26,6 +25,7 @@ import DeleteRole from './DeleteRole';
 import CustomPagination from '../CustomPagination';
 import { usePathname } from 'next/navigation';
 import { toSentenceCase } from '@/utility/helper';
+import { toast } from 'sonner';
 
 export default React.memo(function Roles() {
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -39,7 +39,6 @@ export default React.memo(function Roles() {
 
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [permissionsMenuList, setPermissionsMenuList] = React.useState<RolesInterFace2 | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchBasis, setSearchBasis] = React.useState("name");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState("");
@@ -52,10 +51,6 @@ export default React.memo(function Roles() {
 
   const { direction } = useDirection();
   const hasPermission = useHasPermission();
-
-  const hasAnyActionPermission = React.useCallback(() => {
-    return hasPermission(toSentenceCase('View Role Details')) || hasPermission(toSentenceCase('Delete Role')) || hasPermission(toSentenceCase('Edit Role'));
-  }, [hasPermission]);
 
   // Debounce search query to prevent excessive re-renders
   React.useEffect(() => {
@@ -92,16 +87,6 @@ export default React.memo(function Roles() {
     }
   }, [currentPage, rowsPerPage, dispatch]);
 
-
-  const fetchPermissionMenus = React.useCallback(async () => {
-    setError(null);
-    try {
-      const response = await menuListFn();
-      setPermissionsMenuList(response);
-    } catch (err: any) {
-      console.error('Failed to fetch permissions:', err);
-    }
-  }, []);
 
   React.useEffect(() => {
     fetchRoles();
@@ -150,10 +135,6 @@ export default React.memo(function Roles() {
 
   const toggleEditDrawer = (value: boolean) => {
     setIsEditDrawerOpen(value);
-    if (value) {
-      // Fetch permission menus only when edit drawer is opened
-      fetchPermissionMenus();
-    }
     if (!value) dispatch(clearSelectedRole());
   };
 
@@ -193,19 +174,16 @@ export default React.memo(function Roles() {
       selector: (row: CurrentRoleDataInterFace) =>
         (currentPage - 1) * rowsPerPage + ((allRoles?.indexOf(row) ?? -1) + 1),
       sortable: true,
-      width: "80px",
     },
     {
       name: "Role",
       selector: (row: CurrentRoleDataInterFace) => row.name || "",
       sortable: true,
-      width: "200px",
     },
     {
       name: "Rank",
       selector: (row: CurrentRoleDataInterFace) => row.rank || "",
       sortable: true,
-      width: "200px",
     },
     // ...(hasAnyActionPermission() ? [
          {
@@ -244,7 +222,6 @@ export default React.memo(function Roles() {
          
         </div>
       ),
-      width: "160px",
     },
     // ]: [])
   ];
@@ -374,11 +351,10 @@ export default React.memo(function Roles() {
       />
 
       <EditRoleDrawer
+        direction={direction}
         isDrawerOpen={isEditDrawerOpen}
         toggleDrawer={toggleEditDrawer}
         selectedRole={selectedRole}
-        direction={direction}
-        permissionsMenuList={permissionsMenuList}
         fetchRoles={fetchRoles}
       />
 

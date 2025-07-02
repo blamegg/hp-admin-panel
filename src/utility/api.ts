@@ -19,6 +19,7 @@ export const ApiEndpoints = {
   leaveType:"/api/v1/leaveTypes",
   holidays:"/api/v1/holidays",
   holidayTypes: "/api/v1/holidayTypes",
+  leavesSummary: "/api/v1/leaves/summary",
 };
 
 apiClient.interceptors.request.use(

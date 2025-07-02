@@ -80,21 +80,6 @@ const CreateHolidayDrawer: React.FC<CreateHolidayDrawerProps> = ({ open, onClose
         >
             <ModalHeader text="Create Holiday" toggleDrawer={onClose} />
             <form id="create-holiday-form" onSubmit={handleSubmit} className="p-6 space-y-6">
-                 <div>
-                    <MultipleDatePicker
-                        label="Dates"
-                        selectedDates={dates}
-                        onChange={setDates}
-                    />
-                </div>
-                <div>
-                    <Select
-                        label="Holiday Type"
-                        options={Array.isArray(holidayTypes) ? holidayTypes.map((type) => ({ value: type._id, label: type.name })) : []}
-                        value={holidayType}
-                        onChange={(e) => setHolidayType(e.target.value)}
-                    />
-                </div>
                 <div>
                     <Input
                         label="Title"
@@ -104,6 +89,23 @@ const CreateHolidayDrawer: React.FC<CreateHolidayDrawerProps> = ({ open, onClose
                         type="text"
                     />
                 </div>
+                                <div>
+                    <Select
+                        label="Holiday Type"
+                        options={Array.isArray(holidayTypes) ? holidayTypes.map((type) => ({ value: type._id, label: type.name })) : []}
+                        value={holidayType}
+                        onChange={(e) => setHolidayType(e.target.value)}
+                    />
+                </div>
+                 <div>
+                    <MultipleDatePicker
+                        label="Dates"
+                        selectedDates={dates}
+                        onChange={setDates}
+                    />
+                </div>
+
+                
                 <div>
                     <Textarea
                         label="Description"

@@ -13,7 +13,7 @@ interface SelectProps {
 const Select = ({ label, options, register, error,className, ...props }: SelectProps) => {
   return (
     <>
-      <label className="block text-xs font-medium text-black dark:text-white">
+      <label className="block text-xs font-medium text-black dark:text-white mb-[2px]">
         {label}
       </label>
       <select
