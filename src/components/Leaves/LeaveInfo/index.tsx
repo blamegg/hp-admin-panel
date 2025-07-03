@@ -6,7 +6,7 @@ import Button from "../../common/Button";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
-import { fetchTakenLeaves, fetchLeavesSummary } from "@/redux/slice/takenLeaveSclice";
+import { fetchTakenLeaves } from "@/redux/slice/leaveSclice";
 import { fetchLeaveType } from "@/redux/slice/leaveTypesSlice";
 import Select from "../../common/Select";
 import Input from "../../common/Input";
@@ -16,21 +16,17 @@ import { toSentenceCase } from '@/utility/helper';
 import TakenLeaves from "./TakenLeaves";
 import useDebounce from '@/hooks/useDebounce';
 import PermissionDenied from "@/components/common/PermissionDenied";
+import { fetchLeavesSummary } from "@/redux/slice/leaveSummarySlice";
+import { ApiEndpoints } from "@/utility/api";
 
 
 interface LeaveRecord {
   totalLeaves: number;
   leavesTaken: number;
-  sickLeaves: number;
   remainingLeaves: number;
 }
 
-const leaveRecord: LeaveRecord = {
-  totalLeaves: 30,
-  leavesTaken: 10,
-  sickLeaves: 3, // Added sick leaves data
-  remainingLeaves: 17,
-};
+
 
 const LeaveInfo: React.FC = () => {
   const [isLeaveFormShowing, setIsLeaveFormShowing] = useState(false);
@@ -52,10 +48,34 @@ const LeaveInfo: React.FC = () => {
 
   const leaveState = useSelector((state: RootState) => state.appliedLeaves);
   const { leaveTypes } = useSelector((state: RootState) => state.leaveTypes);
-  const summary = useSelector((state: RootState) => state.appliedLeaves.summary);
+  const leaveSummaryData = useSelector((state: RootState) => state.leaveSummaryReducer.summary);
+  const currentUser = useSelector((state: RootState) => state.authReducer.user);
+
+  const totalLeaves = leaveSummaryData?.summary[0]?.total_allowed_leaves_days || 0;
+  const leavesTaken = leaveSummaryData?.summary[0]?.total_leaves_days_taken || 0;
+
+  const leaveRecord: LeaveRecord = {
+    totalLeaves,
+    leavesTaken,
+    remainingLeaves: totalLeaves - leavesTaken,
+  };
+
+  
+
 
 
   const hasPermission = useHasPermission();
+
+  // Permission-based URL logic
+  const canViewAll = hasPermission("View leaves list");
+  const canViewOwn = hasPermission("View own leaves");
+
+  let customUrl = undefined;
+  if (canViewAll) {
+    customUrl = ApiEndpoints.leaves
+  } else if (canViewOwn) {
+    customUrl = `${ApiEndpoints.leaves}/user`;
+  }
 
   const statusOptions = [
     { value: "Pending", label: "Pending" },
@@ -80,9 +100,6 @@ const LeaveInfo: React.FC = () => {
     dispatch(fetchLeavesSummary());
   }, [dispatch]);
 
-  
-  console.log('Leaves Summary:', summary);
-
   useEffect(() => {
     const searchParams: {
       status?: string;
@@ -92,9 +109,11 @@ const LeaveInfo: React.FC = () => {
       page?: number;
       limit?: number;
       name?: string;
+      customUrl?: string;
     } = {
       page: currentPage,
       limit: rowsPerPage,
+      customUrl,
     };
 
     if (debouncedStatus) searchParams.status = debouncedStatus;
@@ -103,8 +122,11 @@ const LeaveInfo: React.FC = () => {
     if (debouncedEndDate) searchParams.end_date = debouncedEndDate;
     if (debouncedSearchQuery) searchParams.name = debouncedSearchQuery;
 
-    dispatch(fetchTakenLeaves(searchParams));
-  }, [dispatch, debouncedStatus, debouncedLeaveTypeId, debouncedStartDate, debouncedEndDate, debouncedSearchQuery, currentPage, rowsPerPage]);
+    // Only dispatch if user has permission
+    if (customUrl) {
+      dispatch(fetchTakenLeaves(searchParams));
+    }
+  }, [dispatch, debouncedStatus, debouncedLeaveTypeId, debouncedStartDate, debouncedEndDate, debouncedSearchQuery, currentPage, rowsPerPage, customUrl]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -117,44 +139,36 @@ const LeaveInfo: React.FC = () => {
 
   return (
     <div className="w-[350px] md:w-full pb-0  md:pb-0">
-
-      {/* Filter */}
-      {hasPermission("View leaves list") ? (
+      {hasPermission("View leaves list") || hasPermission("View own leaves") ? (
         <>
-          <div className="grid lg:grid-cols-4 grid-cols-2 gap-x-4 gap-y-2 w-full mb-2">
-            {/* Total Leaves */}
-            <div className="flex items-center  bg-white rounded-sm px-2 py-1">
-              <FaClipboardList size={25} className="text-blue-600 mr-2" />
-              <div className="flex flex-col justify-center">
-                <p className=" text-blue-800 font-semibold text-xs">Total Leaves</p>
-                <p className="text-blue-900 font-semibold text-xs">{leaveRecord.totalLeaves} Days</p>
+          {currentUser?.role?.name !== "Admin" && (
+            <div className="grid lg:grid-cols-4 grid-cols-2 gap-x-4 gap-y-2 w-full mb-2">
+              {/* Total Leaves */}
+              <div className="flex items-center  bg-white rounded-sm px-2 py-1">
+                <FaClipboardList size={25} className="text-blue-600 mr-2" />
+                <div className="flex flex-col justify-center">
+                  <p className=" text-blue-800 font-semibold text-xs">Total Leaves</p>
+                  <p className="text-blue-900 font-semibold text-xs">{leaveRecord.totalLeaves} Days</p>
+                </div>
+              </div>
+              {/* Leaves Taken */}
+              <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
+                <FaCheck size={25} className="text-green-600 mr-2" />
+                <div className="flex flex-col justify-center">
+                  <p className="text-green-800 font-semibold text-xs">Leaves Taken</p>
+                  <p className="text-green-900 font-semibold text-xs">{leaveRecord.leavesTaken} Days</p>
+                </div>
+              </div>
+              {/* Remaining Leaves */}
+              <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
+                <FaCalendarAlt size={25} className="text-gray-600 mr-2" />
+                <div className="flex flex-col justify-center">
+                  <p className=" text-gray-800 font-semibold text-xs">Remaining Leaves</p>
+                  <p className="text-gray-900 font-semibold text-xs">{leaveRecord.remainingLeaves} Days</p>
+                </div>
               </div>
             </div>
-            {/* Leaves Taken */}
-            <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
-              <FaCheck size={25} className="text-green-600 mr-2" />
-              <div className="flex flex-col justify-center">
-                <p className="text-green-800 font-semibold text-xs">Leaves Taken</p>
-                <p className="text-green-900 font-semibold text-xs">{leaveRecord.leavesTaken} Days</p>
-              </div>
-            </div>
-            {/* Sick Leaves */}
-            <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
-              <FaHeartbeat size={25} className="text-red-600 mr-2" />
-              <div className="flex flex-col justify-center">
-                <p className=" text-red-800 font-semibold text-xs">Sick Leaves</p>
-                <p className="text-red-900 font-semibold text-xs">{leaveRecord.sickLeaves} Days</p>
-              </div>
-            </div>
-            {/* Remaining Leaves */}
-            <div className="flex items-center h-full bg-white rounded-sm px-2 py-1">
-              <FaCalendarAlt size={25} className="text-gray-600 mr-2" />
-              <div className="flex flex-col justify-center">
-                <p className=" text-gray-800 font-semibold text-xs">Remaining Leaves</p>
-                <p className="text-gray-900 font-semibold text-xs">{leaveRecord.remainingLeaves} Days</p>
-              </div>
-            </div>
-          </div>
+          )}
           <>
             <div className="grid items-center gap-x-4 gap-y-2 grid-cols-2  md:flex   w-full mb-4">
               <div className="w-full">

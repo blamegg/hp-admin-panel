@@ -297,7 +297,7 @@ input:checked ~ span:last-child {
   background-color: white !important;
 }
 
-/* 🔷 Today’s Highlight in Month View */
+/* 🔷 Today's Highlight in Month View */
 .rbc-month-view .rbc-day-bg.rbc-today {
   background-color: #cdf4f9 !important;
 }
@@ -350,3 +350,5 @@ input:checked ~ span:last-child {
 .rbc-time-gutter {
   display: none !important;
 }
+
+

@@ -33,7 +33,7 @@ const PermissionDenied: React.FC<{ message?: string }> = ({ message }) => {
         </Button>
       </Link>
       <p className="text-base text-gray-700 text-center max-w-md">
-        {message || 'You do not have access to view this page or perform this action.'}
+        {message || 'You do not have access to view this page or perform any action.'}
       </p>
     </div>
   );

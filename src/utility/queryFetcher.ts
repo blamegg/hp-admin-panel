@@ -1,5 +1,6 @@
-import { AppliedLeave } from "@/redux/slice/takenLeaveSclice";
+import { AppliedLeave } from "@/redux/slice/leaveSclice";
 import { apiClient, ApiEndpoints } from "./api";
+import { useHasPermission } from "@/hooks/useUserPermissions";
 
 export interface CreatedBy {
   email: string,
@@ -109,11 +110,11 @@ export interface UpdatePermissionsInterFace {
   }[];
 }
 
-export interface CreateLeaveTypesInterface{
+export interface CreateLeaveTypesInterface {
   name: string;
   description?: string;
-  half_day_allowed?:boolean;
-  paid?:boolean;
+  half_day_allowed?: boolean;
+  paid?: boolean;
   total_days_allowed?: number;
 }
 
@@ -127,41 +128,41 @@ export interface ApplyLeaveInterface {
   half_day_session?: string | null
 }
 
-export interface HolidayTypesInterface{
-  name:string,
-  description?:string
+export interface HolidayTypesInterface {
+  name: string,
+  description?: string
 }
 
-export interface HolidaysInterface{
-    _id: string;
-    title: string;
-    description?: string;
-    dates: string[]; 
-    holiday_type: string;  
+export interface HolidaysInterface {
+  _id: string;
+  title: string;
+  description?: string;
+  dates: string[];
+  holiday_type: string;
 }
 
 
 // -------------------------------------------------- Leaves ---------------------------------------------------- 
 
 // fetch leave Type
-export const fetchLeaveTypesFn = async ()=>{
+export const fetchLeaveTypesFn = async () => {
   const response = await apiClient.get(ApiEndpoints.leaveType);
   return response.data;
 }
 
 // create a new leave Type
-export const createLeaveTypesFn = async (payload: CreateLeaveTypesInterface)=>{
+export const createLeaveTypesFn = async (payload: CreateLeaveTypesInterface) => {
   const response = await apiClient.post(ApiEndpoints.leaveType, payload);
   return response.data;
 }
 
 // update a leave Type
-export const updateLeaveTypesFn = async (leaveId:string, payload: {
+export const updateLeaveTypesFn = async (leaveId: string, payload: {
   name?: string;
   description?: string;
-  half_day_allowed?:boolean;
-  paid?:boolean;
-})=>{
+  half_day_allowed?: boolean;
+  paid?: boolean;
+}) => {
   console.log(payload, "api payload")
   const response = await apiClient.put(`${ApiEndpoints.leaveType}/${leaveId}`, payload);
   return response.data
@@ -174,13 +175,13 @@ export const deleteLeaveTypeFn = async (leaveId: string) => {
 }
 
 // fetch leave types dropdown list only
-export const fetchLeaveTypesListFn = async ()=>{
+export const fetchLeaveTypesListFn = async () => {
   const response = await apiClient.get(`${ApiEndpoints.leaveType}/leave-type-dropdown`);
   return response.data;
 }
 
 // fetch leave mode dropdown list only 
-export const fetchLeaveModeListFn = async ()=>{
+export const fetchLeaveModeListFn = async () => {
   const response = await apiClient.get(`${ApiEndpoints.leaves}/leave-modes`);
   return response.data;
 }
@@ -203,7 +204,7 @@ export const dynamicMenuListFn = async () => {
 // fetch user list
 export const usersFn = async (page: number = 1, limit: number = 10, search?: string, searchBasis?: string) => {
   let url = `${ApiEndpoints.users}?page=${page}&limit=${limit}`;
-  
+
   if (search && search.trim()) {
     const searchField = searchBasis || 'name';
     url += `&${searchField}=${encodeURIComponent(search.trim())}`;
@@ -211,7 +212,7 @@ export const usersFn = async (page: number = 1, limit: number = 10, search?: str
   const response = await apiClient.get(url);
   return response.data;
 };
-  
+
 // create user
 export const createUserFn = async (payload: any) => {
   const response = await apiClient.post(ApiEndpoints.users, payload);
@@ -258,13 +259,12 @@ export const rolesFn = async (page: number, limit: number) => {
 
 // create role
 export const createRoleFn = async (payload: { name: string, rank: number }) => {
-  console.log(payload, "Apicall")
   const response = await apiClient.post(ApiEndpoints.roles, payload);
   return response.data;
 };
 
 // update role and Rank
-export const updateRoleAndRankFn = async (payload: { name: string, rank:string }, roleId: string) => {
+export const updateRoleAndRankFn = async (payload: { name: string, rank: string }, roleId: string) => {
   const response = await apiClient.put(
     `${ApiEndpoints.roles}/${roleId}`,
     payload,
@@ -282,7 +282,6 @@ export const deleteRoleFn = async (roleId: string) => {
 
 // fetch permissions
 export const permissionsFn = async (roleId: string) => {
-  console.log("roleId", roleId)
   const response = await apiClient.get(`${ApiEndpoints.permissions}/get-menu-permission/${roleId}`);
   return response.data;
 };
@@ -313,14 +312,14 @@ export const changePasswordFn = async (payload: { oldPassword: string; newPasswo
 };
 
 // reset Password 
-export const resetPasswordFn = async (id:string)=>{
+export const resetPasswordFn = async (id: string) => {
   const response = await apiClient.post(`${ApiEndpoints.users}/reset-password/${id}`)
   return response.data;
 }
 
-// -----------------------------LeaveType---------------------------------------------------------
+// ---------------------------- LeaveType --------------------------------------------------------
 // Create leave Type
-export const createLeaveTypeFn = async (payload: CreateLeaveTypesInterface)=>{
+export const createLeaveTypeFn = async (payload: CreateLeaveTypesInterface) => {
   const response = await apiClient.post(`${ApiEndpoints.leaveType}`, payload);
   return response.data;
 }
@@ -338,16 +337,22 @@ export const updateLeaveTypeFn = async (payload: any, leaveId: string) => {
   return response.data;
 };
 
+// ---------------------------------- Leaves ------------------------------------------------------
+
+
 // fetch taken leave list
-export const fetchTakenLeaveListFn = async (params: { 
-  status?: string;
-  leave_type?: string;
-  start_date?: string;
-  end_date?: string;
-  page?: number;
-  limit?: number;
-} = {}) => {
-  let url = `${ApiEndpoints.leaves}`;
+export const fetchTakenLeaveListFn = async (
+  params: {
+    status?: string;
+    leave_type?: string;
+    start_date?: string;
+    end_date?: string;
+    page?: number;
+    limit?: number;
+  } = {},
+  customUrl?: string
+) => {
+  let url = customUrl || `${ApiEndpoints.leaves}`;
   // Use URLSearchParams to easily construct the query string
   const queryParams = new URLSearchParams();
 
@@ -374,34 +379,41 @@ export const applyLeaveFn = async (payload: ApplyLeaveInterface) => {
 }
 
 // Approve or Reject leave application
-export const approveRejectLeaveFn = async(leaveId:string, payload:{status:string, reason: string})=>{
-    const response = await apiClient.put(`${ApiEndpoints.leaves}/status/${leaveId}`, payload);
-    return response.data;
+export const approveRejectLeaveFn = async (leaveId: string, payload: { status: string, reason: string }) => {
+  const response = await apiClient.put(`${ApiEndpoints.leaves}/status/${leaveId}`, payload);
+  return response.data;
 }
 
 // delete Leave Application
-export const updateAppliedLeaveFn = async(leaveId:string, payload: any)=>{
-    const response = await apiClient.put(`${ApiEndpoints.leaves}/${leaveId}`, payload);
-    return response.data;
+export const updateAppliedLeaveFn = async (leaveId: string, payload: any) => {
+  const response = await apiClient.put(`${ApiEndpoints.leaves}/${leaveId}`, payload);
+  return response.data;
 }
 
 // delete Leave Application
-export const deleteLeaveFn = async(leaveId:string)=>{
-    const response = await apiClient.delete(`${ApiEndpoints.leaves}/${leaveId}`);
-    return response.data;
+export const deleteLeaveFn = async (leaveId: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.leaves}/${leaveId}`);
+  return response.data;
 }
+
+// fetch leaves summary
+export const fetchLeavesSummaryFn = async () => {
+  const response = await apiClient.get(`${ApiEndpoints.leaves}/summary`);
+  return response.data;
+}
+
 
 // --------------------------------------------- Holidays -----------------------------------------
 // create holiday
 export const createHolidayFn = async (payload: any) => {
-    const response = await apiClient.post(ApiEndpoints.holidays, payload);
-    return response.data;
+  const response = await apiClient.post(ApiEndpoints.holidays, payload);
+  return response.data;
 };
 
 // fetch all holidays
 export const fetchHolidaysFn = async () => {
-    const response = await apiClient.get(ApiEndpoints.holidays);
-    return response.data;
+  const response = await apiClient.get(ApiEndpoints.holidays);
+  return response.data;
 };
 
 // fetch holiday by id
@@ -411,7 +423,7 @@ export const getHolidayByIdFn = async (id: string) => {
 };
 
 // fetch holiday by id
-export const updateHolidayFn = async (payload:HolidaysInterface) => {
+export const updateHolidayFn = async (payload: HolidaysInterface) => {
   const response = await apiClient.put(`${ApiEndpoints.holidays}/${payload._id}`, payload);
   return response.data;
 };
@@ -465,10 +477,42 @@ export const deleteHolidayTypeFn = async (id: string) => {
   return response.data;
 };
 
-// fetch leaves summary
-export const fetchLeavesSummaryFn = async () => {
-  const response = await apiClient.get(ApiEndpoints.leavesSummary);
+// ----------------------------------Blogs--------------------------------------
+// Blog API functions
+export const fetchBlogsFn = async (page = 1, limit = 10, search = "") => {
+  let url = `${ApiEndpoints.blogs}?page=${page}&limit=${limit}`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
+  const response = await apiClient.get(url);
   return response.data;
-}
+};
+
+export const createBlogFn = async (payload: any) => {
+  console.log('[API] createBlogFn called with:', payload);
+  try {
+    const response = await apiClient.post(ApiEndpoints.blogs, payload);
+    console.log('[API] createBlogFn response:', response.data);
+    return response.data;
+  } catch (err) {
+    console.error('[API] createBlogFn error:', err);
+    throw err;
+  }
+};
+
+export const updateBlogFn = async (id: string, payload: any) => {
+  const response = await apiClient.put(`${ApiEndpoints.blogs}/${id}`, payload);
+  return response.data;
+};
+
+export const deleteBlogFn = async (id: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.blogs}/${id}`);
+  return response.data;
+};
+
+export const fetchBlogByIdFn = async (id: string) => {
+  const response = await apiClient.get(`${ApiEndpoints.blogs}/${id}`);
+  return response.data;
+};
+
+
 
 

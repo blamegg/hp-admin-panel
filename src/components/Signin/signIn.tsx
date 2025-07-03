@@ -51,7 +51,6 @@ export const Signin = () => {
   useEffect(() => {
     console.log("Signin useEffect triggered:", { user, loginStatus });
     if (user && loginStatus === "success") {
-      console.log("Navigating to dashboard...");
       router.push("/dashboard");
     }
   }, [router, user, loginStatus]);

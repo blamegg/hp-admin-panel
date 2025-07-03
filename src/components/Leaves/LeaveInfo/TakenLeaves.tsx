@@ -2,12 +2,14 @@ import { Tooltip } from '@mui/material'
 import React, { useState } from 'react'
 import DataTable from "react-data-table-component";
 import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
-import { AppliedLeave } from '@/redux/slice/takenLeaveSclice';
+import { AppliedLeave } from '@/redux/slice/leaveSclice';
 import EditTakenLeave from './ApproveTakenLeaveDrawer';
 import DeleteTakenLeaveDrawer from './DeleteTakenLeaveDrawer';
 import ViewTakenLeaveDrawer from './ViewTakenLeaveDrawer';
 import UpdateTakenLeaveDrawer from './UpdateTakenLeaveDrawer';
 import { useHasPermission } from '@/hooks/useUserPermissions';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -35,8 +37,8 @@ const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return 'N/A';
   try {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric', 
-      month: 'short', 
+      year: 'numeric',
+      month: 'short',
       day: 'numeric'
     });
   } catch (error) {
@@ -66,6 +68,10 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
     setIsDeleteTakenLeaveDrawerShowing(value);
   }
 
+  const currentUser = useSelector((state: RootState) => state.authReducer.user);
+  const leaveAppliedUserID = leaves?.map(leaveItem => leaveItem?.user_details?._id);
+  const UpdateLeavePermission = leaveAppliedUserID?.includes(currentUser?._id);
+  console.log("Permission", UpdateLeavePermission);
 
 
   const handleOpenViewDrawer = (leave: AppliedLeave) => {
@@ -80,138 +86,141 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
   };
 
 
-  
-const columns = [
-  {
-    name: "S No",
-    cell: (row: AppliedLeave, index: number) => (
-      <div>
-        {(currentPage - 1) * rowsPerPage + index + 1}
-      </div>
-    ),
-    sortable: false,
-    width: "60px",
-  },
-  {
-    name: "User Name",
-    cell: (row: AppliedLeave) => (
-      <div>
-        {row?.user_details?.name || '-'}
-      </div>
-    ),
-    sortable: true,
-  },
-  {
-    name: "Leave Type",
-    cell: (row: AppliedLeave) => (
-      <div>
-        {typeof row.leave_type === 'object' ? row.leave_type.name : row.leave_type || 'N/A'}
-      </div>
-    ),
-    sortable: true,
-  },
-  {
-    name: "Mode",
-    cell: (row: AppliedLeave) => (
-      <div>
-        {row.leave_mode}
-      </div>
-    ),
-    sortable: true,
-  },
-  {
-    name: "Dates",
-    cell: (row: AppliedLeave) => {
-      const formatDates = (dates: string[]) => {
-        if (!dates || dates.length === 0) return 'N/A';
-        if (dates.length === 1) return formatDate(dates[0]);
-        if (dates.length === 2) return `${formatDate(dates[0])} - ${formatDate(dates[1])}`;
-        return `${formatDate(dates[0])} +${dates.length - 1} more`;
-      };
 
-      if (row.leave_mode === 'Multi-Days' && Array.isArray(row.dates) && row.dates.length > 0) {
-        return <div>{formatDates(row.dates)}</div>;
-      } else if (row.start_date && row.end_date && row.start_date !== row.end_date) {
-        return <div>{formatDate(row.start_date)} - {formatDate(row.end_date)}</div>;
-      } else if (row.start_date) {
-        return <div>{formatDate(row.start_date)}</div>;
-      } else {
-        return <div>N/A</div>;
-      }
+  const columns = [
+    {
+      name: "S No",
+      cell: (row: AppliedLeave, index: number) => (
+        <div>
+          {(currentPage - 1) * rowsPerPage + index + 1}
+        </div>
+      ),
+      sortable: false,
+      width: "60px",
     },
-    sortable: true,
-  },
-  {
-    name: "Days",
-    cell: (row: AppliedLeave) => (
-      <div>
-        {row?.days_count}
-      </div>
-    ),
-    sortable: true,
-  },
-  {
-    name: <div className="truncate w-[100px]">Half Day</div>,
-    cell: (row: AppliedLeave) => (
-      <div>
-        {row.half_day ? 'Yes' : 'No'}
-      </div>
-    ),
-    sortable: true,
-  },
-  {
-    name: "Status",
-    cell: (row: AppliedLeave) => (
-      <div>
-        <StatusBadge status={row.status} />
-      </div>
-    ),
-    sortable: true,
-  },
-  {
-    name: "Actions",
-    cell: (row: AppliedLeave) => (
-      <div className="flex gap-3">
-        {hasPermission('Edit leave') && (
-          <Tooltip title="Approve Leave">
-            <button
-              onClick={() => {
-                setSelectedLeave(row);
-                toggleEditTakenLeaveDrawer(true);
-              }}
-              className="text-blue-500 hover:text-blue-700"
-            >
-              <FaEdit />
-            </button>
-          </Tooltip>
-        )}
-        {hasPermission('View leave details') && (
-          <Tooltip title="View leave">
-            <button
-              onClick={() => handleOpenViewDrawer(row)}
-              className="text-red-500"
-            >
-              <FaEye />
-            </button>
-          </Tooltip>
-        )}
-        {hasPermission('Delete leave') && (
-          <Tooltip title="Delete leave">
-            <button
-              onClick={() => {
-                setSelectedLeave(row);
-                toggleDeleteTakenLeaveDrawer(true);
-              }}
-              className="text-danger"
-            >
-              <FaTrash />
-            </button>
-          </Tooltip>
-        )}
-      </div>
-    ),
-  }
-];
+    {
+      name: "User Name",
+      cell: (row: AppliedLeave) => (
+        <div>
+          {row?.user_details?.name || '-'}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Leave Type",
+      cell: (row: AppliedLeave) => (
+        <div>
+          {typeof row.leave_type === 'object' ? row.leave_type.name : row.leave_type || 'N/A'}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Mode",
+      cell: (row: AppliedLeave) => (
+        <div>
+          {row.leave_mode}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Dates",
+      cell: (row: AppliedLeave) => {
+        const formatDates = (dates: string[]) => {
+          if (!dates || dates.length === 0) return 'N/A';
+          if (dates.length === 1) return formatDate(dates[0]);
+          if (dates.length === 2) return `${formatDate(dates[0])} - ${formatDate(dates[1])}`;
+          return `${formatDate(dates[0])} +${dates.length - 1} more`;
+        };
+
+        if (row.leave_mode === 'Multi-Days' && Array.isArray(row.dates) && row.dates.length > 0) {
+          return <div>{formatDates(row.dates)}</div>;
+        } else if (row.start_date && row.end_date && row.start_date !== row.end_date) {
+          return <div>{formatDate(row.start_date)} - {formatDate(row.end_date)}</div>;
+        } else if (row.start_date) {
+          return <div>{formatDate(row.start_date)}</div>;
+        } else {
+          return <div>N/A</div>;
+        }
+      },
+      sortable: true,
+    },
+    {
+      name: "Days",
+      cell: (row: AppliedLeave) => (
+        <div>
+          {row?.days_count}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      name: <div className="truncate w-[100px]">Half Day</div>,
+      cell: (row: AppliedLeave) => (
+        <div>
+          {row.half_day ? 'Yes' : 'No'}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Status",
+      cell: (row: AppliedLeave) => (
+        <div>
+          <StatusBadge status={row.status} />
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Actions",
+      cell: (row: AppliedLeave) => {
+        const canEdit = hasPermission('Edit leave') && row?.user_details?._id !== currentUser?._id && row?.status?.toLowerCase() !== 'approved';
+        return (
+          <div className="flex gap-3">
+            {hasPermission('View leave details') && (
+              <Tooltip title="View leave">
+                <button
+                  onClick={() => handleOpenViewDrawer(row)}
+                  className="text-red-500"
+                >
+                  <FaEye />
+                </button>
+              </Tooltip>
+            )}
+            {hasPermission('Delete leave') && (
+              <Tooltip title="Delete leave">
+                <button
+                  onClick={() => {
+                    setSelectedLeave(row);
+                    toggleDeleteTakenLeaveDrawer(true);
+                  }}
+                  className="text-danger"
+                >
+                  <FaTrash />
+                </button>
+              </Tooltip>
+            )}
+            {canEdit && (
+              <Tooltip title="Approve Leave">
+                <button
+                  onClick={() => {
+                    setSelectedLeave(row);
+                    toggleEditTakenLeaveDrawer(true);
+                  }}
+                  className="text-blue-500 hover:text-blue-700"
+                >
+                  <FaEdit />
+                </button>
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
+    }
+  ];
 
 
 
@@ -270,10 +279,10 @@ const columns = [
                 "&:not(:last-of-type)": {
                   borderBottomStyle: "solid",
                   borderBottomWidth: "1px",
-                  borderBottomColor: "#E2E8f0", 
+                  borderBottomColor: "#E2E8f0",
                 },
-                backgroundColor: "transprant", 
-                color: "#1C243F", 
+                backgroundColor: "transprant",
+                color: "#1C243F",
               },
               highlightOnHoverStyle: {
                 backgroundColor: "#e4e7f7",

@@ -8,7 +8,7 @@ import Textarea from '../../common/Input/Textarea';
 import Select from '../../common/Select';
 import Input from '../../common/Input';
 import ModalHeader from '@/components/common/ModalHeader';
-import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/takenLeaveSclice';
+import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/leaveSclice';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { FaTrash } from 'react-icons/fa6';

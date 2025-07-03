@@ -23,7 +23,7 @@ export const useUserPermissions = () => {
 // Reusable hook to get hasPermission function
 export const useHasPermission = () => {
   const permissions = useSelector((state: RootState) => state?.permission?.permissions);
-  console.log(permissions, 'Permissios')
+  // console.log(permissions, 'Permissios')
   const hasPermission = (permissionKey: string): boolean => permissions.includes(permissionKey)
 
   return hasPermission;

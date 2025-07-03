@@ -6,15 +6,17 @@ import appReducer from "./slice/appSlice";
 import messageReducer from "./slice/MessageSlice";
 import menuReducer from "./slice/menuList";
 import roleReducer from "./slice/roleSlice";
-import leaveReducer from "./slice/leaveTypesSlice";
-import takenLeaveReducer from './slice/takenLeaveSclice';
+import leavesReducer from './slice/leaveSclice';
+import leaveTypesReducer from "./slice/leaveTypesSlice";
 import leaveTypesListReducer from "./slice/leaveTypesListSlice";
+import leaveSummaryReducer from "./slice/leaveSummarySlice";
 import leaveModes from './slice/leaveModeListSlice';
 import holidayTypesReducer from "./slice/holidayTypesSlice";
 import holidayTypesListReducer from './slice/holidayTypesListSlice';
 import leaveModeListReducer from "./slice/leaveModeListSlice";
 import holidayReducer from "./slice/holidaySlice";
 import permissionReducer from './slice/permissionSlice';
+import blogReducer from './slice/blogSlice';
 
 
 const authPersistConfig = {
@@ -31,15 +33,17 @@ const store = configureStore({
     message: messageReducer,
     menu: menuReducer,
     role: roleReducer,
-    appliedLeaves: takenLeaveReducer,
+    appliedLeaves: leavesReducer,
     leaveModes: leaveModes,
-    leaveTypes: leaveReducer,
+    leaveTypes: leaveTypesReducer,
     leaveTypesList: leaveTypesListReducer,
+    leaveSummaryReducer: leaveSummaryReducer,
     holidayTypes: holidayTypesReducer,
     holidayTypesList: holidayTypesListReducer,
     leaveModeList: leaveModeListReducer,
     holidays: holidayReducer,
     permission: permissionReducer,
+    blogs: blogReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

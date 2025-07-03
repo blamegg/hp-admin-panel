@@ -12,7 +12,7 @@ import Textarea from "../../common/Input/Textarea";
 import Select from "../../common/Select";
 import Input from "../../common/Input";
 import ModalHeader from "@/components/common/ModalHeader";
-import { fetchTakenLeaves } from "@/redux/slice/takenLeaveSclice";
+import { fetchTakenLeaves } from "@/redux/slice/leaveSclice";
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { fetchLeaveTypesList } from "@/redux/slice/leaveTypesListSlice";
 import { fetchLeaveModeList } from "@/redux/slice/leaveModeListSlice";

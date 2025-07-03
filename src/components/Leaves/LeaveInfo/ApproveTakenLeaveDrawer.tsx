@@ -1,6 +1,6 @@
 import Button from '@/components/common/Button';
 import ModalHeader from '@/components/common/ModalHeader'
-import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/takenLeaveSclice';
+import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/leaveSclice';
 import { AppDispatch } from '@/redux/store';
 import { approveRejectLeaveFn } from '@/utility/queryFetcher';
 import { Drawer } from '@mui/material'
