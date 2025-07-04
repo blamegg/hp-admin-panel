@@ -2,7 +2,7 @@ import { Tooltip } from '@mui/material'
 import React, { useState } from 'react'
 import DataTable from "react-data-table-component";
 import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
-import { AppliedLeave } from '@/redux/slice/leaveSclice';
+import { AppliedLeave } from '@/redux/slice/leaves/leaveSclice';
 import EditTakenLeave from './ApproveTakenLeaveDrawer';
 import DeleteTakenLeaveDrawer from './DeleteTakenLeaveDrawer';
 import ViewTakenLeaveDrawer from './ViewTakenLeaveDrawer';
@@ -71,7 +71,6 @@ const TakenLeaves: React.FC<TakenLeavesProps> = ({ leaves, loading, currentPage,
   const currentUser = useSelector((state: RootState) => state.authReducer.user);
   const leaveAppliedUserID = leaves?.map(leaveItem => leaveItem?.user_details?._id);
   const UpdateLeavePermission = leaveAppliedUserID?.includes(currentUser?._id);
-  console.log("Permission", UpdateLeavePermission);
 
 
   const handleOpenViewDrawer = (leave: AppliedLeave) => {

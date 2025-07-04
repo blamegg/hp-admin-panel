@@ -38,7 +38,9 @@ export const fetchBlogs = createAsyncThunk(
   "blogs/fetchBlogs",
   async ({ page = 1, limit = 10, search = "" }: { page?: number; limit?: number; search?: string }, { rejectWithValue }) => {
     try {
-      return await fetchBlogsFn(page, limit, search);
+      const response = await fetchBlogsFn(page, limit, search);
+      console.log("api", response);
+      return response;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data?.message || "Failed to fetch blogs");
     }
@@ -49,10 +51,8 @@ export const createBlog = createAsyncThunk(
   "blogs/createBlog",
   async (payload: any, { rejectWithValue }) => {
     try {
-      console.log('[Thunk] createBlog called with:', payload);
       return await createBlogFn(payload);
     } catch (err: any) {
-      console.error('[Thunk] createBlog error:', err);
       return rejectWithValue(err?.response?.data?.message || "Failed to create blog");
     }
   }
@@ -103,10 +103,10 @@ const blogSlice = createSlice({
       })
       .addCase(fetchBlogs.fulfilled, (state, action) => {
         state.loading = false;
-        state.blogs = action.payload.blogs || [];
-        state.total = action.payload.total || 0;
-        state.currentPage = action.meta.arg.page || 1;
-        state.limit = action.meta.arg.limit || 10;
+        state.blogs = action.payload.data || [];
+        state.total = action.payload.pagination.total || 0;
+        state.currentPage = action.payload.pagination.page || 1;
+        state.limit = action.payload.pagination.limit || 10;
       })
       .addCase(fetchBlogs.rejected, (state, action) => {
         state.loading = false;

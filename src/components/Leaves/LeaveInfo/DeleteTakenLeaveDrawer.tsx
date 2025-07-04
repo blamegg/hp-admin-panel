@@ -1,6 +1,6 @@
 'use client'
 import ModalHeader from '@/components/common/ModalHeader'
-import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/leaveSclice';
+import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/leaves/leaveSclice';
 import { Drawer } from '@mui/material'
 import React, { useState } from 'react'
 import Button from '../../common/Button';

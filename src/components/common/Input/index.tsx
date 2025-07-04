@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import FormError from "../FormError";
 
 interface InputProps {
@@ -8,14 +8,13 @@ interface InputProps {
   register?: any;
   error?: string;
   disabled?: boolean;
-  autofocus?:boolean;
-  id?:string;
-  value?:string;
+  autofocus?: boolean;
+  id?: string;
+  value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  className?:string;
+  className?: string;
   accept?: string;
   multiple?: boolean;
-  min?:number;
 }
 
 
@@ -32,25 +31,84 @@ const Input = ({
   className,
   accept,
   multiple,
-  min,
   ...props
 }: InputProps) => {
-  // Custom styling for file inputs
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string>("");
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+
   const getInputClassName = () => {
-    const baseClass = "w-full rounded border text-xs font-medium focus:border-primary focus-visible:outline-none dark:border-strokedark dark:focus:border-primary transition-all duration-200";
-    
-    if (type === "file") {
-      return `${baseClass} cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/80 file:cursor-pointer file:transition-colors bg-white dark:bg-meta-4 dark:text-white border-dashed hover:border-primary/60 ${error ? "border-red" : "border-stroke"}`;
-    }
-    
-    return `${baseClass} bg-gray px-2 py-[5px] dark:bg-meta-4 dark:text-white ${error ? "border-red" : "border-stroke"}`;
+    return "w-full rounded  text-[13px] font-medium  border border-stroke focus:border-primary focus-visible:outline-none dark:border-strokedark dark:focus:border-primary transition-all duration-200 bg-gray px-2 py-[2px] text-black dark:bg-meta-4 dark:text-white";
   };
+
+  if (type === "file") {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files.length > 0) {
+        setFileName(e.target.files[0].name);
+      } else {
+        setFileName("");
+      }
+
+      // Call react-hook-form's registered onChange
+      if (register?.onChange) {
+        register.onChange(e);
+      }
+
+      // Call your component's onChange
+      if (onChange) {
+        onChange(e);
+      }
+    };
+
+
+    return (
+      <div>
+        {label && (
+          <label className="block text-xs font-medium text-black dark:text-white mb-1">{label}</label>
+        )}
+        <div className="flex gap-2 items-center">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={accept}
+            multiple={multiple}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+            {...register}
+          />
+
+          <button
+            type="button"
+            className="px-3 py-[6px] w-[150px] rounded bg-primary text-white text-xs font-medium hover:bg-primary/80 transition-colors"
+            onClick={() => {
+              if (fileInputRef.current) {
+                fileInputRef.current.click();
+              }
+            }}
+          >
+            Choose File
+          </button>
+          <input
+            type="text"
+            className="w-full rounded border text-[13px] font-medium focus:border-primary focus-visible:outline-none dark:border-strokedark dark:focus:border-primary transition-all duration-200 bg-gray px-2 py-[2px] text-black dark:bg-meta-4 dark:text-white"
+            value={fileName || "No file selected"}
+            placeholder={placeholder}
+            readOnly
+            tabIndex={-1}
+          />
+        </div>
+        <FormError error={error} />
+      </div>
+    );
+  }
 
   return (
     <>
-      <label className="block text-xs font-medium text-black dark:text-white mb-[2px] ">
-        {label}
-      </label>
+      {label && (
+        <label className="block text-xs font-medium text-black dark:text-white mb-1">
+          {label}
+        </label>
+      )}
       <input
         className={getInputClassName()}
         type={type}

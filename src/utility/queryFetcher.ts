@@ -1,4 +1,4 @@
-import { AppliedLeave } from "@/redux/slice/leaveSclice";
+import { AppliedLeave } from "@/redux/slice/leaves/leaveSclice";
 import { apiClient, ApiEndpoints } from "./api";
 import { useHasPermission } from "@/hooks/useUserPermissions";
 
@@ -489,7 +489,11 @@ export const fetchBlogsFn = async (page = 1, limit = 10, search = "") => {
 export const createBlogFn = async (payload: any) => {
   console.log('[API] createBlogFn called with:', payload);
   try {
-    const response = await apiClient.post(ApiEndpoints.blogs, payload);
+    const response = await apiClient.post(ApiEndpoints.blogs, payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     console.log('[API] createBlogFn response:', response.data);
     return response.data;
   } catch (err) {

@@ -6,7 +6,7 @@ import { AiOutlineDelete } from 'react-icons/ai';
 import { ImSpinner2 } from 'react-icons/im';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { deleteHoliday, fetchHolidays } from '@/redux/slice/holidaySlice';
+import { deleteHoliday, fetchHolidays } from '@/redux/slice/holiday/holidaySlice';
 import { toast } from 'sonner';
 
 interface DeleteHolidayDrawerProps {

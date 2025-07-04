@@ -1,6 +1,6 @@
 import Button from '@/components/common/Button';
 import ModalHeader from '@/components/common/ModalHeader';
-import { AppliedLeave } from '@/redux/slice/leaveSclice';
+import { AppliedLeave } from '@/redux/slice/leaves/leaveSclice';
 import { Drawer } from '@mui/material';
 import React from 'react';
 import DetailItem from '@/components/common/DetailItem';

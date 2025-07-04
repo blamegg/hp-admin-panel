@@ -4,7 +4,7 @@ import ModalHeader from '../common/ModalHeader'
 import Button from '../common/Button';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { createBlog } from '@/redux/slice/blogSlice';
+import { createBlog } from '@/redux/slice/blog/blogSlice';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { blogSchema, BlogFormInputs } from '@/schema/blogSchema';
@@ -12,6 +12,9 @@ import Input from '../common/Input';
 import Select from '../common/Select';
 import BlogEditor from './BlogEditor';
 import { toast } from 'sonner';
+import FormError from '../common/FormError';
+import CustomFileSelector from '../common/CustomFileSelector';
+import CustomMultiSelect from '../common/CustomMultiSelect';
 
 interface CreateBlogProps {
   isCreateBlogDrawerOpen: boolean;
@@ -56,12 +59,17 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
   const { register, getValues, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<BlogFormInputs>({
     resolver: zodResolver(blogSchema),
     defaultValues,
+    mode: 'onChange',
   });
 
   const [categoryInput, setCategoryInput] = useState('');
   const [tagInput, setTagInput] = useState('');
   const categories = watch('categories');
   const tags = watch('tags');
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const coverPageFile = watch('coverPage');
+  const [blogStatus, setBlogStatus] = useState<'draft' | 'published'>("draft")
 
   const handleAddCategory = () => {
     const value = categoryInput.trim();
@@ -84,23 +92,49 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
     setValue('tags', tags.filter((t: string) => t !== tag), { shouldValidate: true });
   };
 
-  const onSubmit = async (data: BlogFormInputs) => {
-    console.log('CreateBlog data (onSubmit):', data);
-    try {
-      const resultAction = await dispatch(createBlog(data) as any);
-      // Check for error
-      if (createBlog.rejected.match(resultAction)) {
-        toast.error(resultAction.payload || 'Failed to create blog');
-        console.error('CreateBlog error:', resultAction.payload);
-      } else {
-        toast.success('Blog created successfully');
-        reset();
-        toggleDrawer(false);
-      }
-    } catch (err) {
-      toast.error('Unexpected error creating blog');
-      console.error('Unexpected error:', err);
+  // Custom file input handler for preview and form value
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setValue('coverPage', [file]); // react-hook-form expects an array for file inputs
+      const url = URL.createObjectURL(file);
+      setFilePreview(url);
+    } else {
+      setSelectedFile(null);
+      setValue('coverPage', []);
+      setFilePreview(null);
     }
+  };
+
+  useEffect(() => {
+    if (coverPageFile && coverPageFile.length > 0) {
+      const file = coverPageFile[0];
+      const url = URL.createObjectURL(file);
+      setFilePreview(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setFilePreview(null);
+    }
+  }, [coverPageFile]);
+
+  const onSubmit = async (data: BlogFormInputs) => {
+
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('content', JSON.stringify(data.content));
+    formData.append('status', blogStatus);
+    formData.append('url', data.url || '');
+    formData.append('slug', data.coverPageUrl || '');
+    data.categories.forEach((cat, idx) => formData.append(`categories[${idx}]`, cat));
+    data.tags.forEach((tag, idx) => formData.append(`tags[${idx}]`, tag));
+    if (data.coverPage && data.coverPage[0]) formData.append('coverPage', data.coverPage[0]);
+
+    await dispatch(createBlog(formData) as any);
+    toast.success('Blog created successfully');
+    reset();
+    toggleDrawer(false);
+
   };
 
   return (
@@ -111,88 +145,46 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
       PaperProps={{ sx: { width: { xs: '100vw', sm: 400, md: 500 }, display: 'flex', flexDirection: 'column', height: '100%' } }}
     >
       <ModalHeader text='Create Blog' toggleDrawer={() => toggleDrawer(false)} />
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-1 p-4 flex-1 overflow-y-auto' id="blog-create-form">
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-2 p-4 flex-1 overflow-y-auto' id="blog-create-form">
 
         <Input
           label='Title'
           placeholder='Enter blog title'
           type='text'
           register={register('title')}
-          error={errors.title?.message}
+          error={typeof errors?.title?.message === 'string' ? errors.title.message : undefined}
         />
         <div className='mb-2'>
-          <div className='flex items-end gap-3 w-full'>
-            <div className='w-full'>
-              <Input
-                label='Categories'
-                placeholder='Add category'
-                type='text'
-                value={categoryInput}
-                onChange={e => setCategoryInput(e.target.value)}
-                className='flex-1'
-              />
-            </div>
-            <Button type='button' name='Add' onClick={handleAddCategory} className='bg-primary/85' />
-          </div>
-          <div className=''>
-            <div className=' my-1  mb-1'>
-              {categories.length > 1 && (
-                <div className='text-xs flex flex-wrap gap-2'>
-                  <span >Selected ({categories.length})</span>
-                  <span className='text-danger underline cursor-pointer' onClick={() => setValue('categories', [], { shouldValidate: true })} >delete all</span>
-                </div>
-              )}
-            </div>
-            <div className='flex flex-wrap gap-2 '>
-              {categories.map((cat: string) => (
-                <span key={cat} className='flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium'>
-                  {cat}
-                  <button type='button' className='ml-1 text-red-500 hover:text-red-700' onClick={() => handleRemoveCategory(cat)}>&times;</button>
-                </span>
-              ))}
-            </div>
-          </div>
-          {errors.categories?.message && <p className='text-danger text-xs '>{errors.categories.message as string}</p>}
+          <CustomMultiSelect
+            label="Categories"
+            value={categories}
+            onChange={vals => setValue('categories', vals, { shouldValidate: true })}
+            error={typeof errors?.categories?.message === 'string' ? errors.categories.message : undefined}
+            placeholder="Add category"
+          />
         </div>
-        <div className=''>
-          <div className='flex items-end gap-3 w-full'>
-            <div className='w-full'>
-              <Input
-                label='Tags'
-                placeholder='Add tag'
-                type='text'
-                value={tagInput}
-                onChange={e => setTagInput(e.target.value)}
-                className='flex-1'
-              />
-            </div>
-            {/* <div>
-
-            </div> */}
-            <Button type='button' name='Add' className='bg-primary/85' onClick={handleAddTag} />
-          </div>
-          <div className='my-1 '>
-            {tags.length > 1 && (
-              <div className='text-xs flex flex-wrap gap-2'>
-                <span>Selected ({tags.length})</span>
-                <span className=' text-danger underline cursor-pointer' onClick={() => setValue('tags', [], { shouldValidate: true })} >delete all</span>
-              </div>
-            )}
-          </div>
-          <div className='flex flex-wrap gap-2 '>
-            {tags.map((tag: string) => (
-              <span key={tag} className='flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium'>
-                {tag}
-                <button type='button' className='ml-1 text-red-500 hover:text-red-700' onClick={() => handleRemoveTag(tag)}>&times;</button>
-              </span>
-            ))}
-          </div>
-
-          {errors.tags?.message && <p className='text-danger text-xs mt-1'>{errors.tags.message as string}</p>}
+        <div className='mb-2'>
+          <CustomMultiSelect
+            label="Tags"
+            value={tags}
+            onChange={vals => setValue('tags', vals, { shouldValidate: true })}
+            error={typeof errors?.tags?.message === 'string' ? errors.tags.message : undefined}
+            placeholder="Add tag"
+          />
         </div>
+        {/* Media Upload (Image or Video) */}
+        <div className='mb-2'>
+          <CustomFileSelector
+            label="Cover Image or Video"
+            accept="image/*,video/*"
+            error={typeof errors?.coverPage?.message === 'string' ? errors.coverPage.message : undefined}
+            onChange={e => setValue('coverPage', e.target.files)}
+          />
+        </div>
+
 
         <div className='mb-0 p-0'>
-          <label className='block text-xs font-medium text-black dark:text-white'>Content</label>
+          <label className='block text-xs font-medium text-black dark:text-white mb-1'>Content</label>
           <div className="w-full rounded  focus-visible:outline-none dark:border-strokedar dark:focus-within:border-primary transition-all duration-200 bg-gray text-black dark:bg-meta-4 dark:text-white border-stroke">
             <BlogEditor
               value={watch('content')}
@@ -200,25 +192,40 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
               error={errors.content?.message}
             />
           </div>
+          <FormError error={errors.content?.message} ></FormError>
         </div>
+        {/* Cover page url */}
+        <Input
+          label='Cover page URL'
+          placeholder='Cover page URL (optional)'
+          type='text'
+          register={register('url')}
+          error={typeof errors?.coverPageUrl?.message === 'string' ? errors.coverPageUrl.message : undefined}
+        />
 
+        {/* External url */}
         <Input
           label='External URL'
           placeholder='Enter external URL (optional)'
           type='text'
           register={register('url')}
-          error={errors.url?.message}
+          error={typeof errors?.url?.message === 'string' ? errors.url.message : undefined}
         />
+
+
       </form>
       <div className="flex justify-end items-center gap-3 h-[70px] w-full pr-4 border-t-2 border-gray bg-white">
         <Button type="button" name="Close" onClick={() => { reset(); toggleDrawer(false); }} className="bg-graydark" />
-        <Button type="submit" name={isSubmitting ? 'Drafting...' : 'Draft'} className="bg-primary/85" loading={isSubmitting} form="blog-create-form" />
-        <Button type="button" name={isSubmitting ? 'Publishing...' : 'Publish'} className="bg-success" loading={isSubmitting}
-          onClick={() => {
-            const data = getValues();
-            console.log('Publish blog data (button):', data);
-          }}
+        <Button type="submit" onClick={() => setBlogStatus('draft')} name={isSubmitting ? 'Drafting...' : 'Draft'} className="bg-primary/85" loading={isSubmitting} form="blog-create-form" />
+        <Button
+          type="submit"
+          name={isSubmitting ? 'Publishing...' : 'Publish'}
+          className="bg-success"
+          loading={isSubmitting}
+          onClick={() => setBlogStatus('published')}
+          form="blog-create-form"
         />
+
       </div>
     </Drawer>
   )

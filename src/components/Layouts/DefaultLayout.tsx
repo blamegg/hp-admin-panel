@@ -11,7 +11,7 @@ import ChangePasswordModal from "@/components/changePassword/ChangePasswordModal
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
-import { fetchLeaveType } from "@/redux/slice/leaveTypesSlice";
+import { fetchLeaveType } from "@/redux/slice/leaves/leaveTypesSlice";
 
 export default function DefaultLayout({
   children,

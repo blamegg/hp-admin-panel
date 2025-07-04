@@ -8,15 +8,15 @@ import Textarea from '../../common/Input/Textarea';
 import Select from '../../common/Select';
 import Input from '../../common/Input';
 import ModalHeader from '@/components/common/ModalHeader';
-import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/leaveSclice';
+import { AppliedLeave, fetchTakenLeaves } from '@/redux/slice/leaves/leaveSclice';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { FaTrash } from 'react-icons/fa6';
 import { updateAppliedLeaveFn } from '@/utility/queryFetcher';
 import { toast } from 'sonner';
 import { useDispatch } from 'react-redux';
-import { fetchLeaveType } from '@/redux/slice/leaveTypesSlice';
-import { fetchLeaveTypesList, LeaveTypesListData } from '@/redux/slice/leaveTypesListSlice';
+import { fetchLeaveType } from '@/redux/slice/leaves/leaveTypesSlice';
+import { fetchLeaveTypesList, LeaveTypesListData } from '@/redux/slice/leaves/leaveTypesListSlice';
 
 // Placeholder for update API
 const updateLeaveFn = async (id: string, payload: any) => {

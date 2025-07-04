@@ -10,7 +10,7 @@ import { AppDispatch } from '@/redux/store';
 import { toast } from 'sonner';
 import { getHolidayByIdFn, updateHolidayFn } from '@/utility/queryFetcher';
 import MultipleDatePicker from '@/components/FormElements/DatePicker/MultipleDatePicker';
-import { fetchHolidays } from '@/redux/slice/holidaySlice';
+import { fetchHolidays } from '@/redux/slice/holiday/holidaySlice';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 // import { updateHoliday } from '@/redux/slice/holidaySlice'; // To be implemented
 

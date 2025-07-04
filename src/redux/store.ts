@@ -6,17 +6,17 @@ import appReducer from "./slice/appSlice";
 import messageReducer from "./slice/MessageSlice";
 import menuReducer from "./slice/menuList";
 import roleReducer from "./slice/roleSlice";
-import leavesReducer from './slice/leaveSclice';
-import leaveTypesReducer from "./slice/leaveTypesSlice";
-import leaveTypesListReducer from "./slice/leaveTypesListSlice";
-import leaveSummaryReducer from "./slice/leaveSummarySlice";
-import leaveModes from './slice/leaveModeListSlice';
-import holidayTypesReducer from "./slice/holidayTypesSlice";
-import holidayTypesListReducer from './slice/holidayTypesListSlice';
-import leaveModeListReducer from "./slice/leaveModeListSlice";
-import holidayReducer from "./slice/holidaySlice";
+import leavesReducer from './slice/leaves/leaveSclice';
+import leaveTypesReducer from "./slice/leaves/leaveTypesSlice";
+import leaveTypesListReducer from "./slice/leaves/leaveTypesListSlice";
+import leaveSummaryReducer from "./slice/leaves/leaveSummarySlice";
+import leaveModes from './slice/leaves/leaveModeListSlice';
+import holidayTypesReducer from "./slice/holiday/holidayTypesSlice";
+import holidayTypesListReducer from './slice/holiday/holidayTypesListSlice';
+import leaveModeListReducer from "./slice/leaves/leaveModeListSlice";
+import holidayReducer from "./slice/holiday/holidaySlice";
 import permissionReducer from './slice/permissionSlice';
-import blogReducer from './slice/blogSlice';
+import blogReducer from './slice/blog/blogSlice';
 
 
 const authPersistConfig = {

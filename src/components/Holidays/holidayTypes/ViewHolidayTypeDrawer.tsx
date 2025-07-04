@@ -2,7 +2,7 @@
 import React from 'react';
 import Drawer from '@mui/material/Drawer';
 import ModalHeader from '../../common/ModalHeader';
-import { HolidayType } from '@/redux/slice/holidayTypesSlice';
+import { HolidayType } from '@/redux/slice/holiday/holidayTypesSlice';
 import Button from '../../common/Button';
 import DetailItem from '../../common/DetailItem';
 

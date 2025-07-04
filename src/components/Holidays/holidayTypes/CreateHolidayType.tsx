@@ -6,7 +6,7 @@ import Input from '../../common/Input';
 import ModalHeader from '../../common/ModalHeader';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { createHolidayType } from '@/redux/slice/holidayTypesSlice';
+import { createHolidayType } from '@/redux/slice/holiday/holidayTypesSlice';
 import { toast } from 'sonner';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

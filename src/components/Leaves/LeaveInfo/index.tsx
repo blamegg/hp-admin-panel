@@ -6,8 +6,8 @@ import Button from "../../common/Button";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
-import { fetchTakenLeaves } from "@/redux/slice/leaveSclice";
-import { fetchLeaveType } from "@/redux/slice/leaveTypesSlice";
+import { fetchTakenLeaves } from "@/redux/slice/leaves/leaveSclice";
+import { fetchLeaveType } from "@/redux/slice/leaves/leaveTypesSlice";
 import Select from "../../common/Select";
 import Input from "../../common/Input";
 import CustomPagination from "@/components/CustomPagination";
@@ -16,7 +16,7 @@ import { toSentenceCase } from '@/utility/helper';
 import TakenLeaves from "./TakenLeaves";
 import useDebounce from '@/hooks/useDebounce';
 import PermissionDenied from "@/components/common/PermissionDenied";
-import { fetchLeavesSummary } from "@/redux/slice/leaveSummarySlice";
+import { fetchLeavesSummary } from "@/redux/slice/leaves/leaveSummarySlice";
 import { ApiEndpoints } from "@/utility/api";
 
 
@@ -171,7 +171,7 @@ const LeaveInfo: React.FC = () => {
           )}
           <>
             <div className="grid items-center gap-x-4 gap-y-2 grid-cols-2  md:flex   w-full mb-4">
-              <div className="w-full">
+              {/* <div className="w-full">
                 <Input
                   label="Search by name"
                   type="text"
@@ -179,7 +179,7 @@ const LeaveInfo: React.FC = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by name"
                 />
-              </div>
+              </div> */}
               <div className="w-full">
                 <Select
                   label="Status"

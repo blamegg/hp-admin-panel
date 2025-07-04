@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './blog.css';
 
 @layer base {
   body {
@@ -33,6 +34,10 @@
 
   .inbox-height {
     @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+  }
+
+  .border-gray-200 {
+    border-color: #E5E7EB;
   }
 }
 
@@ -350,5 +355,3 @@ input:checked ~ span:last-child {
 .rbc-time-gutter {
   display: none !important;
 }
-
-

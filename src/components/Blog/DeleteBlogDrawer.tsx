@@ -4,7 +4,7 @@ import ModalHeader from '../common/ModalHeader';
 import Button from '../common/Button';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { deleteBlog } from '@/redux/slice/blogSlice';
+import { deleteBlog } from '@/redux/slice/blog/blogSlice';
 
 interface DeleteBlogDrawerProps {
   isDeleteBlogDrawerOpen: boolean;

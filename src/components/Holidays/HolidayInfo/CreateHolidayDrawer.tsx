@@ -6,7 +6,7 @@ import Select from '@/components/common/Select';
 import Input from '@/components/common/Input';
 import ModalHeader from '@/components/common/ModalHeader';
 import { useDispatch, useSelector } from 'react-redux';
-import { createHoliday, fetchHolidays } from '@/redux/slice/holidaySlice';
+import { createHoliday, fetchHolidays } from '@/redux/slice/holiday/holidaySlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { toast } from 'sonner';
 import MultipleDatePicker from '@/components/FormElements/DatePicker/MultipleDatePicker';

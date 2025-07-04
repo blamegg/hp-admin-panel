@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Drawer from '@mui/material/Drawer';
 import Button from '../../common/Button';
 import ModalHeader from '../../common/ModalHeader';
-import { HolidayType } from '@/redux/slice/holidayTypesSlice';
+import { HolidayType } from '@/redux/slice/holiday/holidayTypesSlice';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { ImSpinner2 } from 'react-icons/im';
 

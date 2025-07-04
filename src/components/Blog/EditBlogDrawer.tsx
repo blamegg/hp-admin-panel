@@ -4,7 +4,7 @@ import ModalHeader from '../common/ModalHeader';
 import Button from '../common/Button';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { updateBlog } from '@/redux/slice/blogSlice';
+import { updateBlog } from '@/redux/slice/blog/blogSlice';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { blogSchema, BlogFormInputs } from '@/schema/blogSchema';
