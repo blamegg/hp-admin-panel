@@ -65,7 +65,7 @@ const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
         </button>
       </div>
       {value.length > 0 && (
-        <div className="mb-3">
+        <div className="mb-3 mt-1">
           <div className="flex items-start justify-start gap-4 mb-2">
             <label className="block font-medium text-gray-600 text-sm">Selected: ( {value.length} )</label>
             {value.length > 1 && (

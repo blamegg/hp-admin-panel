@@ -34,7 +34,7 @@ const CustomFileSelector: React.FC<CustomFileSelectorProps> = ({
       {label && (
         <label className="block text-xs font-medium text-black dark:text-white mb-1">{label}</label>
       )}
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-4 items-center">
         <input
           ref={fileInputRef}
           type="file"
@@ -53,7 +53,7 @@ const CustomFileSelector: React.FC<CustomFileSelectorProps> = ({
         />
         <button
           type="button"
-          className="px-3 py-[6px] w-[150px] rounded bg-primary text-white text-xs font-medium hover:bg-primary/80 transition-colors"
+          className=" py-[6px] w-[150px] rounded bg-primary text-white text-xs font-medium hover:bg-primary/80 transition-colors"
           onClick={() => fileInputRef.current && fileInputRef.current.click()}
         >
           Choose File

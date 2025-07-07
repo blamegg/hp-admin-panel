@@ -1,17 +1,21 @@
 import { Drawer } from '@mui/material';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import ModalHeader from '../common/ModalHeader';
 import Button from '../common/Button';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { updateBlog } from '@/redux/slice/blog/blogSlice';
+import { updateBlog, createBlog, fetchBlogs } from '@/redux/slice/blog/blogSlice';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { blogSchema, BlogFormInputs } from '@/schema/blogSchema';
 import Input from '../common/Input';
-import Select from '../common/Select';
-import Textarea from '../common/Input/Textarea';
-import MultiSelect from '../FormElements/MultiSelect';
+import BlogEditor from './BlogEditor';
+import { toast } from 'sonner';
+import FormError from '../common/FormError';
+import CustomFileSelector from '../common/CustomFileSelector';
+import CustomMultiSelect from '../common/CustomMultiSelect';
+import { buildBlogFormData, addToList, removeFromList, handleFileInput } from '@/utility/helper';
+import { categoriesList, tagsList } from '@/utility/blogFields';
 
 interface EditBlogDrawerProps {
   isEditBlogDrawerOpen: boolean;
@@ -24,53 +28,181 @@ const statusOptions = [
   { value: 'published', label: 'Published' },
 ];
 
-const categoriesList = [
-    { value: 'Tech', text: 'Tech', selected: false },
-    { value: 'News', text: 'News', selected: false },
-    { value: 'Tutorial', text: 'Tutorial', selected: false },
-    { value: 'Opinion', text: 'Opinion', selected: false },
-    { value: 'Review', text: 'Review', selected: false },
-    { value: 'Other', text: 'Other', selected: false },
-];
-const tagsList = [
-    { value: 'React', text: 'React', selected: false },
-    { value: 'Next.js', text: 'Next.js', selected: false },
-    { value: 'JavaScript', text: 'JavaScript', selected: false },
-    { value: 'TypeScript', text: 'TypeScript', selected: false },
-    { value: 'UI', text: 'UI', selected: false },
-    { value: 'Backend', text: 'Backend', selected: false },
-    { value: 'Frontend', text: 'Frontend', selected: false },
-    { value: 'API', text: 'API', selected: false },
-    { value: 'Blog', text: 'Blog', selected: false },
-];
+const defaultValues: BlogFormInputs = {
+  title: '',
+  content: '',
+  url: '',
+  categories: [],
+  tags: [],
+};
 
 const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<BlogFormInputs>({
+  const { register, getValues, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting, isDirty } } = useForm<BlogFormInputs>({
     resolver: zodResolver(blogSchema),
+    defaultValues,
+    mode: 'onChange',
   });
+
+      console.log("blog", blog);
+  
+
+
+  const categories = watch('categories');
+  const tags = watch('tags');
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const coverPageFile = watch('coverPage');
+  const [blogStatus, setBlogStatus] = useState<'draft' | 'published'>("draft")
+
+  // --- Auto-save states ---
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedDataRef = useRef<string>('');
+
+  // Watch form data for changes
+  const title = watch('title');
+  const content = watch('content');
+  const url = watch('url');
+  const coverPageUrl = watch('coverPageUrl');
+
+
+  // Custom file input handler for preview and form value
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileInput(
+      e,
+      setSelectedFile,
+      (name: any, value: any, options?: any) => setValue(name as any, value, options),
+      setFilePreview
+    );
+  };
+
+  useEffect(() => {
+    if (coverPageFile && coverPageFile.length > 0) {
+      const file = coverPageFile[0];
+      // Only create object URL if it's actually a File object
+      if (file instanceof File) {
+        const url = URL.createObjectURL(file);
+        setFilePreview(url);
+        return () => URL.revokeObjectURL(url);
+      } else if (typeof file === 'string') {
+        // If it's a string (URL), use it directly
+        setFilePreview(file);
+      }
+    } else {
+      setFilePreview(null);
+    }
+  }, [coverPageFile]);
 
   useEffect(() => {
     if (blog) {
       reset({
         title: blog.title || '',
         content: blog.content || '',
-        coverPage: blog.coverPage || '',
+        coverPage: blog.coverPage ? [blog.coverPage] : [],
         url: blog.url || '',
-        status: blog.status || 'draft',
         categories: blog.categories || [],
         tags: blog.tags || [],
+        coverPageUrl: blog.coverPageUrl || ""
       });
+      setBlogStatus(blog.status || 'draft');
+      
+      // Set file preview if coverPage is a URL string
+      if (blog.coverPage && typeof blog.coverPage === 'string') {
+        setFilePreview(`${process.env.NEXT_PUBLIC_BASE_URL}${blog.coverPage}`);
+      }
     }
   }, [blog, reset]);
 
+  // --- Auto-save function ---
+  const autoSave = useCallback(async (isDraftAction = false) => {
+    const currentData = getValues();
+    if (!currentData.title && !currentData.content && currentData.categories.length === 0 && currentData.tags.length === 0) {
+      return;
+    }
+    const currentDataHash = JSON.stringify({
+      title: currentData.title,
+      content: currentData.content,
+      url: currentData.url,
+      coverPageUrl: currentData.coverPageUrl,
+      categories: currentData.categories,
+      tags: currentData.tags
+    });
+    if (!isDraftAction && currentDataHash === lastSavedDataRef.current) {
+      return;
+    }
+    setIsAutoSaving(true);
+    setHasUnsavedChanges(false);
+    try {
+  
+      currentData.blogId = blog._id;
+      // Use createBlog for auto-save and draft
+      await dispatch(createBlog(currentData) as any);
+      if (isDraftAction) {
+        toast.success('Draft saved successfully');
+      }
+      // Fetch latest blog list after auto-save
+      dispatch(fetchBlogs({}));
+      lastSavedDataRef.current = currentDataHash;
+      setLastSaved(new Date());
+ 
+    } catch (error) {
+      setHasUnsavedChanges(true);
+      if (isDraftAction) {
+        toast.error('Failed to save draft');
+      }
+    } finally {
+      setIsAutoSaving(false);
+    }
+  }, [dispatch, getValues, blog?._id, blogStatus]);
+
+  // --- Set up auto-save on form changes ---
+  useEffect(() => {
+    if (!isDirty) return; // Only auto-save if the form is dirty
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      autoSave();
+    }, 5000);
+    setHasUnsavedChanges(true);
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [title, content, url, coverPageUrl, categories, tags, coverPageFile, autoSave, isDirty]);
+
+  // --- Cleanup on drawer close ---
+  useEffect(() => {
+    if (!isEditBlogDrawerOpen) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+      setIsAutoSaving(false);
+      setLastSaved(null);
+      setHasUnsavedChanges(false);
+      lastSavedDataRef.current = '';
+      reset();
+    }
+  }, [isEditBlogDrawerOpen, reset]);
+
+  // --- Save Draft and Publish handlers ---
+  const handleDraftClick = async () => {
+    await autoSave(true);
+  };
+  const handlePublishClick = async () => {
+    setBlogStatus('published');
+  };
+
   const onSubmit = async (data: BlogFormInputs) => {
-    const categories = (document.getElementById('edit-categories-multiselect') as HTMLSelectElement)?.selectedOptions;
-    const tags = (document.getElementById('edit-tags-multiselect') as HTMLSelectElement)?.selectedOptions;
-    const categoryValues = categories ? Array.from(categories).map(el => el.value) : [];
-    const tagValues = tags ? Array.from(tags).map(el => el.value) : [];
-    
-    await dispatch(updateBlog({ id: blog._id, payload: { ...data, categories: categoryValues, tags: tagValues } }) as any);
+    const formData = buildBlogFormData(data, blogStatus);
+
+    await dispatch(updateBlog({ id: blog._id, payload: formData }) as any);
+    toast.success('Blog updated successfully');
+    reset();
     toggleDrawer(false);
   };
 
@@ -79,59 +211,158 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
       anchor='right'
       open={isEditBlogDrawerOpen}
       onClose={() => toggleDrawer(false)}
-      PaperProps={{ sx: { width: { xs: '100vw', sm: 400, md: 500 } } }}
+      PaperProps={{ sx: { width: { xs: '100vw', sm: 400, md: 500, lg: 800 }, display: 'flex', flexDirection: 'column', height: '100%' } }}
     >
       <ModalHeader text='Edit Blog' toggleDrawer={() => toggleDrawer(false)} />
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4 p-4'>
+      {/* Auto-save status indicator */}
+      <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            {isAutoSaving && (
+              <div className="flex items-center gap-1 text-blue-600">
+                <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <span>Saving...</span>
+              </div>
+            )}
+            {!isAutoSaving && lastSaved && (
+              <div className="flex items-center gap-1 text-green-600">
+                <span>✓</span>
+                <span>Saved {lastSaved.toLocaleTimeString()}</span>
+              </div>
+            )}
+            {hasUnsavedChanges && !isAutoSaving && (
+              <div className="flex items-center gap-1 text-orange-600">
+                <span>●</span>
+                <span>Unsaved changes</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-2 p-4 flex-1 overflow-y-auto' id="blog-edit-form">
         <Input
           label='Title'
           placeholder='Enter blog title'
           type='text'
           register={register('title')}
-          error={errors.title?.message}
+          error={typeof errors?.title?.message === 'string' ? errors.title.message : undefined}
         />
-        <Textarea
-          label='Content'
-          placeholder='Enter blog content'
-          {...register('content')}
-          error={errors.content?.message}
-        />
-        <Input
-          label='Cover Page (URL)'
-          placeholder='Enter cover image URL'
-          type='text'
-          register={register('coverPage')}
-          error={errors.coverPage?.message}
-        />
-        <Input
-          label='External URL'
-          placeholder='Enter external URL (optional)'
-          type='text'
-          register={register('url')}
-          error={errors.url?.message}
-        />
-        <Select
-          label='Status'
-          options={statusOptions}
-          register={register('status')}
-          error={errors.status?.message}
-        />
-        
-        <select id="edit-categories-multiselect" multiple className="hidden" defaultValue={blog?.categories}>
-          {categoriesList.map(opt => <option key={opt.value} value={opt.value}>{opt.text}</option>)}
-        </select>
-        <MultiSelect id="edit-categories-multiselect" />
-
-        <select id="edit-tags-multiselect" multiple className="hidden" defaultValue={blog?.tags}>
-          {tagsList.map(opt => <option key={opt.value} value={opt.value}>{opt.text}</option>)}
-        </select>
-        <MultiSelect id="edit-tags-multiselect" />
-
-        <div className='flex gap-2 justify-end'>
-          <Button type='button' name='Close' onClick={() => toggleDrawer(false)} className='bg-gray-500' />
-          <Button type='submit' name={isSubmitting ? 'Updating...' : 'Update'} className='bg-success' loading={isSubmitting} />
+        {/* Media Upload (Image or Video) */}
+        <div className='mb-2'>
+          <CustomFileSelector
+            label="Cover page"
+            accept="image/*,video/*"
+            error={typeof errors?.coverPage?.message === 'string' ? errors.coverPage.message : undefined}
+            onChange={handleFileChange}
+          />
+          {filePreview && (
+            <div style={{ marginTop: 8 }}>
+              {selectedFile && selectedFile.type.startsWith('image/') ? (
+                <img
+                  src={filePreview}
+                  alt="Preview"
+                  style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
+                />
+              ) : selectedFile && selectedFile.type.startsWith('video/') ? (
+                <video
+                  src={filePreview}
+                  controls
+                  style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
+                />
+              ) : (() => {
+                // If filePreview is a string (URL), check if it's a video or image
+                let url = filePreview;
+                // Add BASE_URL if not absolute
+                if (typeof url === 'string' && !/^https?:\/\//.test(url) && !url.startsWith('blob:')) {
+                  url = `${process.env.NEXT_PUBLIC_BASE_URL}${url}`;
+                }
+                if (url.match(/\.(mp4|webm|ogg)$/i)) {
+                  return (
+                    <video
+                      src={url}
+                      controls
+                      style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
+                    />
+                  );
+                }
+                // Default to image
+                return (
+                  <img
+                    src={url}
+                    alt="Preview"
+                    style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
+                  />
+                );
+              })()}
+            </div>
+          )}
+        </div>
+        <div className='mb-2 lg:grid lg:grid-cols-2 lg:gap-10'>
+          <div>
+            <Input
+              label='Cover page URL'
+              placeholder='Cover page URL (optional)'
+              type='text'
+              register={register('coverPageUrl')}
+              error={typeof errors?.coverPageUrl?.message === 'string' ? errors.coverPageUrl.message : undefined}
+            />
+          </div>
+          <div>
+            <Input
+              label='External URL'
+              placeholder='Enter external URL (optional)'
+              type='text'
+              register={register('url')}
+              error={typeof errors?.url?.message === 'string' ? errors.url.message : undefined}
+            />
+          </div>
+        </div>
+        <div className='mb-2 lg:grid lg:grid-cols-2 lg:gap-10'>
+          <CustomMultiSelect
+            label="Categories"
+            value={categories}
+            onChange={vals => setValue('categories', vals, { shouldValidate: true })}
+            error={typeof errors?.categories?.message === 'string' ? errors.categories.message : undefined}
+            placeholder="Add category"
+          />
+          <CustomMultiSelect
+            label="Tags"
+            value={tags}
+            onChange={vals => setValue('tags', vals, { shouldValidate: true })}
+            error={typeof errors?.tags?.message === 'string' ? errors.tags.message : undefined}
+            placeholder="Add tag"
+          />
+        </div>
+        <div className='mb-0 p-0'>
+          <label className='block text-xs font-medium text-black dark:text-white mb-1'>Content</label>
+          <div className="w-full rounded  focus-visible:outline-none dark:border-strokedar dark:focus-within:border-primary transition-all duration-200 bg-gray text-black dark:bg-meta-4 dark:text-white border-stroke">
+            <BlogEditor
+              value={watch('content')}
+              onChange={v => setValue('content', v, { shouldValidate: true })}
+              error={errors.content?.message}
+            />
+          </div>
+          <FormError error={errors.content?.message} ></FormError>
         </div>
       </form>
+      <div className="flex justify-end items-center gap-3 h-[70px] w-full pr-4 border-t-2 border-gray bg-white">
+        <Button type="button" name="Close" onClick={() => { reset(); toggleDrawer(false); }} className="bg-graydark" />
+        <Button
+          type="button"
+          onClick={handleDraftClick}
+          name={isAutoSaving ? 'Saving...' : 'Save Draft'}
+          className="bg-primary/85"
+          loading={isAutoSaving}
+        />
+        <Button
+          type="submit"
+          name={isSubmitting ? 'Publishing...' : 'Publish'}
+          className="bg-success"
+          loading={isSubmitting}
+          onClick={handlePublishClick}
+          form="blog-edit-form"
+        />
+      </div>
     </Drawer>
   );
 };

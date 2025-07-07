@@ -441,7 +441,7 @@ const Permissions: React.FC<PermissionDrawerProps> = ({
       <FormControl
         fullWidth
         sx={{
-          height: { xs: "310px", sm: "250px", md: "400px", lg: "430px" }, // ← Use `height` instead of `maxHeight`
+          height: { xs: "310px", sm: "250px", md: "400px", lg: "430px", xl:"auto" }, // ← Use `height` instead of `maxHeight`
           mb: 2,
           mt: { xs: 1, md: 3 },
           display: "grid",

@@ -8,40 +8,165 @@ import { useRouter } from 'next/navigation';
 import DataTable from 'react-data-table-component';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
-import { fetchBlogs } from '@/redux/slice/blog/blogSlice';
+import { fetchBlogs, deleteBlogsBulk, deleteBlogsByStatus, deleteAllBlogs } from '@/redux/slice/blog/blogSlice';
 import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import { Tooltip } from '@mui/material';
 import useDebounce from '@/hooks/useDebounce';
 import CustomPagination from '../CustomPagination';
 import Input from '../common/Input';
+import CustomMultiSelect from '../common/CustomMultiSelect';
+import Select from '../common/Select';
+
+const statusOptions = [
+  { value: '', label: 'All' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'published', label: 'Published' },
+];
+
+const filterOptions = [
+  { value: 'title', label: 'Title' },
+  { value: 'author', label: 'Author' },
+  { value: 'tag', label: 'Tag' },
+  { value: 'category', label: 'Category' },
+  { value: 'status', label: 'Status' },
+];
 
 const Blog = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { blogs, loading, total, currentPage, limit } = useSelector((state: RootState) => state.blogs);
   const [isCreateBlogDrawerOpen, setIsCreateBlogDrawerOpen] = useState(false);
   const [isEditBlogDrawerOpen, setIsEditBlogDrawerOpen] = useState(false);
-  const [isDeleteBlogDrawerOpen, setIsDeleteBlogDrawerOpen] = useState(false);
-  const [isPreviewBlogDrawerOpen, setIsPreviewBlogDrawerOpen] = useState(false);
+
   const [selectedBlog, setSelectedBlog] = useState<any>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const [filterTitle, setFilterTitle] = useState('');
+  const [filterAuthor, setFilterAuthor] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterCategories, setFilterCategories] = useState('');
+  const [filterTags, setFilterTags] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [filterValue, setFilterValue] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+
+  const debouncedFilterTitle = useDebounce(filterTitle, 500);
+  const debouncedFilterAuthor = useDebounce(filterAuthor, 500);
+  const debouncedFilterStatus = useDebounce(filterStatus, 500);
+  const debouncedFilterCategories = useDebounce(filterCategories, 500);
+  const debouncedFilterTags = useDebounce(filterTags, 500);
+  const debouncedMobileFilterValue = useDebounce(filterValue, 500);
+
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(1);
   const router = useRouter();
 
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
+  const [deleteDrawerOpen, setDeleteDrawerOpen] = useState(false);
+  const [deleteAction, setDeleteAction] = useState<'single' | 'selected' | 'all' | 'draft' | 'published'>('single');
+
+
   useEffect(() => {
-    dispatch(fetchBlogs({ page, limit: rowsPerPage, search: debouncedSearchQuery }));
-  }, [dispatch, page, rowsPerPage, debouncedSearchQuery]);
+    const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 768px)').matches);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Mobile filter effect
+  useEffect(() => {
+    if (!isMobile) return;
+    let filters: any = { page, limit: rowsPerPage };
+    if (filterType && debouncedMobileFilterValue) {
+      if (filterType === 'status') {
+        filters.status = debouncedMobileFilterValue;
+      } else if (filterType === 'category') {
+        filters.category = [debouncedMobileFilterValue];
+      } else if (filterType === 'tag') {
+        filters.tag = [debouncedMobileFilterValue];
+      } else {
+        filters[filterType] = debouncedMobileFilterValue;
+      }
+    }
+    dispatch(fetchBlogs(filters));
+  }, [dispatch, page, rowsPerPage, filterType, debouncedMobileFilterValue, isMobile]);
+
+  // Desktop filter effect
+  useEffect(() => {
+    if (isMobile) return;
+    dispatch(fetchBlogs({
+      page,
+      limit: rowsPerPage,
+      title: debouncedFilterTitle,
+      author: debouncedFilterAuthor,
+      status: debouncedFilterStatus,
+      category: debouncedFilterCategories ? [debouncedFilterCategories] : [],
+      tag: debouncedFilterTags ? [debouncedFilterTags] : [],
+    }));
+  }, [dispatch, page, rowsPerPage, debouncedFilterTitle, debouncedFilterAuthor, debouncedFilterStatus, debouncedFilterCategories, debouncedFilterTags, isMobile]);
 
   const handlePageChange = (p: number) => setPage(p);
   const handleRowsPerPageChange = (n: number) => { setRowsPerPage(n); setPage(1); };
 
-  console.log("Blogs", blogs)
+  const handleDeleteSelected = () => {
+    setDeleteAction('selected');
+    setDeleteDrawerOpen(true);
+  };
+  const handleDeleteAll = () => {
+    setSelectedRows(blogs);
+    setDeleteAction('selected');
+    setDeleteDrawerOpen(true);
+  };
+  const handleDeleteDrafted = () => {
+    setDeleteAction('draft');
+    setDeleteDrawerOpen(true);
+  };
+  const handleDeletePublished = () => {
+    setDeleteAction('published');
+    setDeleteDrawerOpen(true);
+  };
+
+
+  // Add select all toggle logic
+  const allSelected = blogs.length > 0 && selectedRows.length === blogs.length;
+  const handleSelectAll = () => {
+    if (allSelected) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(blogs);
+    }
+  };
+
+  // Add indeterminate logic
+  const someSelected = selectedRows.length > 0 && selectedRows.length < blogs.length;
+
   const columns = [
-    { name: 'Title', selector: (row: any) => row.title, sortable: true },
-    { name: 'Status', selector: (row: any) => row.status, sortable: true },
-    { name: 'Categories', cell: (row: any) => (row.categories || []).join(', '), sortable: false },
-    { name: 'Tags', cell: (row: any) => (row.tags || []).join(', '), sortable: false },
+    {
+      name: (
+        <input
+          type="checkbox"
+          checked={allSelected}
+          ref={el => {
+            if (el) el.indeterminate = someSelected;
+          }}
+          onChange={handleSelectAll}
+        />
+      ),
+      cell: (row: any) => (
+        <input
+          type="checkbox"
+          checked={selectedRows.some(r => r._id === row._id)}
+          onChange={e => {
+            if (e.target.checked) setSelectedRows([...selectedRows, row]);
+            else setSelectedRows(selectedRows.filter(r => r._id !== row._id));
+          }}
+        />
+      ),
+      width: '45px',
+    },
+    { name: 'S No', selector: (row: any) => (currentPage - 1) * rowsPerPage + ((blogs.indexOf(row) ?? -1) + 1), sortable: true, width: "75px" },
+    { name: 'Author', selector: (row: any) => row?.author?.name, sortable: true },
+    { name: 'Title', selector: (row: any) => row.title || <span className='text-primary/70'>Not added</span>, sortable: true },
+    { name: 'Status', selector: (row: any) => row.status || <span className='text-primary/70'>Not added</span>, sortable: true },
+    { name: 'Categories', cell: (row: any) => (row.categories || []).join(', ') || <span className='text-primary/70'>Not added</span>, sortable: false },
+    { name: 'Tags', cell: (row: any) => (row.tags || []).join(', ') || <span className='text-primary/70'>Not added</span>, sortable: false },
     {
       name: 'Actions', cell: (row: any) => (
         <div className='flex gap-2'>
@@ -52,7 +177,7 @@ const Blog = () => {
             <button onClick={() => { setSelectedBlog(row); setIsEditBlogDrawerOpen(true); }} className='text-green-600'><FaEdit /></button>
           </Tooltip>
           <Tooltip title='Delete'>
-            <button onClick={() => { setSelectedBlog(row); setIsDeleteBlogDrawerOpen(true); }} className='text-red-500'><FaTrash /></button>
+            <button onClick={() => { setSelectedBlog(row); setDeleteAction('single'); setDeleteDrawerOpen(true); }} className='text-red-500'><FaTrash /></button>
           </Tooltip>
         </div>
       ), width: '140px'
@@ -61,17 +186,106 @@ const Blog = () => {
 
   return (
     <div className='p-2'>
-      <div className='flex flex-col sm:flex-row justify-start h-[30px] md:w-[400px]  items-center mb-4 gap-2'>
-        <Input
-          label=''
-          type='text'
-          placeholder='Search blogs...'
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          className='border border-danger rounded px-2 py-1 w-full sm:w-64'
-        />
-        <Button type='button' name='Create blog' className='min-w-[130px]' onClick={() => setIsCreateBlogDrawerOpen(true)} />
+
+      {/* Filter Bar */}
+      {isMobile ? (
+        <div className="flex flex-wrap gap-2 mb-4 items-end">
+          <div>
+            <Select
+              label="Search by"
+              options={filterOptions}
+              value={filterType}
+              onChange={e => {
+                setFilterType(e.target.value);
+                setFilterValue('');
+              }}
+            />
+          </div>
+          {filterType && (
+            <div>
+              {filterType === 'status' ? (
+                <Select
+                  label="Search by Status"
+                  options={statusOptions}
+                  value={filterValue}
+                  onChange={e => setFilterValue(e.target.value)}
+                />
+              ) : (
+                <Input
+                  label={`Search by ${filterOptions.find(opt => opt.value === filterType)?.label || ''}`}
+                  type="text"
+                  placeholder={`Search by ${filterOptions.find(opt => opt.value === filterType)?.label?.toLowerCase()}`}
+                  value={filterValue}
+                  onChange={e => setFilterValue(e.target.value)}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 items-end gap-2 mb-2">
+          <div>
+            <Input
+              label="Title"
+              type="text"
+              placeholder="Filter by title"
+              value={filterTitle}
+              onChange={e => setFilterTitle(e.target.value)}
+            />
+          </div>
+          <div>
+            <Input
+              label="Author"
+              type="text"
+              placeholder="Filter by author"
+              value={filterAuthor}
+              onChange={e => setFilterAuthor(e.target.value)}
+            />
+          </div>
+          <div>
+            <Select
+              label="Status"
+              options={statusOptions}
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value)}
+            />
+          </div>
+          <div>
+            <Input
+              label="Category"
+              type="text"
+              placeholder="Filter by category"
+              value={filterCategories}
+              onChange={e => setFilterCategories(e.target.value)}
+            />
+          </div>
+          <div>
+            <Input
+              label="Tag"
+              type="text"
+              placeholder="Filter by tag"
+              value={filterTags}
+              onChange={e => setFilterTags(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+      <div className='flex justify-start items-center gap-2 mb-2'>
+        <div>
+          <Button type='button' name='Create blog' className='min-w-[130px]' onClick={() => setIsCreateBlogDrawerOpen(true)} />
+        </div>
+        <Button type="button" name="Delete drafted" className="bg-danger/80" onClick={handleDeleteDrafted} />
+        <Button type="button" name="Delete published" className="bg-danger/80" onClick={handleDeletePublished} />
+        {/* Only show Delete Selected if more than one but not all blogs are selected */}
+        {selectedRows.length > 0 && selectedRows.length < blogs.length && (
+          <Button type="button" name="Delete selected" className="bg-danger/80" onClick={handleDeleteSelected} />
+        )}
+        {/* Only show Delete All if all blogs are selected */}
+        {selectedRows.length > 0 && selectedRows.length === blogs.length && (
+          <Button type="button" name="Delete all" className="bg-danger/80" onClick={handleDeleteAll} />
+        )}
       </div>
+
       <DataTable
         columns={columns}
         data={blogs}
@@ -141,7 +355,7 @@ const Blog = () => {
       <CustomPagination
         rowsPerPage={rowsPerPage}
         currentPage={currentPage}
-        rowCount={limit}
+        rowCount={total}
         onChangePage={handlePageChange}
         onChangeRowsPerPage={handleRowsPerPageChange}
       />
@@ -155,9 +369,11 @@ const Blog = () => {
         blog={selectedBlog}
       />
       <DeleteBlogDrawer
-        isDeleteBlogDrawerOpen={isDeleteBlogDrawerOpen}
-        toggleDrawer={setIsDeleteBlogDrawerOpen}
-        blog={selectedBlog}
+        isDeleteBlogDrawerOpen={deleteDrawerOpen}
+        toggleDrawer={setDeleteDrawerOpen}
+        blog={deleteAction === 'single' ? selectedBlog : undefined}
+        action={deleteAction}
+        selectedBlogs={deleteAction === 'selected' ? selectedRows : []}
       />
     </div>
   );

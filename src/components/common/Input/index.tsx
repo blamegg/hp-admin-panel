@@ -115,12 +115,15 @@ const Input = ({
         placeholder={placeholder}
         accept={accept}
         multiple={multiple}
-        {...register}
-        {...props}
-        value={value}
-        onChange={onChange}
         id={id}
         autoFocus={autofocus}
+        {...(register
+          ? { ...register }
+          : {
+              value,
+              onChange,
+            })}
+        {...props}
       />
       <FormError error={error} />
     </>

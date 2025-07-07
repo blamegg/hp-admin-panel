@@ -59,43 +59,38 @@ const CreateRole: React.FC<AddRoleDrawerProps> = ({
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
       onClose={() => toggleDrawer(false)}
+      PaperProps={{ sx: { width: 350, display: 'flex', flexDirection: 'column', height: '100%' } }}
     >
-      <div className="w-[350px] ">
-        <ModalHeader text={"Create Role"} toggleDrawer={toggleDrawer} />
-        <div className=" mx-3 mt-3">
-          <Input
-            autofocus={true}
-            id="role-name"
-            label="Role Name"
-            type="text"
-            placeholder="Role Name"
-            value={roleName}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRoleName(e.target.value)}
-          />
-
-
-          <div className="mt-2">
-            <label htmlFor="role-rank" className="block text-sm font-medium text-black dark:text-white">Rank</label>
-            <select
-              // labelId="role-rank-label"
-              id="role-rank"
-              value={roleRank}
-              onChange={handleRankChange}
-              className="rounded bg-[#eff4fb] focus:border-primary focus-visible:outline-none px-2 py-[4px] outline-none w-full"
-            >
-              {Array.from({ length: 99 }, (_, i) => i + 2).map((rank) => (
-                <option key={rank} value={rank}>
-                  {rank}
-                </option>
-              ))}
-            </select>
-          </div>
-
+      <ModalHeader text={"Create Role"} toggleDrawer={toggleDrawer} />
+      <div className="flex-1 overflow-y-auto p-4">
+        <Input
+          autofocus={true}
+          id="role-name"
+          label="Role Name"
+          type="text"
+          placeholder="Role Name"
+          value={roleName}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRoleName(e.target.value)}
+        />
+        <div className="mt-2">
+          <label htmlFor="role-rank" className="block text-sm font-medium text-black dark:text-white">Rank</label>
+          <select
+            id="role-rank"
+            value={roleRank}
+            onChange={handleRankChange}
+            className="rounded bg-[#eff4fb] focus:border-primary focus-visible:outline-none px-2 py-[4px] outline-none w-full"
+          >
+            {Array.from({ length: 99 }, (_, i) => i + 2).map((rank) => (
+              <option key={rank} value={rank}>
+                {rank}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="flex justify-end items-center gap-3 absolute bottom-0 h-[70px] w-[100%] pr-2 border-t-2 border-gray">
-          <Button type="button" name="Cancel" onClick={() => toggleDrawer(false)} className="bg-graydark" />
-          <Button type="submit" name=" Create Role" onClick={handleCreateRole} className="bg-success"></Button>
-        </div>
+      </div>
+      <div className="flex justify-end items-center gap-3 h-[70px] w-full pr-4 border-t-2 border-gray bg-white">
+        <Button type="button" name="Cancel" onClick={() => toggleDrawer(false)} className="bg-graydark" />
+        <Button type="submit" name=" Create Role" onClick={handleCreateRole} className="bg-success"></Button>
       </div>
     </Drawer>
   );

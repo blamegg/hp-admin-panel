@@ -17,29 +17,10 @@
 
 /* Blog details layout and card styles */
 .main {
-  /* margin-left: auto;
-  margin-right: auto; */
-  /* display: flex;
-  flex-direction: column; */
   width: 91.666667%;
 }
 
-@media (min-width: 1024px) {
-  .main {
-    /* width: 85%; */
-    /* flex-direction: row; */
-    /* padding-top: 3rem; */
-    /* padding-bottom: 3rem; */
-  }
-}
 
-@media (min-width: 1280px) {
-  .main {
-    /* padding-top: 9rem; */
-    /* padding-bottom: 9rem; */
-
-  }
-}
 
 .blogdetailsleft {
   display: flex;
@@ -157,4 +138,12 @@
 
 .blog-preview a:hover {
   color: #1d4ed8;
+}
+
+/* Ensure ReactQuill editor fills the background */
+.ql-container {
+  min-height: 200px;
+}
+.ql-editor {
+  min-height: 200px;
 }

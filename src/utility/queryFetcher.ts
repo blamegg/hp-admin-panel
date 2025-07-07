@@ -479,36 +479,52 @@ export const deleteHolidayTypeFn = async (id: string) => {
 
 // ----------------------------------Blogs--------------------------------------
 // Blog API functions
-export const fetchBlogsFn = async (page = 1, limit = 10, search = "") => {
-  let url = `${ApiEndpoints.blogs}?page=${page}&limit=${limit}`;
-  if (search) url += `&search=${encodeURIComponent(search)}`;
+export const fetchBlogsFn = async (params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  title?: string;
+  author?: string;
+  status?: string;
+  categories?: string[];
+  tags?: string[];
+} = {}) => {
+  let url = `${ApiEndpoints.blogs}`;
+  const queryParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      if (value.length > 0) {
+        queryParams.append(key, value.join(','));
+      }
+    } else if (value) {
+      queryParams.append(key, String(value));
+    }
+  });
+
+  if (queryParams.toString()) {
+    url += `?${queryParams.toString()}`;
+  }
+
   const response = await apiClient.get(url);
   return response.data;
 };
 
+// This api will be used for create, update, and auto save
 export const createBlogFn = async (payload: any) => {
-  console.log('[API] createBlogFn called with:', payload);
-  try {
     const response = await apiClient.post(ApiEndpoints.blogs, payload, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
-    console.log('[API] createBlogFn response:', response.data);
     return response.data;
-  } catch (err) {
-    console.error('[API] createBlogFn error:', err);
-    throw err;
-  }
+  
 };
 
+// this api will be used only for publish blog
 export const updateBlogFn = async (id: string, payload: any) => {
+  console.log("pay", payload)
   const response = await apiClient.put(`${ApiEndpoints.blogs}/${id}`, payload);
-  return response.data;
-};
-
-export const deleteBlogFn = async (id: string) => {
-  const response = await apiClient.delete(`${ApiEndpoints.blogs}/${id}`);
   return response.data;
 };
 
@@ -516,6 +532,25 @@ export const fetchBlogByIdFn = async (id: string) => {
   const response = await apiClient.get(`${ApiEndpoints.blogs}/${id}`);
   return response.data;
 };
+// Delete one blog
+export const deleteBlogFn = async (id: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.blogs}/${id}`);
+  return response.data;
+};
+
+// Bulk delete blogs by IDs
+export const deleteBlogsBulkFn = async (ids: string[]) => {
+  const response = await apiClient.delete(`${ApiEndpoints.blogs}`, { data: { ids } });
+  return response.data;
+};
+
+// Delete blogs by status (e.g., draft, published)
+export const deleteBlogsByStatusFn = async (status: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.blogs}/delete-all`, { params: { status } });
+  return response.data;
+};
+
+
 
 
 

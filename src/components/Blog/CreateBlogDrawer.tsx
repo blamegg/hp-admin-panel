@@ -1,20 +1,21 @@
 import { Drawer } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import ModalHeader from '../common/ModalHeader'
 import Button from '../common/Button';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { createBlog } from '@/redux/slice/blog/blogSlice';
+import { createBlog, updateBlog, fetchBlogs } from '@/redux/slice/blog/blogSlice';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { blogSchema, BlogFormInputs } from '@/schema/blogSchema';
 import Input from '../common/Input';
-import Select from '../common/Select';
 import BlogEditor from './BlogEditor';
 import { toast } from 'sonner';
 import FormError from '../common/FormError';
 import CustomFileSelector from '../common/CustomFileSelector';
 import CustomMultiSelect from '../common/CustomMultiSelect';
+import { buildBlogFormData, addToList, removeFromList, handleFileInput } from '@/utility/helper';
+import { categoriesList, tagsList } from '@/utility/blogFields';
 
 interface CreateBlogProps {
   isCreateBlogDrawerOpen: boolean;
@@ -24,26 +25,6 @@ interface CreateBlogProps {
 const statusOptions = [
   { value: 'draft', label: 'Draft' },
   { value: 'published', label: 'Published' },
-];
-
-const categoriesList = [
-  { value: 'Tech', label: 'Tech' },
-  { value: 'News', label: 'News' },
-  { value: 'Tutorial', label: 'Tutorial' },
-  { value: 'Opinion', label: 'Opinion' },
-  { value: 'Review', label: 'Review' },
-  { value: 'Other', label: 'Other' },
-];
-const tagsList = [
-  { value: 'React', label: 'React' },
-  { value: 'Next.js', label: 'Next.js' },
-  { value: 'JavaScript', label: 'JavaScript' },
-  { value: 'TypeScript', label: 'TypeScript' },
-  { value: 'UI', label: 'UI' },
-  { value: 'Backend', label: 'Backend' },
-  { value: 'Frontend', label: 'Frontend' },
-  { value: 'API', label: 'API' },
-  { value: 'Blog', label: 'Blog' },
 ];
 
 const defaultValues: BlogFormInputs = {
@@ -71,70 +52,198 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
   const coverPageFile = watch('coverPage');
   const [blogStatus, setBlogStatus] = useState<'draft' | 'published'>("draft")
 
+  // Auto-save states
+  const [blogId, setBlogId] = useState<string | null>(null);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedDataRef = useRef<string>('');
+  const lastFileNameRef = useRef<string | null>(null);
+
+  // Watch form data for changes
+  const title = watch('title');
+  const content = watch('content');
+  const url = watch('url');
+  const coverPageUrl = watch('coverPageUrl');
+
   const handleAddCategory = () => {
-    const value = categoryInput.trim();
-    if (!value) return;
-    if (categories.includes(value)) return;
-    setValue('categories', [...categories, value], { shouldValidate: true });
+    setValue('categories', addToList(categories, categoryInput), { shouldValidate: true });
     setCategoryInput('');
   };
   const handleRemoveCategory = (cat: string) => {
-    setValue('categories', categories.filter((c: string) => c !== cat), { shouldValidate: true });
+    setValue('categories', removeFromList(categories, cat), { shouldValidate: true });
   };
   const handleAddTag = () => {
-    const value = tagInput.trim();
-    if (!value) return;
-    if (tags.includes(value)) return;
-    setValue('tags', [...tags, value], { shouldValidate: true });
+    setValue('tags', addToList(tags, tagInput), { shouldValidate: true });
     setTagInput('');
   };
   const handleRemoveTag = (tag: string) => {
-    setValue('tags', tags.filter((t: string) => t !== tag), { shouldValidate: true });
+    setValue('tags', removeFromList(tags, tag), { shouldValidate: true });
   };
 
   // Custom file input handler for preview and form value
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileInput(
+      e,
+      setSelectedFile,
+      (name: any, value: any, options?: any) => setValue(name as any, value, options),
+      setFilePreview
+    );
     const file = e.target.files && e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setValue('coverPage', [file]); // react-hook-form expects an array for file inputs
-      const url = URL.createObjectURL(file);
-      setFilePreview(url);
-    } else {
-      setSelectedFile(null);
-      setValue('coverPage', []);
-      setFilePreview(null);
+    console.log('File changed:', file);
+    if (file && file.name !== lastFileNameRef.current) {
+      lastFileNameRef.current = file.name;
+      autoSave();
     }
   };
+
+  // Auto-save function
+  const autoSave = useCallback(async (isDraftAction = false) => {
+    const currentData = getValues();
+
+    // Skip auto-save if no meaningful data
+    if (!currentData.title && !currentData.content && currentData.categories.length === 0 && currentData.tags.length === 0) {
+      return;
+    }
+
+    // Create a hash of current data to check if it has changed
+    const currentDataHash = JSON.stringify({
+      title: currentData.title,
+      content: currentData.content,
+      url: currentData.url,
+      coverPageUrl: currentData.coverPageUrl,
+      categories: currentData.categories,
+      tags: currentData.tags
+    });
+
+    // Skip if data hasn't changed (unless it's a manual draft action)
+    if (!isDraftAction && currentDataHash === lastSavedDataRef.current) {
+      return;
+    }
+
+    setIsAutoSaving(true);
+    setHasUnsavedChanges(false);
+
+    try {
+ 
+
+      if (blogId) {
+        currentData.blogId = blogId;
+        console.log(currentData)
+        // Update existing blog
+        console.log("line: 134")
+        await dispatch(createBlog(currentData ) as any);
+        if (isDraftAction) {
+          toast.success('Draft saved successfully');
+        }
+      } else {
+        console.log("line: 139")
+        // Create new blog
+        const result = await dispatch(createBlog(currentData) as any);
+        console.log("res:", result)
+        if (result.payload && result.payload.data && result.payload.data._id) {
+          setBlogId(result.payload.data._id);
+          if (isDraftAction) {
+            toast.success('Draft created successfully');
+          }
+        }
+      }
+
+      // Fetch latest blog list after auto-save
+      dispatch(fetchBlogs({}));
+      lastSavedDataRef.current = currentDataHash;
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+      setHasUnsavedChanges(true);
+      if (isDraftAction) {
+        toast.error('Failed to save draft');
+      }
+    } finally {
+      setIsAutoSaving(false);
+    }
+  }, [dispatch, getValues, blogId, blogStatus]);
+
+  // Set up auto-save on form changes
+  useEffect(() => {
+    // Clear existing timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Set new timeout for auto-save (5 seconds after last change)
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      autoSave();
+    }, 5000);
+
+    setHasUnsavedChanges(true);
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [title, content, url, coverPageUrl, categories, tags, coverPageFile, autoSave]);
+
+  // Cleanup on drawer close
+  useEffect(() => {
+    if (!isCreateBlogDrawerOpen) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+      // Reset states when drawer closes
+      setBlogId(null);
+      setIsAutoSaving(false);
+      setLastSaved(null);
+      setHasUnsavedChanges(false);
+      lastSavedDataRef.current = '';
+      reset();
+    }
+  }, [isCreateBlogDrawerOpen, reset]);
 
   useEffect(() => {
     if (coverPageFile && coverPageFile.length > 0) {
       const file = coverPageFile[0];
-      const url = URL.createObjectURL(file);
-      setFilePreview(url);
-      return () => URL.revokeObjectURL(url);
+      // Only create object URL if it's actually a File object
+      if (file instanceof File) {
+        const url = URL.createObjectURL(file);
+        setFilePreview(url);
+        return () => URL.revokeObjectURL(url);
+      } else if (typeof file === 'string') {
+        // If it's a string (URL), use it directly
+        setFilePreview(file);
+      }
     } else {
       setFilePreview(null);
     }
   }, [coverPageFile]);
 
   const onSubmit = async (data: BlogFormInputs) => {
+    if (blogId) {
+      // Update existing blog
+      const formData = buildBlogFormData(data, blogStatus);
 
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('content', JSON.stringify(data.content));
-    formData.append('status', blogStatus);
-    formData.append('url', data.url || '');
-    formData.append('slug', data.coverPageUrl || '');
-    data.categories.forEach((cat, idx) => formData.append(`categories[${idx}]`, cat));
-    data.tags.forEach((tag, idx) => formData.append(`tags[${idx}]`, tag));
-    if (data.coverPage && data.coverPage[0]) formData.append('coverPage', data.coverPage[0]);
+      await dispatch(updateBlog({ id: blogId, payload: formData }) as any);
+      toast.success(blogStatus === 'published' ? 'Blog published successfully' : 'Blog updated successfully');
+    } else {
+      // Create new blog
+      const formData = buildBlogFormData(data, blogStatus);
 
-    await dispatch(createBlog(formData) as any);
-    toast.success('Blog created successfully');
+      await dispatch(createBlog(formData) as any);
+      toast.success(blogStatus === 'published' ? 'Blog published successfully' : 'Blog created successfully');
+    }
+
     reset();
     toggleDrawer(false);
+  };
 
+  const handleDraftClick = async () => {
+    await autoSave(true); // Force save as draft
+  };
+
+  const handlePublishClick = async () => {
+    setBlogStatus('published');
   };
 
   return (
@@ -142,19 +251,108 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
       anchor='right'
       open={isCreateBlogDrawerOpen}
       onClose={() => toggleDrawer(false)}
-      PaperProps={{ sx: { width: { xs: '100vw', sm: 400, md: 500 }, display: 'flex', flexDirection: 'column', height: '100%' } }}
+      PaperProps={{ sx: { width: { xs: '100vw', sm: 400, md: 500, lg: 800 }, display: 'flex', flexDirection: 'column', height: '100%' } }}
     >
       <ModalHeader text='Create Blog' toggleDrawer={() => toggleDrawer(false)} />
+
+      {/* Auto-save status indicator */}
+      <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            {isAutoSaving && (
+              <div className="flex items-center gap-1 text-blue-600">
+                <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <span>Saving...</span>
+              </div>
+            )}
+            {!isAutoSaving && lastSaved && (
+              <div className="flex items-center gap-1 text-green-600">
+                <span>✓</span>
+                <span>Saved {lastSaved.toLocaleTimeString()}</span>
+              </div>
+            )}
+            {hasUnsavedChanges && !isAutoSaving && (
+              <div className="flex items-center gap-1 text-orange-600">
+                <span>●</span>
+                <span>Unsaved changes</span>
+              </div>
+            )}
+          </div>
+          {blogId && (
+            <div className="text-xs text-gray-500">
+              Draft #{blogId.slice(-6)}
+            </div>
+          )}
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className='space-y-2 p-4 flex-1 overflow-y-auto' id="blog-create-form">
 
-        <Input
-          label='Title'
-          placeholder='Enter blog title'
-          type='text'
-          register={register('title')}
-          error={typeof errors?.title?.message === 'string' ? errors.title.message : undefined}
-        />
-        <div className='mb-2'>
+        <div className='mb-2 lg:grid lg:grid-cols-2 lg:gap-10'>
+          {/* Title */}
+          <div>
+            <Input
+              label='Title'
+              placeholder='Enter blog title'
+              type='text'
+              register={register('title')}
+              error={typeof errors?.title?.message === 'string' ? errors.title.message : undefined}
+            />
+          </div>
+          {/* Media Upload (Image or Video) */}
+          <div className='mb-2'>
+            <CustomFileSelector
+              label="Cover page"
+              accept="image/*,video/*"
+              error={typeof errors?.coverPage?.message === 'string' ? errors.coverPage.message : undefined}
+              onChange={handleFileChange}
+            />
+            {filePreview && selectedFile && (
+              <div style={{ marginTop: 8 }}>
+                {selectedFile.type.startsWith('image/') ? (
+                  <img
+                    src={filePreview}
+                    alt="Preview"
+                    style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
+                  />
+                ) : selectedFile.type.startsWith('video/') ? (
+                  <video
+                    src={filePreview}
+                    controls
+                    style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
+                  />
+                ) : null}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className='mb-2 lg:grid lg:grid-cols-2 lg:gap-10'>
+
+          {/* cover page url */}
+          <div>
+            <Input
+              label='Cover page URL'
+              placeholder='Cover page URL (optional)'
+              type='text'
+              register={register('coverPageUrl')}
+              error={typeof errors?.coverPageUrl?.message === 'string' ? errors.coverPageUrl.message : undefined}
+            />
+          </div>
+
+          {/* External url */}
+          <div>
+            <Input
+              label='External URL'
+              placeholder='Enter external URL (optional)'
+              type='text'
+              register={register('url')}
+              error={typeof errors?.url?.message === 'string' ? errors.url.message : undefined}
+            />
+          </div>
+        </div>
+
+        <div className='mb-2 lg:grid lg:grid-cols-2 lg:gap-10'>
           <CustomMultiSelect
             label="Categories"
             value={categories}
@@ -162,8 +360,6 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
             error={typeof errors?.categories?.message === 'string' ? errors.categories.message : undefined}
             placeholder="Add category"
           />
-        </div>
-        <div className='mb-2'>
           <CustomMultiSelect
             label="Tags"
             value={tags}
@@ -172,15 +368,9 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
             placeholder="Add tag"
           />
         </div>
-        {/* Media Upload (Image or Video) */}
-        <div className='mb-2'>
-          <CustomFileSelector
-            label="Cover Image or Video"
-            accept="image/*,video/*"
-            error={typeof errors?.coverPage?.message === 'string' ? errors.coverPage.message : undefined}
-            onChange={e => setValue('coverPage', e.target.files)}
-          />
-        </div>
+        {/* <div className='mb-2'>
+
+        </div> */}
 
 
         <div className='mb-0 p-0'>
@@ -194,38 +384,28 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
           </div>
           <FormError error={errors.content?.message} ></FormError>
         </div>
-        {/* Cover page url */}
-        <Input
-          label='Cover page URL'
-          placeholder='Cover page URL (optional)'
-          type='text'
-          register={register('url')}
-          error={typeof errors?.coverPageUrl?.message === 'string' ? errors.coverPageUrl.message : undefined}
-        />
 
-        {/* External url */}
-        <Input
-          label='External URL'
-          placeholder='Enter external URL (optional)'
-          type='text'
-          register={register('url')}
-          error={typeof errors?.url?.message === 'string' ? errors.url.message : undefined}
-        />
+
 
 
       </form>
       <div className="flex justify-end items-center gap-3 h-[70px] w-full pr-4 border-t-2 border-gray bg-white">
         <Button type="button" name="Close" onClick={() => { reset(); toggleDrawer(false); }} className="bg-graydark" />
-        <Button type="submit" onClick={() => setBlogStatus('draft')} name={isSubmitting ? 'Drafting...' : 'Draft'} className="bg-primary/85" loading={isSubmitting} form="blog-create-form" />
+        <Button
+          type="button"
+          onClick={handleDraftClick}
+          name={isAutoSaving ? 'Saving...' : 'Save Draft'}
+          className="bg-primary/85"
+          loading={isAutoSaving}
+        />
         <Button
           type="submit"
           name={isSubmitting ? 'Publishing...' : 'Publish'}
           className="bg-success"
           loading={isSubmitting}
-          onClick={() => setBlogStatus('published')}
+          onClick={handlePublishClick}
           form="blog-create-form"
         />
-
       </div>
     </Drawer>
   )

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { fetchBlogsFn, createBlogFn, updateBlogFn, deleteBlogFn, fetchBlogByIdFn } from "@/utility/queryFetcher";
+import { fetchBlogsFn, createBlogFn, updateBlogFn, deleteBlogFn, fetchBlogByIdFn, deleteBlogsBulkFn, deleteBlogsByStatusFn } from "@/utility/queryFetcher";
 
 export interface Blog {
   _id: string;
@@ -36,10 +36,18 @@ const initialState: BlogState = {
 
 export const fetchBlogs = createAsyncThunk(
   "blogs/fetchBlogs",
-  async ({ page = 1, limit = 10, search = "" }: { page?: number; limit?: number; search?: string }, { rejectWithValue }) => {
+  async (params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    title?: string;
+    author?: string;
+    status?: string;
+    category?: string[];
+    tag?: string[];
+  }, { rejectWithValue }) => {
     try {
-      const response = await fetchBlogsFn(page, limit, search);
-      console.log("api", response);
+      const response = await fetchBlogsFn(params);
       return response;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data?.message || "Failed to fetch blogs");
@@ -90,6 +98,32 @@ export const fetchBlogById = createAsyncThunk(
     }
   }
 );
+
+// Bulk delete blogs by IDs
+export const deleteBlogsBulk = createAsyncThunk(
+  "blogs/deleteBlogsBulk",
+  async (ids: string[], { rejectWithValue }) => {
+    try {
+      return await deleteBlogsBulkFn(ids);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+);
+
+// Delete blogs by status
+export const deleteBlogsByStatus = createAsyncThunk(
+  "blogs/deleteBlogsByStatus",
+  async (status: string, { rejectWithValue }) => {
+    try {
+      return await deleteBlogsByStatusFn(status);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+);
+
+
 
 const blogSlice = createSlice({
   name: "blogs",

@@ -30,7 +30,6 @@ export function formatTimestamp(timestamp: string) {
 
 // set token
 export function setTokenCookie(token: string) {
-  console.log("Setting token cookie:", token ? "token exists" : "no token");
   Cookies.set("token", token, {
     expires: 1,
     sameSite: "strict",
@@ -93,4 +92,49 @@ export function clearAllLocalData() {
 export function toSentenceCase(str: string) {
   if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+export function buildBlogFormData(data: any, status: string) {
+  const formData = new FormData();
+  formData.append('title', data.title || '');
+  formData.append('content', JSON.stringify(data.content || ''));
+  formData.append('status', status);
+  formData.append('url', data.url || '');
+  formData.append('slug', data.coverPageUrl || '');
+
+  ['categories', 'tags'].forEach(field => {
+    (data[field] || []).forEach((item: string, idx: number) => {
+      formData.append(`${field}[${idx}]`, item);
+    });
+  });
+
+  if (data.coverPage && data.coverPage[0]) {
+    formData.append('coverPage', data.coverPage[0]);
+  }
+
+  return formData;
+}
+
+export function addToList(list: string[], value: string): string[] {
+  value = value.trim();
+  if (!value || list.includes(value)) return list;
+  return [...list, value];
+}
+
+export function removeFromList(list: string[], value: string): string[] {
+  return list.filter(item => item !== value);
+}
+
+export function handleFileInput(e: React.ChangeEvent<HTMLInputElement>, setSelectedFile: (file: File | null) => void, setValue: (name: string, value: any, options?: any) => void, setFilePreview: (url: string | null) => void) {
+  const file = e.target.files && e.target.files[0];
+  if (file) {
+    setSelectedFile(file);
+    setValue('coverPage', [file]);
+    const url = URL.createObjectURL(file);
+    setFilePreview(url);
+  } else {
+    setSelectedFile(null);
+    setValue('coverPage', []);
+    setFilePreview(null);
+  }
 }
