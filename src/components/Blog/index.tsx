@@ -8,13 +8,12 @@ import { useRouter } from 'next/navigation';
 import DataTable from 'react-data-table-component';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
-import { fetchBlogs, deleteBlogsBulk, deleteBlogsByStatus, deleteAllBlogs } from '@/redux/slice/blog/blogSlice';
+import { fetchBlogs,  } from '@/redux/slice/blog/blogSlice';
 import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import { Tooltip } from '@mui/material';
 import useDebounce from '@/hooks/useDebounce';
 import CustomPagination from '../CustomPagination';
 import Input from '../common/Input';
-import CustomMultiSelect from '../common/CustomMultiSelect';
 import Select from '../common/Select';
 
 const statusOptions = [
@@ -165,8 +164,8 @@ const Blog = () => {
     { name: 'Author', selector: (row: any) => row?.author?.name, sortable: true },
     { name: 'Title', selector: (row: any) => row.title || <span className='text-primary/70'>Not added</span>, sortable: true },
     { name: 'Status', selector: (row: any) => row.status || <span className='text-primary/70'>Not added</span>, sortable: true },
-    { name: 'Categories', cell: (row: any) => (row.categories || []).join(', ') || <span className='text-primary/70'>Not added</span>, sortable: false },
-    { name: 'Tags', cell: (row: any) => (row.tags || []).join(', ') || <span className='text-primary/70'>Not added</span>, sortable: false },
+    { name: 'Categories', cell: (row: any) => (row.categories.slice(0,2) || []).join(', ') || <span className='text-primary/70'>Not added</span>, sortable: false },
+    { name: 'Tags', cell: (row: any) => (row.tags.slice(0,2) || []).join(', ') || <span className='text-primary/70'>Not added</span>, sortable: false },
     {
       name: 'Actions', cell: (row: any) => (
         <div className='flex gap-2'>
@@ -183,6 +182,12 @@ const Blog = () => {
       ), width: '140px'
     },
   ];
+
+  // Add this handler to clear selection on drawer close
+  const handleDeleteDrawerClose = () => {
+    setDeleteDrawerOpen(false);
+    setSelectedRows([]);
+  };
 
   return (
     <div className='p-2'>
@@ -370,7 +375,7 @@ const Blog = () => {
       />
       <DeleteBlogDrawer
         isDeleteBlogDrawerOpen={deleteDrawerOpen}
-        toggleDrawer={setDeleteDrawerOpen}
+        toggleDrawer={handleDeleteDrawerClose}
         blog={deleteAction === 'single' ? selectedBlog : undefined}
         action={deleteAction}
         selectedBlogs={deleteAction === 'selected' ? selectedRows : []}

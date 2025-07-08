@@ -2,10 +2,10 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBlogByIdFn } from "@/utility/queryFetcher";
-import BlogPreviewPage from "@/components/Blog/BlogPreviewPage";
 import { useParams } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import BlogPreviewPage from "@/components/Blog/BlogPreview/BlogPreviewPage";
 
 const BlogPreviewPageWrapper = () => {
   const { id } = useParams();

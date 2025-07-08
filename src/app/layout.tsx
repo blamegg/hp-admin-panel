@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Loader from "@/components/common/Loader";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/provider/theme";
@@ -8,9 +8,6 @@ import { ToastContainer } from "react-toastify";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReduxProvider } from "@/provider/ReduxProvider";
 import { Toaster } from "sonner";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/redux/store";
-import { fetchUserPermissions } from "@/redux/slice/authSlice";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
@@ -37,12 +34,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
-
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
@@ -50,7 +41,7 @@ export default function RootLayout({
           <DirectionProvider>
             <ReduxProvider>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <InnerRootLayout loading={loading}>{children}</InnerRootLayout>
+                <InnerRootLayout>{children}</InnerRootLayout>
               </LocalizationProvider>
             </ReduxProvider>
           </DirectionProvider>
@@ -61,17 +52,15 @@ export default function RootLayout({
 }
 
 const InnerRootLayout = ({
-  loading,
   children,
 }: {
-  loading: boolean;
   children: React.ReactNode;
 }) => {
   const { direction } = useDirection();
   return (
     <ThemeProvider theme={{ ...theme, direction }}>
       <div className={`dark:bg-boxdark-2 dark:text-bodydark ${direction === "rtl" ? "rtl" : "ltr"}`}>
-        {loading ? <Loader /> : children}
+        {children}
       </div>
       <ToastContainer
         position="top-right"

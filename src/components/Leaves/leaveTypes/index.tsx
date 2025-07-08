@@ -15,6 +15,7 @@ import CreateLeaveType from './CreateLeaveTypes'
 import EditLeaveTypes from './EditLeaveTypes'
 import { toSentenceCase } from '@/utility/helper'
 import PermissionDenied from '@/components/common/PermissionDenied'
+import LoaderWrapper from '../../common/LoaderWrapper';
 
 const LeaveTypes = () => {
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
@@ -144,7 +145,7 @@ const LeaveTypes = () => {
   };
 
   return (
-    <div>
+    <LoaderWrapper loading={loading}>
       {hasPermission('View leave types') ? (
         <>
           <div className="flex gap-2 mb-4">
@@ -251,7 +252,7 @@ const LeaveTypes = () => {
       <CreateLeaveType direction={direction} open={isCreateDrawerOpen} toggleDrawer={toggleCreateDrawer} fetchLeaveTypes={fetchLeaveTypes} />
       <EditLeaveTypes direction={direction} open={isEditDrawerOpen} toggleDrawer={toggleEditLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeaveTypes={fetchLeaveTypes} />
       <DeleteLeave direction={direction} open={isDeleteDrawerOpen} toggleDrawer={toggleDeleteLeaveDrawer} selected={selected} setSelected={setSelected} fetchLeaveTypes={fetchLeaveTypes} />
-    </div>
+    </LoaderWrapper>
   )
 }
 

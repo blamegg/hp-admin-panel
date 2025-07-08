@@ -15,7 +15,6 @@ import FormError from '../common/FormError';
 import CustomFileSelector from '../common/CustomFileSelector';
 import CustomMultiSelect from '../common/CustomMultiSelect';
 import { buildBlogFormData, addToList, removeFromList, handleFileInput } from '@/utility/helper';
-import { categoriesList, tagsList } from '@/utility/blogFields';
 
 interface EditBlogDrawerProps {
   isEditBlogDrawerOpen: boolean;
@@ -23,10 +22,6 @@ interface EditBlogDrawerProps {
   blog: any;
 }
 
-const statusOptions = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'published', label: 'Published' },
-];
 
 const defaultValues: BlogFormInputs = {
   title: '',
@@ -44,10 +39,6 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
     mode: 'onChange',
   });
 
-      console.log("blog", blog);
-  
-
-
   const categories = watch('categories');
   const tags = watch('tags');
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -61,6 +52,7 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
+  const timeDelay = 5000;
 
   // Watch form data for changes
   const title = watch('title');
@@ -77,6 +69,13 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
       (name: any, value: any, options?: any) => setValue(name as any, value, options),
       setFilePreview
     );
+    setHasUnsavedChanges(true);
+
+     setTimeout(() => {
+      autoSave(true); // pass true to force save
+    setHasUnsavedChanges(false);
+
+    }, timeDelay);
   };
 
   useEffect(() => {
@@ -85,14 +84,19 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
       // Only create object URL if it's actually a File object
       if (file instanceof File) {
         const url = URL.createObjectURL(file);
+        console.log("image/video", url)
         setFilePreview(url);
+        setSelectedFile(file); // Set selectedFile when a new file is selected
         return () => URL.revokeObjectURL(url);
       } else if (typeof file === 'string') {
         // If it's a string (URL), use it directly
-        setFilePreview(file);
+
+        setFilePreview(`${process.env.NEXT_PUBLIC_BASE_URL}/${file}`);
+        setSelectedFile(null); // Ensure selectedFile is null for URL
       }
     } else {
       setFilePreview(null);
+      setSelectedFile(null);
     }
   }, [coverPageFile]);
 
@@ -108,7 +112,7 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
         coverPageUrl: blog.coverPageUrl || ""
       });
       setBlogStatus(blog.status || 'draft');
-      
+      setSelectedFile(null); // Ensure selectedFile is null when loading existing blog
       // Set file preview if coverPage is a URL string
       if (blog.coverPage && typeof blog.coverPage === 'string') {
         setFilePreview(`${process.env.NEXT_PUBLIC_BASE_URL}${blog.coverPage}`);
@@ -136,18 +140,15 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
     setIsAutoSaving(true);
     setHasUnsavedChanges(false);
     try {
-  
       currentData.blogId = blog._id;
-      // Use createBlog for auto-save and draft
-      await dispatch(createBlog(currentData) as any);
-      if (isDraftAction) {
-        toast.success('Draft saved successfully');
-      }
-      // Fetch latest blog list after auto-save
+      console.log(currentData)
+      // Use buildBlogFormData for auto-save and draft
+      const formData = buildBlogFormData(currentData, blogStatus);
+      await dispatch(createBlog(formData) as any);
+      toast.success('Draft saved successfully');
       dispatch(fetchBlogs({}));
       lastSavedDataRef.current = currentDataHash;
       setLastSaved(new Date());
- 
     } catch (error) {
       setHasUnsavedChanges(true);
       if (isDraftAction) {
@@ -166,7 +167,7 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
     }
     autoSaveTimeoutRef.current = setTimeout(() => {
       autoSave();
-    }, 5000);
+    }, timeDelay);
     setHasUnsavedChanges(true);
     return () => {
       if (autoSaveTimeoutRef.current) {
@@ -257,43 +258,44 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
           />
           {filePreview && (
             <div style={{ marginTop: 8 }}>
-              {selectedFile && selectedFile.type.startsWith('image/') ? (
-                <img
-                  src={filePreview}
-                  alt="Preview"
-                  style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
-                />
-              ) : selectedFile && selectedFile.type.startsWith('video/') ? (
-                <video
-                  src={filePreview}
-                  controls
-                  style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
-                />
-              ) : (() => {
-                // If filePreview is a string (URL), check if it's a video or image
-                let url = filePreview;
-                // Add BASE_URL if not absolute
-                if (typeof url === 'string' && !/^https?:\/\//.test(url) && !url.startsWith('blob:')) {
-                  url = `${process.env.NEXT_PUBLIC_BASE_URL}${url}`;
-                }
-                if (url.match(/\.(mp4|webm|ogg)$/i)) {
-                  return (
-                    <video
-                      src={url}
-                      controls
-                      style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
-                    />
-                  );
-                }
-                // Default to image
-                return (
+              {filePreview.startsWith('blob:') && selectedFile ? (
+                selectedFile.type.startsWith('image/') ? (
                   <img
-                    src={url}
+                    src={filePreview}
                     alt="Preview"
                     style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
                   />
-                );
-              })()}
+                ) : selectedFile.type.startsWith('video/') ? (
+                  <video
+                    src={filePreview}
+                    controls
+                    style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
+                  />
+                ) : null
+              ) : (
+                (() => {
+                  let url = filePreview;
+                  if (!/^https?:\/\//.test(url) && !url.startsWith('blob:')) {
+                    url = `${process.env.NEXT_PUBLIC_BASE_URL}${url}`;
+                  }
+                  if (url.match(/\.(mp4|webm|ogg)$/i)) {
+                    return (
+                      <video
+                        src={url}
+                        controls
+                        style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
+                      />
+                    );
+                  }
+                  return (
+                    <img
+                      src={url}
+                      alt="Preview"
+                      style={{ maxWidth: 120, maxHeight: 80, borderRadius: 4, border: '1px solid #eee' }}
+                    />
+                  );
+                })()
+              )}
             </div>
           )}
         </div>

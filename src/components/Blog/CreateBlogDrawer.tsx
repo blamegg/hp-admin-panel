@@ -22,10 +22,7 @@ interface CreateBlogProps {
   toggleDrawer: (open: boolean) => void;
 }
 
-const statusOptions = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'published', label: 'Published' },
-];
+
 
 const defaultValues: BlogFormInputs = {
   title: '',
@@ -43,8 +40,7 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
     mode: 'onChange',
   });
 
-  const [categoryInput, setCategoryInput] = useState('');
-  const [tagInput, setTagInput] = useState('');
+
   const categories = watch('categories');
   const tags = watch('tags');
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -67,81 +63,64 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
   const url = watch('url');
   const coverPageUrl = watch('coverPageUrl');
 
-  const handleAddCategory = () => {
-    setValue('categories', addToList(categories, categoryInput), { shouldValidate: true });
-    setCategoryInput('');
-  };
-  const handleRemoveCategory = (cat: string) => {
-    setValue('categories', removeFromList(categories, cat), { shouldValidate: true });
-  };
-  const handleAddTag = () => {
-    setValue('tags', addToList(tags, tagInput), { shouldValidate: true });
-    setTagInput('');
-  };
-  const handleRemoveTag = (tag: string) => {
-    setValue('tags', removeFromList(tags, tag), { shouldValidate: true });
-  };
+
 
   // Custom file input handler for preview and form value
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileInput(
-      e,
-      setSelectedFile,
-      (name: any, value: any, options?: any) => setValue(name as any, value, options),
-      setFilePreview
-    );
-    const file = e.target.files && e.target.files[0];
-    console.log('File changed:', file);
-    if (file && file.name !== lastFileNameRef.current) {
-      lastFileNameRef.current = file.name;
-      autoSave();
-    }
-  };
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  handleFileInput(
+    e,
+    setSelectedFile,
+    (name: any, value: any, options?: any) => setValue(name as any, value, options),
+    setFilePreview
+  );
+
+  const file = e.target.files && e.target.files[0];
+  if (file && file.name !== lastFileNameRef.current) {
+    lastFileNameRef.current = file.name;
+
+    // ✅ Force auto-save when file changes
+    setTimeout(() => {
+      autoSave(true); // pass true to force save
+    }, 100); // slight delay to let state update
+  }
+};
+
 
   // Auto-save function
   const autoSave = useCallback(async (isDraftAction = false) => {
     const currentData = getValues();
-
     // Skip auto-save if no meaningful data
     if (!currentData.title && !currentData.content && currentData.categories.length === 0 && currentData.tags.length === 0) {
       return;
     }
-
-    // Create a hash of current data to check if it has changed
+    // Use only coverPage for hash (note: this may not detect file changes reliably)
     const currentDataHash = JSON.stringify({
       title: currentData.title,
       content: currentData.content,
       url: currentData.url,
       coverPageUrl: currentData.coverPageUrl,
+      coverPage: currentData.coverPage,
       categories: currentData.categories,
       tags: currentData.tags
     });
-
     // Skip if data hasn't changed (unless it's a manual draft action)
     if (!isDraftAction && currentDataHash === lastSavedDataRef.current) {
       return;
     }
-
     setIsAutoSaving(true);
     setHasUnsavedChanges(false);
-
     try {
- 
-
+      let formData = buildBlogFormData(currentData, blogStatus);
       if (blogId) {
         currentData.blogId = blogId;
-        console.log(currentData)
-        // Update existing blog
-        console.log("line: 134")
-        await dispatch(createBlog(currentData ) as any);
+        // Update existing blog (if needed, use updateBlog here)
+        await dispatch(createBlog(formData) as any);
         if (isDraftAction) {
           toast.success('Draft saved successfully');
         }
       } else {
-        console.log("line: 139")
         // Create new blog
-        const result = await dispatch(createBlog(currentData) as any);
-        console.log("res:", result)
+        const result = await dispatch(createBlog(formData) as any);
         if (result.payload && result.payload.data && result.payload.data._id) {
           setBlogId(result.payload.data._id);
           if (isDraftAction) {
@@ -149,13 +128,10 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
           }
         }
       }
-
-      // Fetch latest blog list after auto-save
       dispatch(fetchBlogs({}));
       lastSavedDataRef.current = currentDataHash;
       setLastSaved(new Date());
     } catch (error) {
-      console.error('Auto-save failed:', error);
       setHasUnsavedChanges(true);
       if (isDraftAction) {
         toast.error('Failed to save draft');
@@ -175,7 +151,7 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
     // Set new timeout for auto-save (5 seconds after last change)
     autoSaveTimeoutRef.current = setTimeout(() => {
       autoSave();
-    }, 5000);
+    }, 1000);
 
     setHasUnsavedChanges(true);
 

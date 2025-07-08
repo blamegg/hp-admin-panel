@@ -523,7 +523,8 @@ export const createBlogFn = async (payload: any) => {
 
 // this api will be used only for publish blog
 export const updateBlogFn = async (id: string, payload: any) => {
-  console.log("pay", payload)
+  
+  // console.log("pay", payload)
   const response = await apiClient.put(`${ApiEndpoints.blogs}/${id}`, payload);
   return response.data;
 };

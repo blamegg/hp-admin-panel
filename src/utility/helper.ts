@@ -30,11 +30,21 @@ export function formatTimestamp(timestamp: string) {
 
 // set token
 export function setTokenCookie(token: string) {
-  Cookies.set("token", token, {
-    expires: 1,
-    sameSite: "strict",
-    secure: process.env.NODE_ENV === "production", // Only secure in production
-  });
+  try {
+    console.log("Setting token cookie with value:", token ? "present" : "missing");
+    Cookies.set("token", token, {
+      expires: 1,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production", // Only secure in production
+    });
+    console.log("Token cookie set successfully");
+    
+    // Verify the cookie was set
+    const verifyToken = Cookies.get("token");
+    console.log("Verified token cookie:", verifyToken ? "present" : "missing");
+  } catch (error) {
+    console.error("Error setting token cookie:", error);
+  }
 }
 
 // get token
@@ -101,6 +111,7 @@ export function buildBlogFormData(data: any, status: string) {
   formData.append('status', status);
   formData.append('url', data.url || '');
   formData.append('slug', data.coverPageUrl || '');
+  formData.append('blogId', data.blogId || '');
 
   ['categories', 'tags'].forEach(field => {
     (data[field] || []).forEach((item: string, idx: number) => {
@@ -129,7 +140,7 @@ export function handleFileInput(e: React.ChangeEvent<HTMLInputElement>, setSelec
   const file = e.target.files && e.target.files[0];
   if (file) {
     setSelectedFile(file);
-    setValue('coverPage', [file]);
+    setValue('coverPage', [file]); // FIX: set to File object, not file name
     const url = URL.createObjectURL(file);
     setFilePreview(url);
   } else {

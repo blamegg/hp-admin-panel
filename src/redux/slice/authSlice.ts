@@ -134,9 +134,29 @@ const authSlice = createSlice({
         state.loginError = null;
       })
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<any>) => {
+        console.log("Login fulfilled with payload:", action.payload);
         state.loginStatus = "success";
-        state.user = action.payload.user;
-        setTokenCookie(action.payload.token);
+        
+        // Handle different response structures
+        if (action.payload.user) {
+          state.user = action.payload.user;
+        } else if (action.payload.data && action.payload.data.user) {
+          state.user = action.payload.data.user;
+        } else {
+          console.warn("Unexpected response structure:", action.payload);
+          state.user = action.payload;
+        }
+        
+        // Set token cookie first
+        const token = action.payload.token || action.payload.data?.token;
+        if (token) {
+          console.log("Setting token cookie...");
+          setTokenCookie(token);
+        } else {
+          console.warn("No token received in login response");
+        }
+        
+        console.log("Login state updated successfully");
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loginStatus = "failed";

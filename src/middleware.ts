@@ -5,6 +5,8 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const token = request.cookies.get('token')?.value;
 
+  console.log(`Middleware: ${path}, token: ${token ? 'present' : 'missing'}`);
+
   // Define public paths that do not require authentication
   const isPublicPath = 
     path === '/' ||
@@ -18,18 +20,22 @@ export function middleware(request: NextRequest) {
   if (isPublicPath) {
     // If the user is logged in, redirect them to the dashboard
     if (token) {
+      console.log(`Redirecting authenticated user from ${path} to /dashboard`);
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     // Otherwise, allow access
+    console.log(`Allowing access to public path: ${path}`);
     return NextResponse.next();
   }
 
   // If the user is trying to access a protected path without a token, redirect to sign-in
   if (!token) {
+    console.log(`Redirecting unauthenticated user from ${path} to /auth/signin`);
     return NextResponse.redirect(new URL('/auth/signin', request.url));
   }
 
   // If the user is authenticated and accessing a protected path, allow access
+  console.log(`Allowing access to protected path: ${path}`);
   return NextResponse.next();
 }
 

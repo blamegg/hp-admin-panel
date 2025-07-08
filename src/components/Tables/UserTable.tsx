@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { useMenuList } from "@/hooks/useMenuList";
 import { useUserPermissions, useHasPermission } from '@/hooks/useUserPermissions';
 import useDebounce from "@/hooks/useDebounce";
+import LoaderWrapper from '@/components/common/LoaderWrapper';
 
 
 const UserTable = () => {
@@ -291,7 +292,7 @@ const UserTable = () => {
   ];
 
   return (
-    <>
+    <LoaderWrapper loading={isLoading}>
       <div className="custom_tbl_container h-[74vh]  w-[350px] md:w-full">
         {
           showSearchBar && (
@@ -489,7 +490,7 @@ const UserTable = () => {
           toggleDrawer={toggleBulkUserDrawer}
         />
       )}
-    </>
+    </LoaderWrapper>
   );
 };
 
