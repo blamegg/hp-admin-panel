@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import FormError from "./FormError";
 
 interface CustomFileSelectorProps {
   label?: string;
@@ -7,6 +8,7 @@ interface CustomFileSelectorProps {
   multiple?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  register?: any; // Accept register prop
 }
 
 const CustomFileSelector: React.FC<CustomFileSelectorProps> = ({
@@ -16,6 +18,7 @@ const CustomFileSelector: React.FC<CustomFileSelectorProps> = ({
   multiple,
   onChange,
   placeholder,
+  register,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string>("");
@@ -42,6 +45,7 @@ const CustomFileSelector: React.FC<CustomFileSelectorProps> = ({
           multiple={multiple}
           style={{ display: "none" }}
           onChange={handleFileChange}
+          {...(register ? register : {})}
         />
         <input
           type="text"
@@ -59,7 +63,7 @@ const CustomFileSelector: React.FC<CustomFileSelectorProps> = ({
           Choose File
         </button>
       </div>
-      {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
+      {error && <FormError error={error}  />}
     </div>
   );
 };

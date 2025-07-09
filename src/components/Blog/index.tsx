@@ -170,7 +170,7 @@ const Blog = () => {
       name: 'Actions', cell: (row: any) => (
         <div className='flex gap-2'>
           <Tooltip title='Preview'>
-            <button onClick={() => router.push(`/blog/preview/${row._id}`)} className='text-blue-500'><FaEye /></button>
+            <button onClick={() => window.open(`/blogs/preview/${row._id}`, '_blank')} className='text-blue-500'><FaEye /></button>
           </Tooltip>
           <Tooltip title='Edit'>
             <button onClick={() => { setSelectedBlog(row); setIsEditBlogDrawerOpen(true); }} className='text-green-600'><FaEdit /></button>

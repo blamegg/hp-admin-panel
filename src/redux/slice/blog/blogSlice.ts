@@ -59,6 +59,7 @@ export const createBlog = createAsyncThunk(
   "blogs/createBlog",
   async (payload: any, { rejectWithValue }) => {
     try {
+        console.log("api payload", payload)
       return await createBlogFn(payload);
     } catch (err: any) {
       return rejectWithValue(err?.response?.data?.message || "Failed to create blog");

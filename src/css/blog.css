@@ -144,3 +144,10 @@
 .ql-editor {
   min-height: 200px;
 }
+
+.ql-editor img {
+  max-width: 200px !important;
+  height: auto;
+  border-radius: 10px;
+  display: inline-block;
+}

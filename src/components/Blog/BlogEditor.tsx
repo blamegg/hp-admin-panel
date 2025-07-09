@@ -4,6 +4,18 @@ import React from "react";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 
+const toolbarOptions = [
+  [{ 'header': [1, 2, false] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+  ['link', 'image'], // Add image option
+  ['clean']
+];
+
+const modules = {
+  toolbar: toolbarOptions,
+};
+
 interface BlogEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -20,6 +32,7 @@ export default function BlogEditor({ value, onChange, error }: BlogEditorProps) 
         value={value}
         onChange={onChange}
         theme="snow"
+        modules={modules} // Pass modules with image option
       />
     </div>
   );

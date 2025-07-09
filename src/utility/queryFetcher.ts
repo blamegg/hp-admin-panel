@@ -512,18 +512,22 @@ export const fetchBlogsFn = async (params: {
 
 // This api will be used for create, update, and auto save
 export const createBlogFn = async (payload: any) => {
-    const response = await apiClient.post(ApiEndpoints.blogs, payload, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  
+  // console.log('FormData contents:');
+  for (let [key, value] of payload.entries()) {
+    console.log(key, value);
+  }
+  const response = await apiClient.post(ApiEndpoints.blogs, payload, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+
 };
 
 // this api will be used only for publish blog
 export const updateBlogFn = async (id: string, payload: any) => {
-  
+
   // console.log("pay", payload)
   const response = await apiClient.put(`${ApiEndpoints.blogs}/${id}`, payload);
   return response.data;
@@ -531,6 +535,7 @@ export const updateBlogFn = async (id: string, payload: any) => {
 
 export const fetchBlogByIdFn = async (id: string) => {
   const response = await apiClient.get(`${ApiEndpoints.blogs}/${id}`);
+  console.log("fetch blog", response.data)
   return response.data;
 };
 // Delete one blog
@@ -551,8 +556,45 @@ export const deleteBlogsByStatusFn = async (status: string) => {
   return response.data;
 };
 
+// --------------------------------- Blog Comments ------------------------------------------------
 
+// fetch blog comments
 
+export const fetchBlogCommentsFn = async (id:string)=>{
+  const response = await apiClient.get(`${ApiEndpoints.blogs}/${id}/comments`);
+  console.log("api res", response.data)
+  return response.data;
+}
+
+// Update a blog comment
+export const updateBlogCommentFn = async (blogId: string, commentId: string, content: string) => {
+  const response = await apiClient.put(`${ApiEndpoints.blogs}/${blogId}/comments/${commentId}`, { content });
+  return response.data;
+};
+
+// Delete a blog comment
+export const deleteBlogCommentFn = async (blogId: string, commentId: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.blogs}/${blogId}/comments/${commentId}`);
+  return response.data;
+};
+
+// Add a reply to a blog comment
+export const addBlogCommentReplyFn = async (blogId: string, commentId: string, content: string) => {
+  const response = await apiClient.post(`${ApiEndpoints.blogs}/${blogId}/comments/${commentId}/replies`, { content });
+  return response.data;
+};
+
+// Like a blog comment
+export const likeBlogCommentFn = async (blogId: string, commentId: string) => {
+  const response = await apiClient.post(`${ApiEndpoints.blogs}/${blogId}/comments/${commentId}/like`);
+  return response.data;
+};
+
+// Dislike a blog comment
+export const dislikeBlogCommentFn = async (blogId: string, commentId: string) => {
+  const response = await apiClient.post(`${ApiEndpoints.blogs}/${blogId}/comments/${commentId}/dislike`);
+  return response.data;
+};
 
 
 

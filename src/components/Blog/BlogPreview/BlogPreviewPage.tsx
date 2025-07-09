@@ -7,6 +7,8 @@ import { RootState } from "@/redux/store";
 import LoaderWrapper from "@/components/common/LoaderWrapper";
 import PreviewBlog from "./PreviewBlog";
 import RecentBlogs from "./RecentBlogs";
+import Button from "@/components/common/Button";
+import { useRouter } from "next/navigation";
 
 interface BlogPreviewPageProps {
   blog: {
@@ -20,7 +22,8 @@ interface BlogPreviewPageProps {
       _id: string;
     },
     publishedAt: string;
-    updatedAt:string;
+    updatedAt: string;
+    _id: string;
   };
 }
 
@@ -28,9 +31,11 @@ const decodeHtml = (html: string) => he.decode(html);
 
 const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
   const loading = useSelector((state: RootState) => state.blogs.loading);
+  const router = useRouter();
+
   return (
     <LoaderWrapper loading={loading}>
-      <div className="w-full flex px-4 gap-10">
+      <div className="w-full flex gap-10">
         <div className="flex flex-col w-3/4 ">
           <div>
             <div className="w-full">
@@ -66,17 +71,17 @@ const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
               {/* Author */}
               <div className="flex flex-wrap items-center gap-6 mb-8 text-sm text-gray-500">
                 <div className="flex items-center gap-2">
-                  <IoPerson className="text-primary text-lg" />
-                  <span className="font-medium">{blog.author.name}</span>
+                  <IoPerson className="text-companyRed text-lg" />
+                  <span className="font-medium">{blog?.author?.name}</span>
                 </div>
                 {blog?.publishedAt ? (
                   <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-primary text-lg" />
+                    <FaCalendarAlt className="text-lg text-companyRed" />
                     <span>{blog?.publishedAt?.split('T')[0]}</span>
                   </div>
-                ): (
+                ) : (
                   <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-primary text-lg" />
+                    <FaCalendarAlt className="text-companyRed text-lg" />
                     <span>{blog?.updatedAt?.split('T')[0]}</span>
                   </div>
                 )}
@@ -86,8 +91,11 @@ const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
           <PreviewBlog htmlContent={decodeHtml(blog.content)} />
         </div>
         <div className="hidden lg:block w-1/4">
-        <h1 className="text-xl text-black font-bold mb-2">Recent blogs</h1>
-        <RecentBlogs />
+          <h1 className="text-xl text-black font-bold mb-2">Recent blogs</h1>
+          <RecentBlogs />
+          <div className="mt-5">
+            <Button type='button' name='Comments' onClick={() => router.push(`/blogs/comments?blogId=${blog._id}`)} />
+          </div>
         </div>
       </div>
     </LoaderWrapper>

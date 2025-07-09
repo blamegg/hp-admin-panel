@@ -355,3 +355,10 @@ input:checked ~ span:last-child {
 .rbc-time-gutter {
   display: none !important;
 }
+
+/* Style images inside the Quill editor to be small by default */
+.ql-editor img {
+  max-width: 200px;
+  height: auto;
+  display: inline-block;
+}

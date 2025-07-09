@@ -50,10 +50,10 @@ const RecentBlogs = () => {
                 </div>
             </div>
         ))}
-        <div>
-            <Button type='button' name='Comments' onClick={()=> router.push(`/blog/comments`)} />
+        {/* <div>
+            <Button type='button' name='Comments' onClick={()=> router.push(`/blogs/comments`)} />
            
-        </div>
+        </div> */}
     </div>
   )
 }
