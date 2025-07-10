@@ -106,15 +106,31 @@ const UserTable = () => {
     return () => clearTimeout(timeoutId);
   }, [searchQuery, searchBasis, queryClient, showSearchBar]); */
 
-  // Auto-refresh to detect blocked users
+  // Auto-refresh to detect blocked users - OPTIMIZED
   useEffect(() => {
     if (!showSearchBar) return; // Don't run if not on users page
 
-    const intervalId = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-    }, 30000); // Refresh every 30 seconds
+    // Only refresh if user is actively viewing the page
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+      }
+    };
 
-    return () => clearInterval(intervalId);
+    // Refresh every 2 minutes instead of 30 seconds
+    const intervalId = setInterval(() => {
+      if (!document.hidden) {
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+      }
+    }, 120000); // 2 minutes
+
+    // Listen for page visibility changes
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [queryClient, showSearchBar]);
 
   // Cleanup queries when leaving users page

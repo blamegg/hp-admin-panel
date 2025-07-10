@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "ANALYZE=true npm run build",
+    "build:analyze": "cross-env ANALYZE=true next build",
+    "performance:check": "npm run build && npm run start & sleep 10 && lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-report.json && pkill -f 'next start'"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

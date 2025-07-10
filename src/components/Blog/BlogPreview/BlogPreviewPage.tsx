@@ -1,37 +1,32 @@
-import React from "react";
-import he from "he";
-import { FaCalendarAlt } from "react-icons/fa";
-import { IoPerson } from "react-icons/io5";
+'use client'
+import React from 'react';
+import Image from 'next/image';
 import { useSelector } from 'react-redux';
-import { RootState } from "@/redux/store";
-import LoaderWrapper from "@/components/common/LoaderWrapper";
-import PreviewBlog from "./PreviewBlog";
-import RecentBlogs from "./RecentBlogs";
-import Button from "@/components/common/Button";
-import { useRouter } from "next/navigation";
+import { RootState } from '@/redux/store';
+import LoaderWrapper from '@/components/common/LoaderWrapper';
+import RecentBlogs from './RecentBlogs';
+import Button from '@/components/common/Button';
+import { useRouter } from 'next/navigation';
 
 interface BlogPreviewPageProps {
-  blog: {
-    coverPage?: string;
-    title: string;
-    shortDescription?: string;
-    content: string;
-    tags: string[];
-    author: {
-      name: string;
-      _id: string;
-    },
-    publishedAt: string;
-    updatedAt: string;
-    _id: string;
-  };
+  blog: any;
 }
 
-const decodeHtml = (html: string) => he.decode(html);
+function prependBaseUrlToImages(html: string, baseUrl: string) {
+  if (!baseUrl) return html;
+  const cleanBase = baseUrl.replace(/\/$/, '');
+  // Replace <img src="..."> with <img src="BASE_URL/..."> for relative URLs
+  return html.replace(/<img\s+([^>]*?)src=["'](?!https?:\/\/|\/\/)([^"'>]+)["']/gi, (match, pre, src) => {
+    const cleanSrc = src.replace(/^\/+/, '');
+    return `<img ${pre}src=\"${cleanBase}/${cleanSrc}\"`;
+  });
+}
 
 const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
   const loading = useSelector((state: RootState) => state.blogs.loading);
-  const router = useRouter();
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+  const processedContent = prependBaseUrlToImages(blog.content, baseUrl);
+  const router = useRouter()
 
   return (
     <LoaderWrapper loading={loading}>
@@ -46,14 +41,16 @@ const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
                 )}
               </div>
               <div className="flex flex-wrap gap-2 mb-6">
-                {blog.tags.map(tag => (
+                {blog.tags?.map((tag: string) => (
                   <span key={tag} className="bg-primary/10 text-primary text-xs md:text-sm rounded-full px-3 py-1 font-semibold">#{tag}</span>
                 ))}
               </div>
               <div className="my-6">
                 {blog.coverPage && (() => {
-                  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/${blog.coverPage}`;
-                  const isVideo = /\.(mp4|webm|ogg)$/i.test(blog.coverPage);
+                  const url = blog.coverPage.startsWith('http')
+                    ? blog.coverPage
+                    : `${process.env.NEXT_PUBLIC_BASE_URL}/${blog.coverPage.replace(/^\/+/, '')}`;
+                  const isVideo = /\.(mp4|webm|ogg)$/i.test(url);
                   if (isVideo) {
                     return (
                       <video className="w-full rounded-xl my-4 block shadow" autoPlay controls>
@@ -63,38 +60,74 @@ const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
                     );
                   }
                   return (
-                    <img src={url} alt={blog.coverPage} className="w-full rounded-xl my-4 block shadow" />
+                    <div className="relative w-full h-[400px] rounded-xl my-4 block shadow overflow-hidden">
+                      <Image 
+                        src={url} 
+                        alt={blog.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
+                        priority={true}
+                        quality={85}
+                      />
+                    </div>
                   );
                 })()}
               </div>
 
               {/* Author */}
-              <div className="flex flex-wrap items-center gap-6 mb-8 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <IoPerson className="text-companyRed text-lg" />
-                  <span className="font-medium">{blog?.author?.name}</span>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                  <Image
+                    src="/images/user/user-01.png"
+                    alt="Author"
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
                 </div>
-                {blog?.publishedAt ? (
-                  <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-lg text-companyRed" />
-                    <span>{blog?.publishedAt?.split('T')[0]}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-companyRed text-lg" />
-                    <span>{blog?.updatedAt?.split('T')[0]}</span>
-                  </div>
-                )}
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {blog.author
+                      ? typeof blog.author === 'string'
+                        ? blog.author
+                        : blog.author.name || blog.author.email || 'Anonymous'
+                      : 'Anonymous'}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(blog.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
               </div>
+
+              {/* Content */}
+              <div 
+                className="prose prose-lg max-w-none"
+                dangerouslySetInnerHTML={{ __html: processedContent }}
+              />
             </div>
           </div>
-          <PreviewBlog htmlContent={decodeHtml(blog.content)} />
         </div>
-        <div className="hidden lg:block w-1/4">
-          <h1 className="text-xl text-black font-bold mb-2">Recent blogs</h1>
-          <RecentBlogs />
-          <div className="mt-5">
-            <Button type='button' name='Comments' onClick={() => router.push(`/blogs/comments?blogId=${blog._id}`)} />
+
+        {/* Sidebar */}
+        <div className="w-1/4">
+          <div className="sticky top-4">
+            <div className="bg-white rounded-lg shadow-md py-6 px-4">
+              <h3 className="text-lg font-semibold mb-4">Recent Posts</h3>
+              <div className="space-y-4">
+                <RecentBlogs />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow-md py-3 px-4 my-5">
+              <h3 className="text-lg font-semibold mb-4">Blog Comments </h3>
+              <div className=" flex items-center justify-center">
+                  <Button type='button' name='Comments' onClick={()=> router.push(`/blogs/comments/${blog._id}`)} className='bg-blue-400'   />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -103,3 +136,5 @@ const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
 };
 
 export default BlogPreviewPage; 
+
+

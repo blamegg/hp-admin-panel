@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import BlogProfile from "../../assets/blog/blogProfile.png"
 import Image from "next/image";
 import { AiFillDislike, AiFillLike, AiOutlineDislike, AiOutlineLike } from "react-icons/ai";
@@ -35,9 +35,34 @@ interface CommentItemProps {
   onDelete?: () => void;
   onLike?: () => void;
   onDislike?: () => void;
+  isExpanded?: boolean;
+  onToggleReplies?: () => void;
+  handleCommentStatus?: (action: 'approve' | 'reject') => void;
 }
 
-const CommentItem: React.FC<CommentItemProps> = ({ comment, level = 0, isEditing: controlledEditing, editValue: controlledEditValue, onEdit, onEditValueChange, onSave, onCancel, children, isReplying, replyValue, onReply, onReplyValueChange, onReplySubmit, onReplyCancel, onDelete, onLike, onDislike }) => {
+const CommentItem: React.FC<CommentItemProps> = React.memo(({
+  comment,
+  level = 0,
+  isEditing: controlledEditing,
+  editValue: controlledEditValue,
+  onEdit,
+  onEditValueChange,
+  onSave,
+  onCancel,
+  children,
+  isReplying,
+  replyValue,
+  onReply,
+  onReplyValueChange,
+  onReplySubmit,
+  onReplyCancel,
+  onDelete,
+  onLike,
+  onDislike,
+  isExpanded,
+  onToggleReplies,
+  handleCommentStatus
+}) => {
   const marginLeft = level * 5; // indentation per level
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownDirection, setDropdownDirection] = useState<'down' | 'up'>('down');
@@ -52,13 +77,86 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, level = 0, isEditing
   const setEditing = controlledEditing !== undefined ? (v: boolean) => { if (!v && onCancel) onCancel(); else if (v && onEdit) onEdit(); } : setIsEditing;
   const setValue = onEditValueChange || setEditValue;
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
-          triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
+  // Memoize formatted date
+  const formattedDate = useMemo(() => {
+    return new Date(comment.createdAt).toLocaleString();
+  }, [comment.createdAt]);
+
+  // Memoize dropdown direction calculation
+  const calculateDropdownDirection = useCallback(() => {
+    if (!triggerRef.current) return 'down';
+    const rect = triggerRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const spaceBelow = viewportHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    return spaceBelow < 160 && spaceAbove > spaceBelow ? 'up' : 'down';
+  }, []);
+
+  // Optimized event handlers
+  const handleDropdownToggle = useCallback(() => {
+    if (!dropdownOpen) {
+      setDropdownDirection(calculateDropdownDirection());
     }
+    setDropdownOpen((open) => !open);
+  }, [dropdownOpen, calculateDropdownDirection]);
+
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
+      triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
+      setDropdownOpen(false);
+    }
+  }, []);
+
+  const handleSave = useCallback(() => {
+    setEditing(false);
+    if (onSave) onSave();
+  }, [setEditing, onSave]);
+
+  const handleCancel = useCallback(() => {
+    setEditing(false);
+    if (onCancel) onCancel();
+  }, [setEditing, onCancel]);
+
+  const handleEdit = useCallback(() => {
+    setDropdownOpen(false);
+    setEditing(true);
+    if (onEdit) onEdit();
+  }, [setEditing, onEdit]);
+
+  const handleDelete = useCallback(() => {
+    setDropdownOpen(false);
+    if (onDelete) onDelete();
+  }, [onDelete]);
+
+  const handleLike = useCallback(() => {
+    if (onLike) onLike();
+  }, [onLike]);
+
+  const handleDislike = useCallback(() => {
+    if (onDislike) onDislike();
+  }, [onDislike]);
+
+  const handleReply = useCallback(() => {
+    if (onReply) onReply();
+  }, [onReply]);
+
+  const handleReplySubmit = useCallback(() => {
+    if (onReplySubmit) onReplySubmit();
+  }, [onReplySubmit]);
+
+  const handleReplyCancel = useCallback(() => {
+    if (onReplyCancel) onReplyCancel();
+  }, [onReplyCancel]);
+
+  const handleEditValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+  }, [setValue]);
+
+  const handleReplyValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onReplyValueChange) onReplyValueChange(e.target.value);
+  }, [onReplyValueChange]);
+
+  useEffect(() => {
     if (dropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
@@ -67,65 +165,49 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, level = 0, isEditing
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownOpen]);
+  }, [dropdownOpen, handleClickOutside]);
 
-  // Decide dropdown direction on open
-  const handleDropdownToggle = () => {
-    if (!dropdownOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const spaceBelow = viewportHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      // Assume dropdown height ~150px
-      if (spaceBelow < 160 && spaceAbove > spaceBelow) {
-        setDropdownDirection('up');
-      } else {
-        setDropdownDirection('down');
-      }
-    }
-    setDropdownOpen((open) => !open);
-  };
-
-  console.log("comment line 89", comment);
+  console.log("comments", comment )
 
   return (
     <div
-      className={`pl-4 pt-3  ${level > 0 ? "border-gray-300" : "border-transparent"}`}
+      className={`pl-0 pt-2   ${level > 0 ? "border-transparent" : "border-transparent"}`}
       style={{ marginLeft }}
     >
-      <div className="flex items-center justify-start gap-3">
+      <div className="flex items-center  justify-start gap-3">
         <div className="w-[40px] h-[40px] rounded-full p-1 border-2 border-primary ">
           <Image src={BlogProfile} alt="👤" className="rounded-full" />
         </div>
         <div className="font-bold text-back text-sm">User Name</div>
-        <div className="text-xs text-gray-500 mt-[2px]">{new Date(comment.createdAt).toLocaleString()}</div>
+        <div className="text-xs text-gray-500 mt-[2px]">{formattedDate}</div>
+        <div className={`text-xs font-blod mt-[2px] rounded px-1 py-[2px] ${comment.status  === "Pending" ? "bg-warning text-white ":  comment.status  === "Rejected" ? "bg-danger text-white" : "bg-success text-white"}`}>{comment.status}</div>
       </div>
-      <div className=" ps-13 pb-1 rounded-md shadow-sm ">
-        <div className="flex items-center justify-between gap-5  py-1  ">
+      <div className=" ps-8 ms-5  rounded">
+        <div className="flex items-center justify-between gap-5">
           <p className="text-sm text-black font-medium w-full">
             {editing ? (
-              <div className="flex items-center gap-3 pr-3">
+              <form className="flex items-center gap-3 pr-3" onSubmit={e => { e.preventDefault(); handleSave(); }}>
                 <input
                   className="px-2 py-1 text-sm w-full border-b border-graydark/20 rounded-l outline-0"
                   value={value}
-                  onChange={e => setValue(e.target.value)}
+                  onChange={handleEditValueChange}
                   autoFocus
                 />
                 <div className="flex gap-2 mt-2">
                   <Button
-                  type="submit"
-                  name="Save"
+                    type="submit"
+                    name="Save"
                     className="px-2 py-1 bg-success text-white rounded text-xs"
-                    onClick={() => { setEditing(false); if (onSave) onSave(); }}
+                    onClick={handleSave}
                   ></Button>
                   <Button
-                  type="button"
-                  name="Cancel"
+                    type="button"
+                    name="Cancel"
                     className="px-2 py-1 bg-graydark  rounded text-xs"
-                    onClick={() => { setEditing(false); if (onCancel) onCancel(); }}
+                    onClick={handleCancel}
                   ></Button>
                 </div>
-              </div>
+              </form>
             ) : (
               value
             )}
@@ -135,16 +217,16 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, level = 0, isEditing
         <div className="flex items-center justify-start gap-5 mt-2">
           {/* like and dislike */}
           <div className="flex items-center justify-start gap-4">
-            <div className="flex items-center gap-1 cursor-pointer" onClick={onLike}>
+            <div className="flex items-center gap-1 cursor-pointer" onClick={handleLike}>
               <AiFillLike />
               <p className="text-xs">{comment.likeCount}</p>
             </div>
-            <div className="flex items-center gap-1 cursor-pointer" onClick={onDislike}>
+            {/* <div className="flex items-center gap-1 cursor-pointer" onClick={handleDislike}>
               <AiFillDislike />
               <p className="text-xs">{comment.dislikeCount}</p>
-            </div>
+            </div> */}
           </div>
-          <TbMessageFilled onClick={onReply} className="cursor-pointer" />
+          <TbMessageFilled onClick={handleReply} className="cursor-pointer" />
           <div className="relative" ref={dropdownRef}>
             <button ref={triggerRef} onClick={handleDropdownToggle}>
               <BsThreeDotsVertical />
@@ -154,46 +236,60 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, level = 0, isEditing
                 className={`absolute z-10 right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg
                   ${dropdownDirection === 'down' ? 'top-full' : 'bottom-full mb-2'}`}
               >
-                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); setEditing(true); if (onEdit) onEdit(); }}>Edit</button>
-                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); if (onDelete) onDelete(); }}>Delete</button>
-                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); /* handle report */ }}>Approve</button>
-                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); /* handle report */ }}>Reject</button>
+                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={handleEdit}>Edit</button>
+                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={handleDelete}>Delete</button>
+                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); if (handleCommentStatus) handleCommentStatus('approve'); }}>Approve</button>
+                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); if (handleCommentStatus) handleCommentStatus('reject'); }}>Reject</button>
               </div>
             )}
           </div>
         </div>
       </div>
-
-      {/* Render replies recursively */}
-      {children}
-      {/* Reply input UI */}
-      {isReplying && (
-        <div className="flex items-center gap-3 pr-3 mt-2">
-          <input
-            className="px-2 py-1 text-sm w-full border-b border-graydark/20 rounded-l outline-0"
-            value={replyValue}
-            onChange={e => onReplyValueChange && onReplyValueChange(e.target.value)}
-            placeholder="Write a reply..."
-            autoFocus
-          />
-          <div className="flex gap-2 mt-2">
-            <Button
-              type="submit"
-              name="Reply"
-              className="px-2 py-1 bg-primary text-white rounded text-xs"
-              onClick={onReplySubmit}
-            ></Button>
-            <Button
-              type="button"
-              name="Cancel"
-              className="px-2 py-1 bg-graydark rounded text-xs"
-              onClick={onReplyCancel}
-            ></Button>
-          </div>
-        </div>
+      {comment.replies && comment.replies.length > 0 && (
+        <button
+          className="text-xs border-b-[1.5px] border-graydark/20 ml-13"
+          onClick={onToggleReplies}
+          type="button"
+        >
+          Reply ({comment.replies.length}) {isExpanded ? '▲' : '▼'}
+        </button>
       )}
+      {/* Render replies recursively */}
+      <div className="ps-8">
+        {/* Reply input UI */}
+        <div >
+        {isReplying && (
+          <form className="flex items-center gap-3 pr-3 mt-2" onSubmit={e => { e.preventDefault(); handleReplySubmit(); }}>
+            <input
+              className="px-2 py-1 text-sm w-full border-b border-graydark/20 rounded-l outline-0"
+              value={replyValue}
+              onChange={handleReplyValueChange}
+              placeholder="Write a reply..."
+              autoFocus
+            />
+            <div className="flex gap-2 mt-2">
+              <Button
+                type="submit"
+                name="Reply"
+                className="px-2 py-1 bg-success text-white rounded text-xs"
+                onClick={handleReplySubmit}
+              ></Button>
+              <Button
+                type="button"
+                name="Cancel"
+                className="px-2 py-1 bg-graydark  rounded text-xs"
+                onClick={handleReplyCancel}
+              ></Button>
+            </div>
+          </form>
+        )}
+        </div>
+        {children}
+      </div>
     </div>
   );
-};
+});
+
+CommentItem.displayName = 'CommentItem';
 
 export default CommentItem;

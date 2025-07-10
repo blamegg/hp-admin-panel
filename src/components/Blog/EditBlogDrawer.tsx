@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import FormError from '../common/FormError';
 import CustomFileSelector from '../common/CustomFileSelector';
 import CustomMultiSelect from '../common/CustomMultiSelect';
-import { buildBlogFormData, addToList, removeFromList, handleFileInput } from '@/utility/helper';
+import { buildBlogFormData, addToList, removeFromList, handleFileInput, buildBlogPayload } from '@/utility/helper';
 
 interface EditBlogDrawerProps {
   isEditBlogDrawerOpen: boolean;
@@ -102,15 +102,15 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
     }
   }, [blog, reset]);
 
-  // Rename autoSave to saveDraft
+  // Save draft function - always uses createBlog
   const saveDraft = async () => {
     const currentData = getValues();
     if (!currentData.title && !currentData.content && currentData.categories.length === 0 && currentData.tags.length === 0) {
       return;
     }
     currentData.blogId = blog._id;
-    const formData = buildBlogFormData(currentData, blogStatus);
-    await dispatch(createBlog(formData) as any);
+    const payload = buildBlogPayload(currentData, 'draft');
+    await dispatch(createBlog(payload) as any);
     toast.success('Draft saved successfully');
     dispatch(fetchBlogs({}));
   };
@@ -126,19 +126,30 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
   const handleDraftClick = async () => {
     await saveDraft();
   };
+  
   const handlePublishClick = async () => {
     setBlogStatus('published');
   };
 
   const onSubmit = async (data: BlogFormInputs) => {
-    // Fix: If content is only four quotes, set to empty string
-    if (typeof data.content === 'string' && data.content.replace(/\s/g, '') === '""""') {
-      data.content = '';
+    // // Fix: If content is only four quotes, set to empty string
+    // if (typeof data.content === 'string' && data.content.replace(/\s/g, '') === '""') {
+    //   data.content = '';
+    // }
+    
+    // For publishing, always use updateBlog
+    if (blogStatus === 'published') {
+      const payload = buildBlogPayload(data, blogStatus);
+      await dispatch(updateBlog({ id: blog._id, payload }) as any);
+      toast.success('Blog published successfully');
+    } else {
+      // For draft, use createBlog
+      data.blogId = blog._id;
+      const payload = buildBlogPayload(data, blogStatus);
+      await dispatch(createBlog(payload) as any);
+      toast.success('Draft updated successfully');
     }
-    const formData = buildBlogFormData(data, blogStatus);
-
-    await dispatch(updateBlog({ id: blog._id, payload: formData }) as any);
-    toast.success('Blog updated successfully');
+    
     reset();
     toggleDrawer(false);
   };
@@ -159,6 +170,11 @@ const EditBlogDrawer = ({ isEditBlogDrawerOpen, toggleDrawer, blog }: EditBlogDr
               <div className="flex items-center gap-1 text-blue-600">
                 <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                 <span>Publishing...</span>
+              </div>
+            )}
+            {!isSubmitting && (
+              <div className="flex items-center gap-1 text-gray-600">
+                <span>Status: {blog?.status === 'published' ? 'Published' : 'Draft'}</span>
               </div>
             )}
           </div>

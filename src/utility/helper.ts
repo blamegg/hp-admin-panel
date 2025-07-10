@@ -107,7 +107,24 @@ export function toSentenceCase(str: string) {
 export function buildBlogFormData(data: any, status: string) {
   const formData = new FormData();
   formData.append('title', data.title || '');
-  formData.append('content', JSON.stringify(data.content || ''));
+  // Only append content if it's not empty, not just quotes, and not just whitespace
+  let content = data.content;
+  if (typeof content === 'string') {
+    const trimmed = content.trim();
+    if (
+      trimmed !== '' &&
+      trimmed !== '""' &&
+      trimmed !== "''" &&
+      trimmed !== '"' &&
+      trimmed !== "'" &&
+      trimmed.replace(/\s/g, '') !== ''
+    ) {
+      formData.append('content', JSON.stringify(content));
+    }
+  } else if (content) {
+    // If content is not a string (e.g., an object), still append
+    formData.append('content', JSON.stringify(content));
+  }
   formData.append('status', status);
   formData.append('url', data.url || '');
   formData.append('slug', data.coverPageUrl || '');
@@ -124,6 +141,37 @@ export function buildBlogFormData(data: any, status: string) {
   }
 
   return formData;
+}
+
+// Build a JSON payload for blog create/update (no FormData, cleans content)
+export function buildBlogPayload(data: any, status: string) {
+  let content = data.content;
+  if (typeof content === 'string') {
+    const trimmed = content.trim();
+    if (
+      !trimmed ||
+      trimmed === '""' ||
+      trimmed === "''" ||
+      trimmed === '"' ||
+      trimmed === "'" ||
+      trimmed.replace(/\s/g, '') === ''
+    ) {
+      content = undefined;
+    }
+  }
+  const payload = {
+    title: data.title || '',
+    content,
+    status,
+    url: data.url || '',
+    slug: data.coverPageUrl || '',
+    blogId: data.blogId || '',
+    categories: data.categories || [],
+    tags: data.tags || [],
+    coverPage: data.coverPage || '', // If coverPage is a URL or string
+  };
+  console.log('[buildBlogPayload] Final payload:', payload);
+  return payload;
 }
 
 export function addToList(list: string[], value: string): string[] {

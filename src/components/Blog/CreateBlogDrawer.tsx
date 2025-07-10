@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import FormError from '../common/FormError';
 import CustomFileSelector from '../common/CustomFileSelector';
 import CustomMultiSelect from '../common/CustomMultiSelect';
-import { buildBlogFormData, addToList, removeFromList, handleFileInput } from '@/utility/helper';
+import { buildBlogFormData, addToList, removeFromList, handleFileInput, buildBlogPayload } from '@/utility/helper';
 import { categoriesList, tagsList } from '@/utility/blogFields';
 
 interface CreateBlogProps {
@@ -30,6 +30,7 @@ const defaultValues: BlogFormInputs = {
   url: '',
   categories: [],
   tags: [],
+  coverPage: [],
 };
 
 const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogProps) => {
@@ -83,48 +84,57 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
   }, [coverPageFile]);
 
   const onSubmit = async (data: BlogFormInputs) => {
-    if (blogId) {
-      data.blogId = blogId;
-    }
-    // Fix: If content is only four quotes, set to empty string
-    if (typeof data.content === 'string' && data.content.replace(/\s/g, '') === '""') {
-      data.content = '';
-    }
-    const formData = buildBlogFormData(data, blogStatus);
-    if (blogId) {
-      await dispatch(updateBlog({ id: blogId, payload: formData }) as any);
-      toast.success(blogStatus === 'published' ? 'Blog published successfully' : 'Blog updated successfully');
+  
+    // For publishing, always use updateBlog
+    if (blogStatus === 'published') {
+      if (!blogId) {
+        toast.error('Cannot publish without saving draft first');
+        return;
+      }
+      const payload = buildBlogPayload(data, blogStatus);
+      await dispatch(updateBlog({ id: blogId, payload }) as any);
+      toast.success('Blog published successfully');
     } else {
-      const result = await dispatch(createBlog(formData) as any);
-      toast.success(blogStatus === 'published' ? 'Blog published successfully' : 'Blog created successfully');
+      // For draft, use createBlog
+      if (blogId) {
+        data.blogId = blogId;
+      }
+      const payload = buildBlogPayload(data, blogStatus);
+      console.log("payload", payload)
+      const result = await dispatch(createBlog(payload) as any);
+      console.log("create response", result);
+      toast.success('Blog created successfully');
       if (result.payload && result.payload.data && result.payload.data._id) {
         setBlogId(result.payload.data._id);
       }
     }
+    
     reset();
     toggleDrawer(false);
   };
 
-  // Rename autoSave to saveDraft
+  // Save draft function - always uses createBlog
   const saveDraft = async () => {
     const currentData = getValues();
     if (!currentData.title && !currentData.content && currentData.categories.length === 0 && currentData.tags.length === 0) {
       return;
     }
+    
+    // Include blogId if it exists (for subsequent saves)
     if (blogId) {
       currentData.blogId = blogId;
     }
-    let formData = buildBlogFormData(currentData, blogStatus);
-    if (blogId) {
-      await dispatch(createBlog(formData) as any);
-      toast.success('Draft saved successfully');
+    
+    const payload = buildBlogPayload(currentData, 'draft');
+    const result = await dispatch(createBlog(payload) as any);
+    
+    if (result.payload && result.payload.data && result.payload.data._id) {
+      setBlogId(result.payload.data._id);
+      toast.success(blogId ? 'Draft updated successfully' : 'Draft created successfully');
     } else {
-      const result = await dispatch(createBlog(formData) as any);
-      if (result.payload && result.payload.data && result.payload.data._id) {
-        setBlogId(result.payload.data._id);
-        toast.success('Draft created successfully');
-      }
+      toast.success('Draft saved successfully');
     }
+    
     dispatch(fetchBlogs({}));
   };
 
@@ -154,6 +164,16 @@ const CreateBlogDrawer = ({ isCreateBlogDrawerOpen, toggleDrawer }: CreateBlogPr
               <div className="flex items-center gap-1 text-blue-600">
                 <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                 <span>Publishing...</span>
+              </div>
+            )}
+            {!isSubmitting && blogId && (
+              <div className="flex items-center gap-1 text-green-600">
+                <span>✓ Draft saved</span>
+              </div>
+            )}
+            {!isSubmitting && !blogId && (
+              <div className="flex items-center gap-1 text-gray-500">
+                <span>New draft</span>
               </div>
             )}
           </div>

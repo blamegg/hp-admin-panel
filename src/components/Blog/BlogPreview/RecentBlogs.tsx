@@ -40,13 +40,13 @@ const RecentBlogs = () => {
   return (
     <div className='flex flex-col gap-3'>
         {recentBlogData.map(items=>(
-            <div key={items._id} className='flex  items-start justify-start  gap-2 border-b pb-2 hover:pl-2 transition-all cursor-pointer'>
+            <div key={items._id} className='flex  items-start justify-start  gap-2 border-b pb-2 hover:pl-1 transition-all cursor-pointer'>
                 <div className='w-[300px]  h-[80px] relative'>
                     <Image src={items.image} alt={items.title} fill className='rounded-lg' />
                 </div>
                 <div>
                     <p className='text-xs text-graydark/60 font-bold'>{items.pulishedData}</p>
-                    <h2 className='text-black text-sm font-[500] line-clamp-3'>{items.title}</h2>
+                    <h2 className='text-sm font-[500] line-clamp-3 mt-[2px]' >{items.title}</h2>
                 </div>
             </div>
         ))}

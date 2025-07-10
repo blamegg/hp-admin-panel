@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { fetchBlogCommentsFn, updateBlogCommentFn, deleteBlogCommentFn, addBlogCommentReplyFn, likeBlogCommentFn, dislikeBlogCommentFn } from '@/utility/queryFetcher';
+import { fetchBlogCommentsFn, updateBlogCommentFn, deleteBlogCommentFn, addBlogCommentReplyFn, likeBlogCommentFn, dislikeBlogCommentFn, approveBlogCommentFn, rejectBlogCommentFn } from '@/utility/queryFetcher';
 
 export interface BlogComment {
   _id: string;
@@ -25,12 +25,10 @@ const initialState: BlogCommentsState = {
 
 export const fetchBlogComments = createAsyncThunk(
   "blogComments/fetchBlogComments",
-  async (blogId: string, { rejectWithValue }) => {
-    console.log("blogId", blogId);
+  async ({ blogId, status }: { blogId: string; status: string }, { rejectWithValue }) => {
     try {
-      const response = await fetchBlogCommentsFn(blogId);
-      // Adjust this if your API response structure is different
-      return response ;
+      const response = await fetchBlogCommentsFn(blogId, status);
+      return response;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data?.message || "Failed to fetch blog comments");
     }
@@ -102,6 +100,32 @@ export const dislikeBlogComment = createAsyncThunk(
   }
 );
 
+// Approve comment
+export const approveBlogComment = createAsyncThunk(
+  'blogComments/approveBlogComment',
+  async ({ blogId, commentId }: { blogId: string; commentId: string }, { rejectWithValue }) => {
+    try {
+      const response = await approveBlogCommentFn(blogId, commentId);
+      return { commentId, response };
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data?.message || 'Failed to approve comment');
+    }
+  }
+);
+
+// Reject comment
+export const rejectBlogComment = createAsyncThunk(
+  'blogComments/rejectBlogComment',
+  async ({ blogId, commentId }: { blogId: string; commentId: string }, { rejectWithValue }) => {
+    try {
+      const response = await rejectBlogCommentFn(blogId, commentId);
+      return { commentId, response };
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data?.message || 'Failed to reject comment');
+    }
+  }
+);
+
 const blogCommentsSlice = createSlice({
   name: "blogComments",
   initialState,
@@ -146,8 +170,8 @@ const blogCommentsSlice = createSlice({
         function addReply(comments: BlogComment[]): BlogComment[] {
           return comments.map(c =>
             c._id === commentId
-              ? { ...c, replies: [...c.replies, reply] }
-              : { ...c, replies: addReply(c.replies) }
+              ? { ...c, replies: [...(c.replies || []), reply] }
+              : { ...c, replies: addReply(c.replies || []) }
           );
         }
         state.comments = addReply(state.comments);
@@ -175,6 +199,30 @@ const blogCommentsSlice = createSlice({
           );
         }
         state.comments = dislikeComment(state.comments);
+      })
+      // Approve comment
+      .addCase(approveBlogComment.fulfilled, (state, action) => {
+        const { commentId } = action.payload;
+        function approveComment(comments: BlogComment[]): BlogComment[] {
+          return comments.map(c =>
+            c._id === commentId
+              ? { ...c, approved: true, rejected: false }
+              : { ...c, replies: approveComment(c.replies) }
+          );
+        }
+        state.comments = approveComment(state.comments);
+      })
+      // Reject comment
+      .addCase(rejectBlogComment.fulfilled, (state, action) => {
+        const { commentId } = action.payload;
+        function rejectComment(comments: BlogComment[]): BlogComment[] {
+          return comments.map(c =>
+            c._id === commentId
+              ? { ...c, approved: false, rejected: true }
+              : { ...c, replies: rejectComment(c.replies) }
+          );
+        }
+        state.comments = rejectComment(state.comments);
       });
   },
 });
