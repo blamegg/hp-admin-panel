@@ -7,6 +7,7 @@ import LoaderWrapper from '@/components/common/LoaderWrapper';
 import RecentBlogs from './RecentBlogs';
 import Button from '@/components/common/Button';
 import { useRouter } from 'next/navigation';
+import PreviewBlog from './PreviewBlog';
 
 interface BlogPreviewPageProps {
   blog: any;
@@ -27,6 +28,7 @@ const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   const processedContent = prependBaseUrlToImages(blog.content, baseUrl);
   const router = useRouter()
+  console.log(blog)
 
   return (
     <LoaderWrapper loading={loading}>
@@ -105,10 +107,7 @@ const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
               </div>
 
               {/* Content */}
-              <div 
-                className="prose prose-lg max-w-none"
-                dangerouslySetInnerHTML={{ __html: processedContent }}
-              />
+              <PreviewBlog htmlContent={processedContent} />
             </div>
           </div>
         </div>

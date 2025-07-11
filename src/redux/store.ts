@@ -18,6 +18,7 @@ import holidayReducer from "./slice/holiday/holidaySlice";
 import permissionReducer from './slice/permissionSlice';
 import blogReducer from './slice/blog/blogSlice';
 import blogCommentsReducer from './slice/blog/blogCommentsSlice';
+import assetsReducer from './slice/assetsSlice';
 
 
 const authPersistConfig = {
@@ -46,6 +47,7 @@ const store = configureStore({
     permission: permissionReducer,
     blogs: blogReducer,
     blogComments: blogCommentsReducer,
+    assets: assetsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

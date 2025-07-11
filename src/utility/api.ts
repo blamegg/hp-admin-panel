@@ -20,6 +20,7 @@ export const ApiEndpoints = {
   holidays:"/api/v1/holidays",
   holidayTypes: "/api/v1/holidayTypes",
   blogs: "/api/v1/blogs",
+  assets: "/api/v1/assets",
 };
 
 apiClient.interceptors.request.use(

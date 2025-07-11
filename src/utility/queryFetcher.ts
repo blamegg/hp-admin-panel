@@ -524,6 +524,31 @@ export const updateBlogFn = async (id: string, payload: any) => {
   return response.data;
 };
 
+// Asset management APIs
+export const fetchAssetsFn = async (params?: any) => {
+  const response = await apiClient.get(ApiEndpoints.assets, { params });
+  return response.data;
+};
+
+export const uploadAssetFn = async (payload: FormData) => {
+  const response = await apiClient.post(ApiEndpoints.assets, payload, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const deleteAssetFn = async (id: string) => {
+  const response = await apiClient.delete(`${ApiEndpoints.assets}/${id}`);
+  return response.data;
+};
+
+export const updateAssetFn = async (id: string, payload: any) => {
+  const response = await apiClient.put(`${ApiEndpoints.assets}/${id}`, payload);
+  return response.data;
+};
+
 export const fetchBlogByIdFn = async (id: string) => {
   const response = await apiClient.get(`${ApiEndpoints.blogs}/${id}`);
   return response.data;
@@ -550,10 +575,15 @@ export const deleteBlogsByStatusFn = async (status: string) => {
 
 // fetch blog comments
 
-export const fetchBlogCommentsFn = async (id: string, status?: string) => {
-  let url = `${ApiEndpoints.blogs}/${id}/comments`;
+export const fetchBlogCommentsFn = async (
+  id: string,
+  status?: string,
+  page: number = 1,
+  limit: number = 4
+) => {
+  let url = `${ApiEndpoints.blogs}/${id}/comments?page=${page}&limit=${limit}`;
   if (status && status !== '') {
-    url += `?status=${encodeURIComponent(status)}`;
+    url += `&status=${encodeURIComponent(status)}`;
   }
   const response = await apiClient.get(url);
   return response.data;
@@ -573,10 +603,22 @@ export const deleteBlogCommentFn = async (blogId: string, commentId: string) => 
 
 // Add a reply to a blog comment
 export const addBlogCommentReplyFn = async (blogId: string, commentId: string, content: string) => {
-  console.log("blogId", blogId)
-  console.log("comment id", commentId)
-  console.log("content", content)
   const response = await apiClient.post(`${ApiEndpoints.blogs}/${blogId}/comments/${commentId}/reply`, { content });
+  return response.data;
+};
+
+// Fetch replies for a blog comment
+export const fetchCommentRepliesFn = async (blogId: string, commentId: string, page: number = 1, limit: number = 5, status: string = 'Approved') => {
+  let url = `${ApiEndpoints.blogs}/comments/${commentId}/replies?page=${page}&limit=${limit}`;
+  if (status) {
+    url += `&status=${encodeURIComponent(status)}`;
+  }
+  // ?page=${page}&limit=${limit}
+
+  console.log("url", url);
+  const response = await apiClient.get(url);
+      console.log("Api check commment", response.data)
+
   return response.data;
 };
 

@@ -14,6 +14,7 @@ interface Comment {
   replies: Comment[];
   likeCount: number;
   dislikeCount: number;
+  status?: string;
 }
 
 interface CommentItemProps {
@@ -36,7 +37,7 @@ interface CommentItemProps {
   onLike?: () => void;
   onDislike?: () => void;
   isExpanded?: boolean;
-  onToggleReplies?: () => void;
+  // onToggleReplies?: () => void;
   handleCommentStatus?: (action: 'approve' | 'reject') => void;
 }
 
@@ -60,7 +61,7 @@ const CommentItem: React.FC<CommentItemProps> = React.memo(({
   onLike,
   onDislike,
   isExpanded,
-  onToggleReplies,
+  // onToggleReplies,
   handleCommentStatus
 }) => {
   const marginLeft = level * 5; // indentation per level
@@ -167,7 +168,6 @@ const CommentItem: React.FC<CommentItemProps> = React.memo(({
     };
   }, [dropdownOpen, handleClickOutside]);
 
-  console.log("comments", comment )
 
   return (
     <div
@@ -245,7 +245,7 @@ const CommentItem: React.FC<CommentItemProps> = React.memo(({
           </div>
         </div>
       </div>
-      {comment.replies && comment.replies.length > 0 && (
+      {/* {comment.replies && comment.replies.length > 0 && (
         <button
           className="text-xs border-b-[1.5px] border-graydark/20 ml-13"
           onClick={onToggleReplies}
@@ -253,7 +253,7 @@ const CommentItem: React.FC<CommentItemProps> = React.memo(({
         >
           Reply ({comment.replies.length}) {isExpanded ? '▲' : '▼'}
         </button>
-      )}
+      )} */}
       {/* Render replies recursively */}
       <div className="ps-8">
         {/* Reply input UI */}
@@ -272,8 +272,7 @@ const CommentItem: React.FC<CommentItemProps> = React.memo(({
                 type="submit"
                 name="Reply"
                 className="px-2 py-1 bg-success text-white rounded text-xs"
-                onClick={handleReplySubmit}
-              ></Button>
+              />
               <Button
                 type="button"
                 name="Cancel"
