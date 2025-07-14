@@ -35,6 +35,7 @@ export const fetchAssets = createAsyncThunk(
   async (params: any, { rejectWithValue }) => {
     try {
       const response = await fetchAssetsFn(params);
+      console.log("api", response)
       return { ...response, requestId: params.requestId };
     } catch (err: any) {
       return rejectWithValue(err?.response?.data?.message || "Failed to fetch assets");
@@ -111,8 +112,9 @@ const assetsSlice = createSlice({
       })
       .addCase(fetchAssets.fulfilled, (state, action) => {
         state.loading = false;
-        state.assets = action.payload.data;
-        state.totalCount = action.payload.pagination.total;
+        console.log("assets action", action);
+        state.assets = action.payload.data.files;
+        state.totalCount = action.payload.data.pagination.total;
       })
       .addCase(fetchAssets.rejected, (state, action) => {
         state.loading = false;

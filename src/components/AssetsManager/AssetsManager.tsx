@@ -6,11 +6,11 @@ import { Dialog, DialogContent, DialogTitle, IconButton, MenuItem, Select, Input
 import { Close as CloseIcon, Search as SearchIcon, Upload as UploadIcon, FolderOpen as FolderIcon } from '@mui/icons-material';
 import { toast } from 'sonner';
 import AssetGrid from './AssetGrid';
-import UploadZone from './UploadZone';
 import { Asset } from '../../types/asset';
 import { RootState } from '@/redux/store';
 import { fetchAssets, uploadAsset, setSearchParams } from '@/redux/slice/assetsSlice';
 import CustomPagination from '../CustomPagination';
+import useDebounce from '@/hooks/useDebounce';
 
 interface AssetsManagerProps {
   open: boolean;
@@ -34,24 +34,39 @@ const AssetsManager: React.FC<AssetsManagerProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [allLoaded, setAllLoaded] = useState(false);
 
-  console.log("assets", assets)
+  const debouncedSearchTerm = useDebounce(searchTerm, 400);
+  const debouncedFileType = useDebounce(fileType, 400);
 
-  // Fetch assets when searchTerm, fileType, page, or limit changes
+  // Fetch assets when dialog is opened (initial fetch)
   useEffect(() => {
     if (open) {
       dispatch(fetchAssets({
-        name: searchTerm,
-        type: fileType,
+        name: debouncedSearchTerm,
+        type: debouncedFileType,
         page,
         limit,
       }) as any);
     }
-  }, [open, searchTerm, fileType, page, limit, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Fetch assets when debounced searchTerm, fileType, page, or limit change (but only if dialog is open)
+  useEffect(() => {
+    if (open) {
+      dispatch(fetchAssets({
+        name: debouncedSearchTerm,
+        type: debouncedFileType,
+        page,
+        limit,
+      }) as any);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm, debouncedFileType, page, limit]);
 
   // Reset to page 1 when searchTerm or fileType changes
   useEffect(() => {
     setPage(1);
-  }, [searchTerm, fileType]);
+  }, [debouncedSearchTerm, debouncedFileType]);
 
   // Show error toast
   useEffect(() => {

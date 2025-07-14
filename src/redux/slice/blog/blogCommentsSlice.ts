@@ -183,11 +183,10 @@ const blogCommentsSlice = createSlice({
       })
       .addCase(fetchBlogComments.fulfilled, (state, action) => {
         state.loading = false;
-        console.log("api", action.payload)
         state.comments = action.payload.data || [];
-        state.total = action.payload.pagination?.total || 0;
-        state.currentPage = action.payload.pagination?.page || 1;
-        state.limit = action.payload.pagination?.limit || 4;
+        // state.total = action.payload.data.pagination?.total || 0;
+        // state.currentPage = action.payload.data.pagination?.page || 1;
+        // state.limit = action.payload.data.pagination?.limit || 4;
       })
       .addCase(fetchBlogComments.rejected, (state, action) => {
         state.loading = false;
@@ -216,11 +215,15 @@ const blogCommentsSlice = createSlice({
       // Add reply
       .addCase(addBlogCommentReply.fulfilled, (state, action) => {
         const { commentId, reply } = action.payload;
-        function addReply(comments: BlogComment[]): BlogComment[] {
+        
+        console.log("addblogcomment replies", action.payload)
+        const replyObj = reply.data ? reply.data : reply; // Use reply.data if present, else reply
+        function addReply(comments: BlogComment[] = []): BlogComment[] {
+          if (!Array.isArray(comments)) return [];
           return comments.map(c =>
             c._id === commentId
-              ? { ...c, replies: [...(c.replies || []), reply] }
-              : { ...c, replies: addReply(c.replies || []) }
+              ? { ...c, replies: [...(Array.isArray(c.replies) ? c.replies : []), replyObj] }
+              : { ...c, replies: addReply(c.replies as BlogComment[] || []) }
           );
         }
         state.comments = addReply(state.comments);
@@ -268,11 +271,16 @@ const blogCommentsSlice = createSlice({
       })
       .addCase(fetchCommentReplies.fulfilled, (state, action) => {
         const { commentId, data, page } = action.payload;
+
+
         state.repliesLoading[commentId] = false;
+
+        const repliesArray = Array.isArray(data.data.replies) ? data.data.replies : [];
+
         if (!state.replies[commentId] || page === 1) {
-          state.replies[commentId] = data.data || [];
+          state.replies[commentId] = repliesArray;
         } else {
-          state.replies[commentId] = [...state.replies[commentId], ...(data.data || [])];
+          state.replies[commentId] = [...state.replies[commentId], ...repliesArray];
         }
         state.repliesPagination[commentId] = {
           page,

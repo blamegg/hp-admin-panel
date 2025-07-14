@@ -15,11 +15,10 @@ const BlogPreviewPageWrapper = () => {
   });
 
   if (isLoading) return <div className="text-center py-10 text-lg">Loading...</div>;
-  // if (error || !blog) return <div className="text-center py-10 text-lg">Blog not found</div>;
 
   return (
     <div className=" px-10 py-10">
-      <BlogPreviewPage blog={blog} />
+      <BlogPreviewPage blog={blog.data} />
     </div>
   )
 };

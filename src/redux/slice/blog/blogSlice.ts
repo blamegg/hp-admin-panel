@@ -136,11 +136,12 @@ const blogSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchBlogs.fulfilled, (state, action) => {
+        console.log("actions", action.payload)
         state.loading = false;
-        state.blogs = action.payload.data || [];
-        state.total = action.payload.pagination.total || 0;
-        state.currentPage = action.payload.pagination.page || 1;
-        state.limit = action.payload.pagination.limit || 10;
+        state.blogs = action.payload.data.blogs || [];
+        state.total = action.payload.data.pagination.total || 0;
+        state.currentPage = action.payload.data.pagination.page || 1;
+        state.limit = action.payload.data.pagination.limit || 10;
       })
       .addCase(fetchBlogs.rejected, (state, action) => {
         state.loading = false;

@@ -6,11 +6,25 @@ import "react-quill/dist/quill.snow.css";
 import { AssetsManager } from "../AssetsManager";
 import { Asset } from "@/types/asset";
 
+// --- Add these imports for image resize and align ---
+import Quill from "quill";
+import ImageResize from "quill-image-resize-module-react";
+import ImageRemoveOverlay from "./QuillImageRemove";
+
+// Remove top-level registration
+
 const toolbarOptions = [
-  [{ 'header': [1, 2, false] }],
-  ['bold', 'italic', 'underline', 'strike'],
+  [{ 'font': [] }],
+  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+  [{ 'size': ['small', false, 'large', 'huge'] }],
+  ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
+  [{ 'color': [] }, { 'background': [] }],
+  [{ 'script': 'sub'}, { 'script': 'super' }],
   [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-  ['link', 'image'], // Keep image option for custom handler
+  [{ 'indent': '-1'}, { 'indent': '+1' }],
+  [{ 'direction': 'rtl' }],
+  [{ 'align': [] }],
+  ['link', 'image', 'video'],
   ['clean']
 ];
 
@@ -28,6 +42,25 @@ let globalQuillInstance: any = null;
 
 export default function BlogEditor({ value, onChange, error }: BlogEditorProps) {
   const [showAssetsManager, setShowAssetsManager] = useState(false);
+
+  // Register Quill modules in useEffect to avoid Attributor error
+  useEffect(() => {
+    if (typeof window !== "undefined" && Quill) {
+      try {
+        if (!(Quill as any)._imageResizeRegistered) {
+          Quill.register("modules/imageResize", ImageResize);
+          (Quill as any)._imageResizeRegistered = true;
+        }
+        if (!(Quill as any)._imageRemoveRegistered) {
+          Quill.register("modules/imageRemove", ImageRemoveOverlay);
+          (Quill as any)._imageRemoveRegistered = true;
+        }
+      } catch (err) {
+        // Optionally log error
+        // console.error('Quill module registration error:', err);
+      }
+    }
+  }, []);
 
   // Custom image handler
   const imageHandler = useCallback(() => {
@@ -79,7 +112,11 @@ export default function BlogEditor({ value, onChange, error }: BlogEditorProps) 
       handlers: {
         image: imageHandler
       }
-    }
+    },
+    imageResize: {
+      modules: [ 'Resize', 'DisplaySize', 'Toolbar' ]
+    },
+    imageRemove: true
   };
 
   return (

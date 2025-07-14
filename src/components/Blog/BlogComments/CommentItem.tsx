@@ -1,11 +1,11 @@
 
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
-import BlogProfile from "../../assets/blog/blogProfile.png"
+import BlogProfile from "../../../assets/blog/blogProfile.png"
 import Image from "next/image";
-import { AiFillDislike, AiFillLike, AiOutlineDislike, AiOutlineLike } from "react-icons/ai";
+import {AiFillLike} from "react-icons/ai";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { TbMessageFilled } from "react-icons/tb";
-import Button from "../common/Button";
+import Button from "../../common/Button";
 
 interface Comment {
   _id: string;
@@ -198,7 +198,6 @@ const CommentItem: React.FC<CommentItemProps> = React.memo(({
                     type="submit"
                     name="Save"
                     className="px-2 py-1 bg-success text-white rounded text-xs"
-                    onClick={handleSave}
                   ></Button>
                   <Button
                     type="button"
@@ -213,49 +212,37 @@ const CommentItem: React.FC<CommentItemProps> = React.memo(({
             )}
           </p>
         </div>
+      
         {/* Actions like: likes,  dislikes, reply */}
-        <div className="flex items-center justify-start gap-5 mt-2">
-          {/* like and dislike */}
-          <div className="flex items-center justify-start gap-4">
-            <div className="flex items-center gap-1 cursor-pointer" onClick={handleLike}>
-              <AiFillLike />
-              <p className="text-xs">{comment.likeCount}</p>
-            </div>
-            {/* <div className="flex items-center gap-1 cursor-pointer" onClick={handleDislike}>
-              <AiFillDislike />
-              <p className="text-xs">{comment.dislikeCount}</p>
-            </div> */}
-          </div>
-          <TbMessageFilled onClick={handleReply} className="cursor-pointer" />
-          <div className="relative" ref={dropdownRef}>
-            <button ref={triggerRef} onClick={handleDropdownToggle}>
-              <BsThreeDotsVertical />
-            </button>
-            {dropdownOpen && (
-              <div
-                className={`absolute z-10 right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg
-                  ${dropdownDirection === 'down' ? 'top-full' : 'bottom-full mb-2'}`}
-              >
-                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={handleEdit}>Edit</button>
-                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={handleDelete}>Delete</button>
-                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); if (handleCommentStatus) handleCommentStatus('approve'); }}>Approve</button>
-                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); if (handleCommentStatus) handleCommentStatus('reject'); }}>Reject</button>
-              </div>
-            )}
+
+       {!isReplying && !editing && (
+        <div className="flex justify-start items-center gap-5 mt-1">
+        <div className="flex items-center justify-start gap-4">
+          <div className="flex items-center gap-1 cursor-pointer" onClick={handleLike}>
+            <AiFillLike />
+            <p className="text-xs">{comment.likeCount}</p>
           </div>
         </div>
-      </div>
-      {/* {comment.replies && comment.replies.length > 0 && (
-        <button
-          className="text-xs border-b-[1.5px] border-graydark/20 ml-13"
-          onClick={onToggleReplies}
-          type="button"
-        >
-          Reply ({comment.replies.length}) {isExpanded ? '▲' : '▼'}
-        </button>
-      )} */}
-      {/* Render replies recursively */}
-      <div className="ps-8">
+        <TbMessageFilled onClick={handleReply} className="cursor-pointer" />
+        <div className="relative" ref={dropdownRef}>
+          <button ref={triggerRef} onClick={handleDropdownToggle}>
+            <BsThreeDotsVertical />
+          </button>
+          {dropdownOpen && (
+            <div
+              className={`absolute z-10 right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg
+                ${dropdownDirection === 'down' ? 'top-full' : 'bottom-full mb-2'}`}
+            >
+              <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={handleEdit}>Edit</button>
+              <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={handleDelete}>Delete</button>
+              <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); if (handleCommentStatus) handleCommentStatus('approve'); }}>Approve</button>
+              <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { setDropdownOpen(false); if (handleCommentStatus) handleCommentStatus('reject'); }}>Reject</button>
+            </div>
+          )}
+        </div>
+
+        </div>
+            )}
         {/* Reply input UI */}
         <div >
         {isReplying && (
@@ -283,6 +270,7 @@ const CommentItem: React.FC<CommentItemProps> = React.memo(({
           </form>
         )}
         </div>
+        {/* Render nested replies (children) */}
         {children}
       </div>
     </div>

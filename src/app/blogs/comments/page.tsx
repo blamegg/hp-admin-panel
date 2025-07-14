@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import CommentList from "@/components/BlogComments";
+import CommentList from "@/components/Blog/BlogComments";
 
 export default function CommentsPage() {
   

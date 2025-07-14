@@ -1,5 +1,4 @@
 'use client'
-
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
@@ -26,8 +25,14 @@ interface LocalComment extends Omit<Comment, 'replies'> {
 
 
 const CommentList: React.FC = () => {
+
   const dispatch = useDispatch();
-  const { comments: blogComments, loading, error, total, currentPage: reduxPage, limit: reduxLimit, moreCommentsLoading, replies, repliesLoading, repliesPagination } = useSelector((state: RootState) => state.blogComments);
+  const { comments: blogCommentsRaw, loading, error, total, currentPage: reduxPage, limit: reduxLimit, moreCommentsLoading, replies, repliesLoading, repliesPagination } = useSelector((state: RootState) => state.blogComments);
+
+  const blogComments = Array.isArray(blogCommentsRaw) ? blogCommentsRaw : (blogCommentsRaw && Array.isArray(blogCommentsRaw.comments) ? blogCommentsRaw.comments : []);
+
+  const pagination = blogCommentsRaw && blogCommentsRaw.pagination ? blogCommentsRaw.pagination : {};
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [replyingId, setReplyingId] = useState<string | null>(null);
@@ -41,10 +46,6 @@ const CommentList: React.FC = () => {
   const [repliesOpen, setRepliesOpen] = useState<{ [commentId: string]: boolean }>({});
   const [repliesPage, setRepliesPage] = useState<{ [commentId: string]: number }>({});
 
-  useEffect(() => {
-    console.log("comments", blogComments);
-    console.log('replies', replies);
-  }, [blogComments, replies]);
 
   useEffect(() => {
     if (blogId) {
@@ -93,7 +94,6 @@ const CommentList: React.FC = () => {
 
   // When reply is submitted
   const handleReplySubmit = (id: string) => {
-    console.log("pId", id);
     if (replyValue.trim()) {
       dispatch(addBlogCommentReply({ blogId, commentId: id, content: replyValue }) as any)
         .then(() => {
@@ -121,25 +121,16 @@ const CommentList: React.FC = () => {
     dispatch(dislikeBlogComment({ blogId, commentId: id }) as any);
   };
 
-  const handleToggleReplies = (id: string) => {
-    setExpandedReplies(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) newSet.delete(id);
-      else newSet.add(id);
-      return newSet;
-    });
-  };
 
-
-  // Helper to render replies
-  function renderReplies(commentId: string) {
+  // Helper to render replies (recursive)
+  function renderReplies(commentId: string, level = 1) {
     const replyList = replies[commentId] || [];
     const isLoading = repliesLoading[commentId];
     const pagination = repliesPagination[commentId] || { page: 1, hasNext: false };
     return (
       <div className="ml-8 mt-2">
         {isLoading && <div className="py-2 text-center text-gray-400">Loading replies...</div>}
-        {replyList.map(reply => renderComment(reply, 1))}
+        {replyList.map(reply => renderComment(reply, level))}
         {pagination.hasNext && !isLoading && (
           <button
             className="mt-2 px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 text-sm text-primary"
@@ -157,48 +148,49 @@ const CommentList: React.FC = () => {
   }
 
   // Helper to render comments recursively (top-level only calls this for replies)
-  function renderComment(comment: LocalComment, level = 0) {
-    const isExpanded = expandedReplies.has(comment._id);
-    const showReplies = repliesOpen[comment._id];
-    // Handler for dropdown actions
-    const handleCommentStatus = async (action: 'approve' | 'reject') => {
-      const status = action === 'approve' ? 'Approved' : 'Rejected';
-      await dispatch(updateBlogCommentStatus({ blogId, commentId: comment._id, status }) as any);
-      toast.success('Status updated successfully');
-      await dispatch(fetchBlogComments({ blogId, status: statusFilter }) as any);
-    };
-    return (
-      <div key={comment._id} className="mb-4">
-        <CommentItem
-          comment={comment}
-          level={level}
-          isEditing={editingId === comment._id}
-          editValue={editingId === comment._id ? editValue : comment.content}
-          onEdit={() => handleEdit(comment._id, comment.content)}
-          onEditValueChange={setEditValue}
-          onSave={() => handleSave(comment._id)}
-          onCancel={handleCancel}
-          isReplying={replyingId === comment._id}
-          replyValue={replyingId === comment._id ? replyValue : ""}
-          onReply={() => handleReply(comment._id)}
-          onReplyValueChange={setReplyValue}
-          onReplySubmit={() => handleReplySubmit(comment._id)}
-          onReplyCancel={handleReplyCancel}
-          onDelete={() => handleDelete(comment._id)}
-          onLike={() => handleLike(comment._id)}
-          onDislike={() => handleDislike(comment._id)}
-          isExpanded={isExpanded}
-          handleCommentStatus={handleCommentStatus}
-        />
+function renderComment(comment: LocalComment, level = 0) {
+  const isExpanded = expandedReplies.has(comment._id);
+  const showReplies = repliesOpen[comment._id];
+
+  const handleCommentStatus = async (action: 'approve' | 'reject') => {
+    const status = action === 'approve' ? 'Approved' : 'Rejected';
+    await dispatch(updateBlogCommentStatus({ blogId, commentId: comment._id, status }) as any);
+    toast.success('Status updated successfully');
+    await dispatch(fetchBlogComments({ blogId, status: statusFilter }) as any);
+  };
+
+  return (
+    <div key={comment._id} className="mb-4">
+      <CommentItem
+        comment={comment}
+        level={level}
+        isEditing={editingId === comment._id}
+        editValue={editingId === comment._id ? editValue : comment.content}
+        onEdit={() => handleEdit(comment._id, comment.content)}
+        onEditValueChange={setEditValue}
+        onSave={() => handleSave(comment._id)}
+        onCancel={handleCancel}
+        isReplying={replyingId === comment._id}
+        replyValue={replyingId === comment._id ? replyValue : ""}
+        onReply={() => handleReply(comment._id)}
+        onReplyValueChange={setReplyValue}
+        onReplySubmit={() => handleReplySubmit(comment._id)}
+        onReplyCancel={handleReplyCancel}
+        onDelete={() => handleDelete(comment._id)}
+        onLike={() => handleLike(comment._id)}
+        onDislike={() => handleDislike(comment._id)}
+        isExpanded={isExpanded}
+        handleCommentStatus={handleCommentStatus}
+      >
         {/* Replies Button for all levels, only if there are replies or more can be loaded */}
         {(repliesPagination[comment._id]?.hasNext || (replies[comment._id] && replies[comment._id].length > 0)) && (
           <button
             className="ml-4 mt-1 px-3 py-1 rounded bg-blue-50 hover:bg-blue-100 text-sm text-blue-700"
             onClick={() => {
               if (!showReplies) {
-                setRepliesOpen(prev => ({ ...prev, [comment._id]: true })); // Only open this one
+                setRepliesOpen(prev => ({ ...prev, [comment._id]: true })); 
               } else {
-                setRepliesOpenRecursive(comment._id, false); // Recursively close all descendants
+                setRepliesOpenRecursive(comment._id, false); 
               }
             }}
           >
@@ -206,10 +198,12 @@ const CommentList: React.FC = () => {
           </button>
         )}
         {/* Replies List - only show if open */}
-        {showReplies && renderReplies(comment._id)}
-      </div>
-    );
-  }
+        {showReplies && renderReplies(comment._id, level + 1)}
+      </CommentItem>
+    </div>
+  );
+}
+
 
   // Add useEffect in main component to auto-fetch replies for all comments/replies
   useEffect(() => {
@@ -226,7 +220,7 @@ const CommentList: React.FC = () => {
     if (blogComments && blogComments.length > 0) {
       fetchRepliesRecursively(blogComments);
     }
-  }, [blogComments, replies, blogId, statusFilter]);
+  }, [blogComments, blogId, statusFilter]);
 
   // Helper to recursively set repliesOpen for all descendants
   function setRepliesOpenRecursive(commentId: string, open: boolean) {
@@ -285,9 +279,9 @@ const CommentList: React.FC = () => {
           {loading && <div className="text-center py-2">Loading comments...</div>}
           {error && <div className="text-center py-2 text-danger">{error}</div>}
           <h2 className="font-bold md:text-xl">Comments</h2>
-          {blogComments.map(comment => renderComment(comment))}
+          {blogComments.map((comment: LocalComment) => renderComment(comment))}
           {/* Load More Button */}
-          {total > blogComments.length && !loading && (
+          {pagination.total > blogComments.length && !loading && (
             <div className="flex justify-center mt-6">
               <button
                 className="px-5 py-2 rounded bg-primary text-white hover:bg-primary/90 font-semibold text-base shadow"

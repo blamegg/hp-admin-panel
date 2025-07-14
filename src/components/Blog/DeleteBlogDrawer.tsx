@@ -4,7 +4,7 @@ import ModalHeader from '../common/ModalHeader';
 import Button from '../common/Button';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { deleteBlog, deleteBlogsBulk, deleteBlogsByStatus, deleteAllBlogs, fetchBlogs } from '@/redux/slice/blog/blogSlice';
+import { deleteBlog, deleteBlogsBulk, deleteBlogsByStatus, fetchBlogs } from '@/redux/slice/blog/blogSlice';
 import { toast } from 'sonner';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { ImSpinner2 } from 'react-icons/im';
@@ -21,33 +21,33 @@ const DeleteBlogDrawer = ({ isDeleteBlogDrawerOpen, toggleDrawer, blog, action, 
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
 
-  const handleDelete = async () => {
-    setLoading(true);
-    try {
-      if (action === 'single' && blog) {
-        await dispatch(deleteBlog(blog._id) as any);
-        toast.success('Blog deleted successfully');
-      } else if (action === 'selected' && selectedBlogs.length > 0) {
-        await dispatch(deleteBlogsBulk(selectedBlogs.map(b => b._id)) as any);
-        toast.success('Selected blogs deleted successfully');
-      } else if (action === 'all') {
-        await dispatch(deleteAllBlogs() as any);
-        toast.success('All blogs deleted successfully');
-      } else if (action === 'draft') {
-        await dispatch(deleteBlogsByStatus('draft') as any);
-        toast.success('All drafted blogs deleted successfully');
-      } else if (action === 'published') {
-        await dispatch(deleteBlogsByStatus('published') as any);
-        toast.success('All published blogs deleted successfully');
-      }
-      dispatch(fetchBlogs({}));
-      toggleDrawer(false);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Failed to delete blog(s)');
-    } finally {
-      setLoading(false);
+ const handleDelete = async () => {
+  setLoading(true);
+  try {
+    let response;
+    if (action === 'single' && blog) {
+      response = await dispatch(deleteBlog(blog._id) as any);
+    } else if (action === 'selected' && selectedBlogs.length > 0) {
+      const blogTobeDelete = selectedBlogs.map(blog => blog._id);
+      response = await dispatch(deleteBlogsBulk(blogTobeDelete) as any);
+    } else if (action === 'draft') {
+      response = await dispatch(deleteBlogsByStatus('draft') as any);
+    } else if (action === 'published') {
+      response = await dispatch(deleteBlogsByStatus('published') as any);
     }
-  };
+
+    if (response?.payload?.message) {
+      toast.success(response.payload.message);
+    }
+    dispatch(fetchBlogs({}));
+    toggleDrawer(false);
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error?.response?.data?.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getConfirmText = () => {
     if (action === 'single') {

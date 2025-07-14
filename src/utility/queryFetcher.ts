@@ -521,6 +521,7 @@ export const createBlogFn = async (payload: any) => {
 export const updateBlogFn = async (id: string, payload: any) => {
   console.log('[updateBlogFn] Payload being sent:', payload);
   const response = await apiClient.put(`${ApiEndpoints.blogs}/${id}`, payload);
+  console.log(response)
   return response.data;
 };
 

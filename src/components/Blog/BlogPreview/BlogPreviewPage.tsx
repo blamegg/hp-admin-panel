@@ -8,6 +8,10 @@ import RecentBlogs from './RecentBlogs';
 import Button from '@/components/common/Button';
 import { useRouter } from 'next/navigation';
 import PreviewBlog from './PreviewBlog';
+import CommentItem from '../BlogComments/CommentItem';
+import CommentList from '../BlogComments';
+import { useQuery } from '@tanstack/react-query';
+import { fetchBlogByIdFn } from '@/utility/queryFetcher';
 
 interface BlogPreviewPageProps {
   blog: any;
@@ -16,7 +20,6 @@ interface BlogPreviewPageProps {
 function prependBaseUrlToImages(html: string, baseUrl: string) {
   if (!baseUrl) return html;
   const cleanBase = baseUrl.replace(/\/$/, '');
-  // Replace <img src="..."> with <img src="BASE_URL/..."> for relative URLs
   return html.replace(/<img\s+([^>]*?)src=["'](?!https?:\/\/|\/\/)([^"'>]+)["']/gi, (match, pre, src) => {
     const cleanSrc = src.replace(/^\/+/, '');
     return `<img ${pre}src=\"${cleanBase}/${cleanSrc}\"`;
@@ -24,11 +27,19 @@ function prependBaseUrlToImages(html: string, baseUrl: string) {
 }
 
 const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
+
+   const { data: blogComments, isLoading, error } = useQuery({
+      queryKey: ["blog", blog._id],
+      queryFn: () => fetchBlogByIdFn(blog._id as string),
+      enabled: !! blog._id,
+    });
+  
   const loading = useSelector((state: RootState) => state.blogs.loading);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   const processedContent = prependBaseUrlToImages(blog.content, baseUrl);
+  // const processedContent = baseUrl
   const router = useRouter()
-  console.log(blog)
+  console.log(blog.data)
 
   return (
     <LoaderWrapper loading={loading}>
@@ -108,6 +119,7 @@ const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
 
               {/* Content */}
               <PreviewBlog htmlContent={processedContent} />
+              <CommentList />
             </div>
           </div>
         </div>
@@ -119,12 +131,6 @@ const BlogPreviewPage: React.FC<BlogPreviewPageProps> = ({ blog }) => {
               <h3 className="text-lg font-semibold mb-4">Recent Posts</h3>
               <div className="space-y-4">
                 <RecentBlogs />
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow-md py-3 px-4 my-5">
-              <h3 className="text-lg font-semibold mb-4">Blog Comments </h3>
-              <div className=" flex items-center justify-center">
-                  <Button type='button' name='Comments' onClick={()=> router.push(`/blogs/comments/${blog._id}`)} className='bg-blue-400'   />
               </div>
             </div>
           </div>
