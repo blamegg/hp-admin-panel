@@ -114,14 +114,14 @@ const Report = () => {
                                 {/* Standup Section */}
                                 <div className="mb-1">
                                     <Typography className="!text-form-strokedark !text-base font-semibold"># Standup</Typography>
-                                    <Typography className="text-gray-600 !text-xs"><span className="!font-semibold">Yesterday's Task:</span> {item.standup.yesterdayTask}</Typography>
-                                    <Typography className="text-gray-600 !text-xs"><span className="!font-semibold">Today's Task:</span> {item.standup.todayTask}</Typography>
+                                    <Typography className="text-gray-600 !text-xs"><span className="!font-semibold">Yesterday&apos;s Task:</span> {item.standup.yesterdayTask}</Typography>
+                                    <Typography className="text-gray-600 !text-xs"><span className="!font-semibold">Today&apos;s Task:</span> {item.standup.todayTask}</Typography>
                                 </div>
 
                                 {/* Report Section */}
                                 <div>
                                     <Typography className="font-semibold text-gray-700 !text-form-strokedark  !text-base"># Report</Typography>
-                                    <Typography className="text-gray-600 !text-xs"><span className="!font-semibold">Today's Task:</span> {item.report.todayTask}</Typography>
+                                    <Typography className="text-gray-600 !text-xs"><span className="!font-semibold">Today&apos;s Task:</span> {item.report.todayTask}</Typography>
                                 </div>
                             </div>
 
