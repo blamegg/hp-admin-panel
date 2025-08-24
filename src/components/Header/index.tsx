@@ -6,14 +6,28 @@ import DropdownUser from "./DropdownUser";
 import Image from "next/image";
 import RTLSwitcher from "./RTLSwitcher";
 import { logo } from "@/assets";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
+  // Get user data from Redux
+  const { user } = useSelector((state: RootState) => state.authReducer);
+  const userInfo = user?.user;
+
+  // Check if user has temporary password - check both possible paths
+  const isTempPassword = user?.isTempPassword || userInfo?.isTempPassword;
+
+  // If user has temporary password, don't show the header
+  if (isTempPassword) {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none print:hidden">
-      <div className="flex flex-grow items-center justify-end px-4 py-2 shadow-2 md:px-6 2xl:px-11">
+      <div className="flex flex-grow items-center justify-end px-4  py-2 shadow-2 md:px-6 2xl:px-11">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
           {/* <!-- Hamburger Toggle BTN --> */}
 
@@ -80,7 +94,7 @@ const Header = (props: {
           </ul>
 
           {/* <!-- User Area --> */}
-          <DropdownUser />
+          {!isTempPassword && <DropdownUser />}
           {/* <!-- User Area --> */}
         </div>
       </div>

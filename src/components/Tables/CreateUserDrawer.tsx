@@ -1,21 +1,21 @@
 "use client";
 import { Drawer } from "@mui/material";
 import React, { useState } from "react";
-import Image from "next/image";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Button from "@/components/common/Button";
 import { usercover } from "@/assets";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createUserFn, } from "@/utility/queryFetcher";
+import { UserDrawerProps } from "@/types/CreateUser";
+import { UserFormInputs, userSchema } from "@/schema/createUserSchema";
+import { toast } from "sonner";
+import Image from "next/image";
+import Button from "@/components/common/Button";
 import Basic from "./UserTab/Basic";
 import Company from "./UserTab/Company";
 import Personalization from "./UserTab/Personalization";
 import ModalHeader from "../common/ModalHeader";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createUserFn } from "@/utility/queryFetcher";
-import { UserDrawerProps } from "@/types/CreateUser";
-import { UserFormInputs, userSchema } from "@/schema/createUserSchema";
-import { toast } from "sonner";
+
 
 const CreateUserDrawer = ({
   direction,
@@ -24,14 +24,19 @@ const CreateUserDrawer = ({
 }: UserDrawerProps) => {
   const [profile, setProfile] = useState<string>("/images/user/user-06.png");
   const [selectedTab, setSelectedTab] = useState<string>("Basic");
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<UserFormInputs>({
-    resolver: zodResolver(userSchema),
-  });
+  const { register, handleSubmit, reset, formState: { errors }} = useForm<UserFormInputs>(
+    {
+      resolver: zodResolver(userSchema), mode: "onSubmit", defaultValues:
+      {
+        name: "",
+        email: "",
+        password: "",
+        mobile: "",
+        role_id: "",
+      },
+    });
+
+
   const queryClient = useQueryClient();
 
   const createUserMn = useMutation({
@@ -39,7 +44,7 @@ const CreateUserDrawer = ({
     onSuccess: () => {
       reset();
       toast.success("Users is successfully created");
-      queryClient.refetchQueries({ queryKey: ["menu-list"] });
+      queryClient.refetchQueries({ queryKey: ["users"] });
       toggleDrawer(false);
     },
     onError: (error: any) => {
@@ -50,6 +55,8 @@ const CreateUserDrawer = ({
       toast.error(errorMessage);
     },
   });
+
+   
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -150,11 +157,10 @@ const CreateUserDrawer = ({
                 (e: string, i: number) => (
                   <div
                     key={i}
-                    className={`cursor-pointer border border-x-2  px-5 py-1 text-[16px] font-medium transition-all duration-200 ease-in-out ${
-                      selectedTab === e
-                        ? "border border-b-white bg-white text-black"
-                        : "border-l-0 border-r-0 border-t-0"
-                    }`}
+                    className={`cursor-pointer border border-x-2  px-5 py-1 text-[16px] font-medium transition-all duration-200 ease-in-out ${selectedTab === e
+                      ? "border border-b-white bg-white text-black"
+                      : "border-l-0 border-r-0 border-t-0"
+                      }`}
                     onClick={() => {
                       setSelectedTab(e);
                     }}
@@ -169,7 +175,7 @@ const CreateUserDrawer = ({
 
           <div className="mt-10 px-10">
             {selectedTab === "Basic" && (
-              <Basic register={register} errors={errors} />
+              <Basic register={register} errors={errors} isDrawerOpen={isDrawerOpen} />
             )}
             {selectedTab === "Company" && (
               <Company register={register} errors={errors} />
@@ -178,13 +184,9 @@ const CreateUserDrawer = ({
               <Personalization register={register} errors={errors} />
             )}
           </div>
-
-          <div className="mx-10 mt-6">
-            <Button
-              name="Submit"
-              type="submit"
-              className="h-[30px] w-[100px] text-[16px]"
-            />
+          <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
+            <Button type="button" name="Close" className="mr-4 bg-graydark"  onClick={() => toggleDrawer(false)} />
+            <Button name="Submit" type="submit" className="bg-success" />
           </div>
         </form>
       </div>

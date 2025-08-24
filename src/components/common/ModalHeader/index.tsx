@@ -14,16 +14,10 @@ const ModalHeader = ({ toggleDrawer, text }: ModalHeaderProps) => {
 
   return (
     <div
-      className="flex items-center justify-between p-4 text-white"
-      style={{
-        background: color,
-      }}
+      className="flex items-center justify-between p-4 text-white "
+      style={{ background: color}}
     >
       <h2 className="text-xl font-bold">{text}</h2>
-      <RxCrossCircled
-        className="cursor-pointer text-[30px] font-bold text-white hover:rounded-full"
-        onClick={() => toggleDrawer(false)}
-      />
     </div>
   );
 };

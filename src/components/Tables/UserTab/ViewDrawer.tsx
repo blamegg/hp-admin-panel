@@ -11,6 +11,7 @@ import { Calendar, dayjsLocalizer, Views } from 'react-big-calendar'
 import dayjs from 'dayjs'
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import BasicTabs from "@/components/tabs";
+import Button from "@/components/common/Button";
 
 const ViewDrawer = ({
     direction,
@@ -20,6 +21,7 @@ const ViewDrawer = ({
     setSelected,
 }: any) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
     const {
         register,
         handleSubmit,
@@ -39,20 +41,13 @@ const ViewDrawer = ({
         }
     }, [selected, reset]);
 
+
+
     const onSubmit = (data: ViewUserFormInputs) => {
-        console.log(data);
     };
 
     const handleDateSelect = (slotInfo: any) => {
         setSelectedDate(slotInfo.start); // Update selected date on slot click
-        console.log("Selected date:", slotInfo.start);
-    };
-    const localizer = dayjsLocalizer(dayjs)
-
-    const leaveData = {
-        totalLeave: 20,
-        takingLeave: 5,
-        remainingLeave: 15,
     };
 
     return (
@@ -72,6 +67,8 @@ const ViewDrawer = ({
         >
             <div role="presentation">
                 <ModalHeader text={"View User"} toggleDrawer={toggleDrawer} />
+                <div className="max-h-[490px] overflow-auto">
+
                 <div className="flex justify-between px-8">
                     <div className="mt-6 px-6 w-4/6">
                         <form onSubmit={handleSubmit(onSubmit)}>
@@ -104,16 +101,16 @@ const ViewDrawer = ({
                                         error={errors.mobile?.message}
                                     />
                                 </div>
-                                    </div>
-                                <div>
-                                    <h1 className="text-black font-semibold mt-3">Address</h1>
-                                    <textarea
-                                        rows={3}
-                                        name=""
-                                        id=""
-                                        className="border w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    ></textarea>
-                                </div>
+                            </div>
+                            <div>
+                                <h1 className="text-black font-semibold mt-3">Address</h1>
+                                <textarea
+                                    rows={3}
+                                    name=""
+                                    id=""
+                                    className="border w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                ></textarea>
+                            </div>
                         </form>
 
                     </div>
@@ -124,7 +121,11 @@ const ViewDrawer = ({
                 <div>
                     <BasicTabs />
                 </div>
+                </div>
 
+                <div className='bg-white flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
+                    <Button type="button" name="Close" className="mr-4 bg-graydark" onClick={() => toggleDrawer(false)} />
+                </div>
             </div>
         </Drawer>
     );

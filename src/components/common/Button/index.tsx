@@ -5,21 +5,29 @@ import { twMerge } from "tailwind-merge";
 
 interface ButtonProps {
   name: string;
-  onClick?: () => void;
+  children?: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   type: "submit" | "reset" | "button" | undefined;
+  disabled?:boolean;
   className?: string;
   loading?: boolean;
   loadingSpinnerClassName?: string;
+  style?: React.CSSProperties;
+  form?: string;
 }
 
 const Button = ({
   name,
+  children,
   onClick,
   type,
   className,
   loading = false,
   loadingSpinnerClassName,
-  ...props
+  disabled,
+  style,
+  form,
+  ...rest
 }: ButtonProps) => {
   const color = useSelector((state: RootState) => state?.app?.color);
 
@@ -27,14 +35,14 @@ const Button = ({
     <button
       type={type}
       onClick={onClick}
-      {...props}
-      disabled={loading}
+      form={form}
+      {...rest}
+      disabled={loading || disabled}
       className={twMerge(
-        `relative flex w-max items-center justify-center rounded px-4 py-[3px] text-[14px] text-white outline-none transition-all duration-200 ease-in-out hover:bg-opacity-80`,
+        `relative flex w-max bg-primary items-center justify-center rounded px-4 py-[3px] text-[14px] text-white outline-none transition-all duration-200 ease-in-out hover:bg-opacity-80`,
         loading && "cursor-not-allowed opacity-70",
         className,
       )}
-      style={{ backgroundColor: color }}
     >
       {loading ? (
         <>
@@ -48,10 +56,10 @@ const Button = ({
               borderTopColor: "#fff",
             }}
           ></span>
-          <span className="opacity-0">{name}</span>
+          <span className="opacity-0">{name || children}</span>
         </>
       ) : (
-        name
+         children || name
       )}
     </button>
   );

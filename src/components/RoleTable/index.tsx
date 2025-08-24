@@ -1,115 +1,379 @@
 'use client'
 import * as React from 'react';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import Button from '@/components/common/Button';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { MdDelete, MdDeleteOutline } from "react-icons/md";
-import { CiEdit } from "react-icons/ci";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/redux/store";
+import { setSelectedRole, clearSelectedRole, fetchRoleFn } from "@/redux/slice/roleSlice";
 
-interface Column {
-  id: 'Role' | 'Permission' | 'Actions';
-  label: string;
-  minWidth?: number;
-  align?: 'right';
-}
+import DataTable from "react-data-table-component";
+import { Typography } from '@mui/material';
+import {
+  deleteRoleFn,
+  menuListFn,
+  RolesInterFace,
+  CurrentRoleDataInterFace,
+  RolesInterFace2,
+} from '@/utility/queryFetcher';
+import { useDirection } from '@/context/DirectionContext';
+import { useHasPermission } from '@/hooks/useUserPermissions';
+import EditRoleDrawer from './EditRoleDrawer';
+import ViewRoleDrawer from './ViewRoleDrawer';
+import { FaEye, FaEdit, FaTrash, FaRegQuestionCircle } from 'react-icons/fa';
+import { Tooltip } from "@mui/material";
+import Button from "@/components/common/Button";
+import CreateRole from './CreateRole';
+import DeleteRole from './DeleteRole';
+import CustomPagination from '../CustomPagination';
+import { usePathname } from 'next/navigation';
+import { toSentenceCase } from '@/utility/helper';
+import { toast } from 'sonner';
 
-const columns: readonly Column[] = [
-  { id: 'Role', label: 'Role', minWidth: 170 },
-  { id: 'Permission', label: 'Permission', minWidth: 300 },
-  { id: 'Actions', label: 'Actions', minWidth: 100 },
-];
-
-interface Data {
-  id: number;
-  role: string;
-  Permission: string;
-}
-
-const rows = [
-  { id: 1, role: 'Admin', Permission: 'Manage all users and settings' },
-  { id: 2, role: 'Manager', Permission: 'Oversee team projects and tasks' },
-  { id: 3, role: 'Developer', Permission: 'Develop and maintain software applications' },
-  { id: 4, role: 'Designer', Permission: 'Create user interface designs' },
-  { id: 5, role: 'QA Engineer', Permission: 'Test software applications' },
-  { id: 6, role: 'DevOps Engineer', Permission: 'Manage infrastructure and deployment' },
-  { id: 7, role: 'Project Manager', Permission: 'Manage project timelines and resources' },
-  { id: 8, role: 'UX Researcher', Permission: 'Conduct user research and analyze data' },
-  { id: 9, role: 'Technical Writer', Permission: 'Create technical documentation' },
-  { id: 10, role: 'Data Analyst', Permission: 'Analyze and interpret data' },
-];
-
-export default function RoleResponsibility() {
-  const [page, setPage] = React.useState(0);
+export default React.memo(function Roles() {
+  const [currentPage, setCurrentPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const dispatch = useDispatch<AppDispatch>();
+  const selectedRole = useSelector((state: RootState) => state.role.selectedRole);
+  const allRoles = useSelector((state: RootState) => state.role.allRoles);
+  const totalDocuments = useSelector((state: RootState) => state.role.totalDocuments);
+  const pathname = usePathname();
+  const isOnRolesPage = pathname.toLowerCase().includes('/roles');
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchBasis, setSearchBasis] = React.useState("name");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState("");
+
+  const [isAddDrawerOpen, setIsAddDrawerOpen] = React.useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false);
+  const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = React.useState(false);
+  const [isViewDrawerOpen, setIsViewDrawerOpen] = React.useState(false);
+  const [isPermissiondrawerOpen, setIsPermissionDrawerOpen] = React.useState(false);
+
+  const { direction } = useDirection();
+  const hasPermission = useHasPermission();
+
+  // Debounce search query to prevent excessive re-renders
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Reset to page 1 when search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, searchBasis]);
+
+  // Memoize filtered data to prevent unnecessary re-renders
+  const filteredRoles = React.useMemo(() => {
+    if (!allRoles) return [];
+    if (!debouncedSearchQuery.trim()) return allRoles;
+    return allRoles.filter((role: any) => {
+      const value = role[searchBasis]?.toString().toLowerCase() || '';
+      return value.includes(debouncedSearchQuery.toLowerCase());
+    });
+  }, [allRoles, debouncedSearchQuery, searchBasis]);
+
+  const fetchRoles = React.useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      dispatch(fetchRoleFn({ page: currentPage, limit: rowsPerPage }));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, rowsPerPage, dispatch]);
+
+
+  React.useEffect(() => {
+    fetchRoles();
+  }, [currentPage, rowsPerPage]); // Only depend on pagination changes
+
+  // Cleanup when leaving roles page
+  React.useEffect(() => {
+    if (!isOnRolesPage) {
+      setLoading(false);
+      setError(null);
+    }
+  }, [isOnRolesPage]);
+
+  React.useEffect(() => {
+    const totalPages = Math.ceil(totalDocuments / rowsPerPage);
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalDocuments, rowsPerPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
   };
+
+  const handleDeleteRole = async (id: string) => {
+    try {
+      await deleteRoleFn(id);
+      toast.success("Role Deleted Successfully")
+      fetchRoles();
+    } catch (err: any) {
+      console.error('Failed to delete role:', err);
+      toast.error("Failed to Delete Role")
+      setError(err.message);
+    }
+  };
+
+  const toggleAddDrawer = (value: boolean) => {
+    setIsAddDrawerOpen(value);
+    if (!value) dispatch(clearSelectedRole());
+  };
+
+  const toggleEditDrawer = (value: boolean) => {
+    setIsEditDrawerOpen(value);
+    if (!value) dispatch(clearSelectedRole());
+  };
+
+  const toggleDeleteDrawer = (value: boolean) => {
+    setIsDeleteDrawerOpen(value);
+    if (!value) dispatch(clearSelectedRole());
+  };
+
+  const toggleViewDrawer = (value: boolean) => {
+    setIsViewDrawerOpen(value);
+    if (!value) dispatch(clearSelectedRole());
+  };
+
+  const togglePermissionDrawer = (value: boolean, role?: CurrentRoleDataInterFace | RolesInterFace | null) => {
+    setIsPermissionDrawerOpen(value);
+    if (value && role) {
+      dispatch(setSelectedRole(role as CurrentRoleDataInterFace));
+    } else if (!value) {
+      dispatch(clearSelectedRole());
+    }
+  };
+
+  const handleDeleteClick = (row: CurrentRoleDataInterFace) => {
+    dispatch(setSelectedRole(row));
+    setIsDeleteDrawerOpen(true);
+  };
+
+  const handleViewClick = (row: CurrentRoleDataInterFace) => {
+    dispatch(setSelectedRole(row));
+    setIsViewDrawerOpen(true);
+  };
+
+
+  const columns = [
+    {
+      name: "S No",
+      selector: (row: CurrentRoleDataInterFace) =>
+        (currentPage - 1) * rowsPerPage + ((allRoles?.indexOf(row) ?? -1) + 1),
+      sortable: true,
+    },
+    {
+      name: "Role",
+      selector: (row: CurrentRoleDataInterFace) => row.name || "",
+      sortable: true,
+    },
+    {
+      name: "Rank",
+      selector: (row: CurrentRoleDataInterFace) => row.rank || "",
+      sortable: true,
+    },
+    // ...(hasAnyActionPermission() ? [
+         {
+      name: "Actions",
+      cell: (row: CurrentRoleDataInterFace) => (
+        <div className="flex gap-3">
+          {/* {hasPermission('Edit Role') && ( */}
+            <button
+              onClick={() => {
+                dispatch(setSelectedRole(row));
+                toggleEditDrawer(true);
+              }}
+              className="text-blue-500 hover:text-blue-700"
+            >
+              <FaEdit />
+            </button>
+          {/* )} */}
+          {hasPermission(toSentenceCase('Delete Role')) && (
+            <button
+              onClick={() => handleDeleteClick(row)}
+              className="text-red-500 hover:text-red-700"
+            >
+              <FaTrash />
+            </button>
+          )}
+          {hasPermission(toSentenceCase('View Role Details')) && (
+            <button
+              onClick={() => {
+                handleViewClick(row);
+              }}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FaEye />
+            </button>
+          )}
+         
+        </div>
+      ),
+    },
+    // ]: [])
+  ];
+
+
+  if (loading) return <Typography>Loading roles...</Typography>;
+  if (error) return <Typography color="error">Error: {error}</Typography>;
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 440 }}>
-        <Table sx={{ padding: "20px" }} stickyHeader aria-label="sticky table">
-          <TableHead >
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  style={{ minWidth: column.minWidth }}
-                  sx={{ fontWeight: 'bold', color: '#333', backgroundColor: '#f8f2f1' }}
-                  align={column.align}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                    <TableCell>{row.role}</TableCell>
-                    <TableCell>{row.Permission}</TableCell>
-                    <TableCell>
-                      <button
-                      >
-                        <CiEdit className='w-5 h-5' />
-                      </button>
-                      <button
-                      >
-                        <MdDeleteOutline className='w-5 h-5 ml-2' />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+    <div className="custom_tbl_container h-[74vh] w-[350px] md:w-full">
+      <div className="grid grid-cols-2 md:flex items-center gap-4  ">
+        <select
+          value={searchBasis}
+          onChange={(e) => setSearchBasis(e.target.value)}
+          className="rounded bg-[#eff4fb] border px-1 py-2 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+        >
+          <option value="name">Role Name</option>
+        </select>
+        <input
+          type="text"
+          placeholder={`Search by ${searchBasis}...`}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="rounded bg-[#eff4fb] border  p-1 text-[12px] text-black outline-none dark:bg-boxdark dark:text-bodydark"
+        />
+        {hasPermission(toSentenceCase('Create Role')) && (
+          <Button
+            name="Create Role"
+            type="button"
+            onClick={() => toggleAddDrawer(true)}
+            className="w-full md:w-auto bg-primary"
+          />
+        )}
+        <Tooltip
+          title="Roles define what users can do and see within the system."
+          arrow
+        >
+          <button>
+            <FaRegQuestionCircle />
+          </button>
+        </Tooltip>
+      </div>
+
+
+      <div className="mt-5 overflow-x-auto ">
+        <DataTable
+          columns={columns}
+          data={filteredRoles}
+          pagination
+          paginationPerPage={rowsPerPage}
+          paginationTotalRows={totalDocuments}
+          highlightOnHover
+          paginationComponent={() => (
+            <CustomPagination
+              rowsPerPage={rowsPerPage}
+              currentPage={currentPage}
+              rowCount={totalDocuments}
+              onChangePage={handlePageChange}
+              onChangeRowsPerPage={handleRowsPerPageChange}
+            />
+          )}
+          className="custom_tbl"
+      customStyles={{
+            header: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                backgroundColor: "#F9FAFB", // Light mode header background
+                color: "#1C243F", // Light mode header text
+              },
+            },
+            headRow: {
+              style: {
+                fontSize: "12px",
+                minHeight: "30px",
+                backgroundColor: "#F9FAFB", // Light mode header row background
+                borderBottomWidth: "1px",
+                borderBottomColor: "#E2E8F0", // stroke
+              },
+            },
+            headCells: {
+              style: {
+                fontWeight: 700,
+                color: "#1C243F", // Light mode header cells text
+                backgroundColor: "#F9FAFB", // Light mode header cells background
+              },
+            },
+            cells: {
+              style: {
+                fontSize: "11px",
+                fontWeight: 500,
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                height: "27px",
+                color: "#1C243F", // Light mode cell text
+                backgroundColor: "transparent", // Allow row background to show through
+              },
+            },
+            rows: {
+              style: {
+                fontSize: "11px",
+                minHeight: "27px",
+                "&:not(:last-of-type)": {
+                  borderBottomStyle: "solid",
+                  borderBottomWidth: "1px",
+                  borderBottomColor: "#E2E8f0", 
+                },
+                backgroundColor: "transprant", 
+                color: "#1C243F", 
+              },
+              highlightOnHoverStyle: {
+                backgroundColor: "#e4e7f7",
+                color: "white",
+                cursor: "pointer",
+              },
+            },
+          }}
+        />
+      </div>
+
+      <CreateRole
+        isDrawerOpen={isAddDrawerOpen}
+        toggleDrawer={toggleAddDrawer}
+        fetchRoles={fetchRoles}
+        togglePermissionDrawer={togglePermissionDrawer}
+        direction={direction}
       />
-    </Paper>
+
+      <EditRoleDrawer
+        direction={direction}
+        isDrawerOpen={isEditDrawerOpen}
+        toggleDrawer={toggleEditDrawer}
+        selectedRole={selectedRole}
+        fetchRoles={fetchRoles}
+      />
+
+      <DeleteRole
+        isDrawerOpen={isDeleteDrawerOpen}
+        toggleDrawer={toggleDeleteDrawer}
+        onDelete={handleDeleteRole}
+        selectedRole={selectedRole}
+        setSelectedRole={setSelectedRole}
+        direction={direction}
+        fetchRoles={fetchRoles}
+      />
+
+      <ViewRoleDrawer  
+        isDrawerOpen={isViewDrawerOpen}
+        toggleDrawer={toggleViewDrawer}
+        selectedRole={selectedRole}
+        direction={direction}
+      />
+    </div>
   );
-}
+})

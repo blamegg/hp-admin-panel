@@ -1,34 +1,48 @@
-import { apiClient, ApiEndpoints } from "@/utility/api";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { dynamicMenuListFn } from "@/utility/queryFetcher";
 
-interface AuthState {
-  menu: any;
+interface MenuListState {
+  menuList: any[] | null;
   menuListError: null | string;
   menuListStatus: "idle" | "loading" | "success" | "failed";
+  lastFetched: number | null;
 }
 
-const initialState: AuthState = {
-  menu: null,
+const initialState: MenuListState = {
+  menuList: null,
   menuListError: null,
   menuListStatus: "idle",
+  lastFetched: null,
 };
 
 export const getMenuList = createAsyncThunk(
-  "menuList/menu",
+  "menuList/getMenuList",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(ApiEndpoints.menu);
-      return response.data;
+      const response = await dynamicMenuListFn();
+      return response;
     } catch (error: any) {
-      return rejectWithValue(error?.response?.data?.message || "failed");
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch menu list");
     }
-  },
+  }
 );
 
 const menuListSlice = createSlice({
   name: "menuList",
   initialState,
-  reducers: {},
+  reducers: {
+    clearMenuList: (state) => {
+      state.menuList = null;
+      state.menuListError = null;
+      state.menuListStatus = "idle";
+      state.lastFetched = null;
+    },
+    setMenuListFromCache: (state, action: PayloadAction<any[]>) => {
+      state.menuList = action.payload;
+      state.menuListStatus = "success";
+      state.lastFetched = Date.now();
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getMenuList.pending, (state) => {
@@ -37,7 +51,8 @@ const menuListSlice = createSlice({
       })
       .addCase(getMenuList.fulfilled, (state, action) => {
         state.menuListStatus = "success";
-        state.menu = action.payload?.data || [];
+        state.menuList = action.payload.data;
+        state.lastFetched = Date.now();
       })
       .addCase(getMenuList.rejected, (state, action) => {
         state.menuListStatus = "failed";
@@ -46,4 +61,5 @@ const menuListSlice = createSlice({
   },
 });
 
+export const { clearMenuList, setMenuListFromCache } = menuListSlice.actions;
 export default menuListSlice.reducer;

@@ -7,11 +7,20 @@ export const apiClient = api.create({
 });
 
 export const ApiEndpoints = {
+  menus:"/api/v1/menus",
+  permissions: `/api/v1/rolePermissionMenu`,
   login: "/api/v1/login",
   register: "/api/v1/signup",
   logout: "/api/v1/logout",
-  menu: "/api/v1/menus",
+  changePassword: "/api/v1/change-password",
   users: "/api/v1/users",
+  roles: "/api/v1/roles",
+  leaves:"/api/v1/leaves",
+  leaveType:"/api/v1/leaveTypes",
+  holidays:"/api/v1/holidays",
+  holidayTypes: "/api/v1/holidayTypes",
+  blogs: "/api/v1/blogs",
+  assets: "/api/v1/assets",
 };
 
 apiClient.interceptors.request.use(

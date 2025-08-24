@@ -6,6 +6,7 @@ interface CustomPaginationProps {
   currentPage: number;
   onChangePage: (page: number) => void;
   onChangeRowsPerPage: (rowsPerPage: number) => void;
+  rowsPerPageOptions?: number[];
 }
 
 const CustomPagination: React.FC<CustomPaginationProps> = ({
@@ -14,6 +15,7 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
   onChangePage,
   currentPage,
   onChangeRowsPerPage,
+  rowsPerPageOptions,
 }) => {
   const pages = Math.ceil(rowCount / rowsPerPage);
   const startEntry = (currentPage - 1) * rowsPerPage + 1;
@@ -66,7 +68,7 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
           key={i}
           className={`rounded-md border px-3 py-0 ${
             i + 1 === currentPage
-              ? "bg-companyRed text-white"
+              ? "bg-primary text-white"
               : "hover:bg-gray-200"
           }`}
           onClick={() => handlePageChange(i + 1)}
@@ -109,10 +111,9 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
           onChange={handleRowsPerPageChange}
           className="rounded-md border px-2 py-1 text-[12px]"
         >
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
+          {(rowsPerPageOptions || [5, 10, 20, 35]).map(opt => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
         </select>
         <button
           className={`rounded-md border px-2 py-0 ${

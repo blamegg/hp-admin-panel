@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 import { FaCheck } from "react-icons/fa";
 
@@ -14,9 +15,11 @@ export const Success = () => {
         Password changed successfully
       </span>
 
-      <button className="w-full cursor-pointer rounded-lg border-primary bg-primary py-2 text-white transition hover:bg-opacity-90 ">
-        Go To Login
-      </button>
+      <Link href="/" className="w-full">
+        <button className="w-full cursor-pointer rounded-lg border-primary bg-primary py-2 text-white transition hover:bg-opacity-90 ">
+          Go To Login
+        </button>
+      </Link>
     </div>
   );
 };

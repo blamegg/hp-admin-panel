@@ -9,6 +9,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import ModalHeader from "../common/ModalHeader";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteUserFn } from "@/utility/queryFetcher";
+import { toast } from "sonner";
 
 interface UserDrawerProps {
   direction: string;
@@ -28,37 +29,50 @@ const DeleteDrawer = ({
   selected,
 }: UserDrawerProps) => {
   const queryClient = useQueryClient();
+  const [deletedUserName, setDeletedUserName] = useState<string>("");
+
   const deleteUserMn = useMutation({
     mutationFn: (userId: string) => deleteUserFn(userId),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["menu-list"] });
+      queryClient.refetchQueries({ queryKey: ["users"] });
+      toast.success(`The user ${deletedUserName} has been successfully deleted.`);
+      toggleDrawer(false);
+      setSelected(null);
+      setDeletedUserName("");
+      deleteUserMn.reset();
     },
   });
 
   const handleDelete = () => {
-    deleteUserMn.mutate(selected._id);
+    if (selected) {
+      setDeletedUserName(selected.name);
+      deleteUserMn.mutate(selected._id);
+    }
+  };
+
+  const handleClose = () => {
+    setDeleteDrawer(false);
+    setSelected(null);
+    setDeletedUserName("");
+    deleteUserMn.reset();
   };
 
   return (
     <Drawer
       anchor={direction === "ltr" ? "right" : "left"}
       open={isDrawerOpen}
-      onClose={() => {
-        setDeleteDrawer(false);
-        setSelected(null);
-        deleteUserMn.reset();
-      }}
+      onClose={handleClose}
       disableEnforceFocus
       PaperProps={{
         sx: {
-          width: "25%",
+          width: "30%",
         },
       }}
     >
       <div role="presentation">
-        <ModalHeader text="Delete Confirmation" toggleDrawer={toggleDrawer} />
+        <ModalHeader text="Delete Confirmation" toggleDrawer={handleClose} />
 
-        <div className="relative mt-[50px] flex flex-col items-center justify-center px-7 pb-7">
+        <div className="relative  flex flex-col items-center justify-center px-7 pb-7 h-[calc(100vh-60px)]">
           {deleteUserMn.isPending && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-75">
               <ImSpinner2 className="animate-spin text-5xl text-companyRed" />
@@ -75,7 +89,7 @@ const DeleteDrawer = ({
               </div>
               <h2 className="mt-2 text-xl font-semibold">User Deleted!</h2>
               <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
-                The user {selected?.name} has been successfully deleted.
+                The user {deletedUserName} has been successfully deleted.
               </h3>
             </>
           ) : (
@@ -89,17 +103,14 @@ const DeleteDrawer = ({
               <h3 className="mt-2 text-center text-[18px] font-semibold text-[#8D8D8D]">
                 Are you sure you want to delete {selected?.name} user?
               </h3>
-              <div className="mt-6 flex w-full items-center justify-center gap-7">
+              
+              <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-full pr-8 border-t-2 border-gray'>
+                <Button type="button" name="Close" className="mr-4 bg-graydark"  onClick={handleClose} />
                 <Button
                   type="button"
                   name="Confirm"
-                  className="bg-green-500"
                   onClick={handleDelete}
-                />
-                <Button
-                  type="button"
-                  name="Cancel"
-                  onClick={() => toggleDrawer(false)}
+                  className="bg-danger"
                 />
               </div>
             </>

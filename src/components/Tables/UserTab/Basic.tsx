@@ -1,7 +1,17 @@
 import React from "react";
 import Input from "@/components/common/Input";
+import Select from "@/components/common/Select";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { CurrentRoleDataInterFace } from "@/utility/queryFetcher";
 
-const Basic = ({ register, errors }: any) => {
+const Basic = ({ register, errors, isDrawerOpen }: any) => {
+
+  const roles = useSelector((state: RootState) => 
+    isDrawerOpen ? state.role.allRoles : []
+  );
+  const roleList = roles?.map((role: CurrentRoleDataInterFace) => ({ value: role._id, label: role.name }));
+  
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <div>
@@ -39,6 +49,15 @@ const Basic = ({ register, errors }: any) => {
           register={register("mobile")}
           error={errors.mobile?.message}
         />
+      </div>
+      <div>
+        <Select
+          label="Role"
+          options={roleList}
+          register={register("role_id")}
+          error={errors.role_id?.message}
+        >
+        </Select>
       </div>
     </div>
   );

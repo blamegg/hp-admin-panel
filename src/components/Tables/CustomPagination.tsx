@@ -26,7 +26,7 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
   return (
     <div className="pagination-container flex items-center justify-between p-4">
       <button
-        className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-700"
+        className="rounded px-3 py-1 border "
         onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
       >
@@ -34,7 +34,7 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
       </button>
       <span>{`Page ${currentPage} of ${totalPages}`}</span>
       <button
-        className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-700"
+        className="rounded px-3 py-1 border "
         onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
       >

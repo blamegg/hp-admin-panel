@@ -4,7 +4,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import AttendanceCalendar from '../AttendanceCalendar';
 import Report from '../Report';
-import LeaveInfo from '../LeaveInfo';
+import LeaveInfo from '../Leaves/LeaveInfo';
 import EmployeeDetailsCard from '../Documents';
 
 interface TabPanelProps {

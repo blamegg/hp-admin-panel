@@ -5,23 +5,25 @@ interface SelectProps {
   options: { value: string; label: string }[];
   register?: any;
   error?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  className?:string;
 }
 
-const Select = ({ label, options, register, error, ...props }: SelectProps) => {
+const Select = ({ label, options, register, error,className, ...props }: SelectProps) => {
   return (
     <>
-      <label className="block text-sm font-medium text-black dark:text-white">
+      <label className="block text-xs font-medium text-black dark:text-white mb-[2px]">
         {label}
       </label>
       <select
-        className={`w-full rounded border bg-gray px-2 py-[5px] text-[13px] font-medium text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${
+        className={`w-full rounded border bg-gray px-2 py-[5px] text-xs font-medium  focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${
           error ? "border-red" : "border-stroke"
         }`}
-        defaultValue=""
         {...register}
         {...props}
       >
-        <option value="" disabled>
+        <option value="">
           Select {label}
         </option>
         {options.map((option) => (

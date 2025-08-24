@@ -77,11 +77,11 @@ export default function AttendanceCalendar() {
     return {};
   };
 
-  const CustomToolbar = ({ label }: ToolbarProps) => (
-    <div className="rbc-toolbar">
-      <span className="rbc-toolbar-label">{label}</span>
-    </div>
-  );
+ const CustomToolbar: React.FC<ToolbarProps<AttendanceEvent, object>> = ({ label }) => (
+  <div className="rbc-toolbar">
+    <span className="rbc-toolbar-label">{label}</span>
+  </div>
+);
 
   const CustomEvent = ({ event }: EventProps<AttendanceEvent>) => (
     <Tooltip
@@ -104,7 +104,7 @@ export default function AttendanceCalendar() {
     </Tooltip>
   );
 
-  const CustomNavigation = ({ onNavigate }: { onNavigate: (action: Navigate) => void }) => (
+  const CustomNavigation = ({ onNavigate }: { onNavigate: (action:  typeof Navigate[keyof typeof Navigate]) => void }) => (
     <>
       <button
         onClick={() => onNavigate(Navigate.PREVIOUS)}
@@ -133,10 +133,6 @@ export default function AttendanceCalendar() {
     }),
     []
   );
-
-  useEffect(() => {
-    console.log("Current date changed:", currentDate);
-  }, [currentDate]);
 
   return (
     <div className="h-[600px] w-[93%] mx-auto p-4 py-4 relative">

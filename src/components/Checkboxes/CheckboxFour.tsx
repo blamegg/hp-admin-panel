@@ -1,38 +1,48 @@
-import { useState } from "react";
+import React from "react";
 
-const CheckboxFour = () => {
-  const [isChecked, setIsChecked] = useState<boolean>(false);
+interface CheckboxFourProps {
+  label: string;
+  id: string;
+  checked: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement> | boolean) => void;
+  disabled?: boolean;
+  className?: string;
+}
 
+const CheckboxFour: React.FC<CheckboxFourProps> = ({
+  label,
+  id,
+  checked,
+  onChange,
+  disabled = false,
+  className = "",
+}) => {
   return (
     <div>
       <label
-        htmlFor="checkboxLabelFour"
-        className="flex cursor-pointer select-none items-center"
+        htmlFor={id}
+        className={`flex  cursor-pointer select-none items-center text-xs font-medium text-black dark:text-white ${className}`}
       >
         <div className="relative">
           <input
             type="checkbox"
-            id="checkboxLabelFour"
+            id={id}
             className="sr-only"
-            onChange={() => {
-              setIsChecked(!isChecked);
-            }}
+            checked={checked}
+            onChange={e => onChange(e)}
+            disabled={disabled}
           />
           <div
-            className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
-              isChecked && "border-primary"
-            }`}
+            className={`mr-1 flex h-3 w-3 items-center justify-center rounded-full  border bg-gray ${checked ? "border-primary" : ""}`}
           >
             <span
-              className={`h-2.5 w-2.5 rounded-full bg-transparent ${
-                isChecked && "!bg-primary"
-              }`}
+              className={`h-full w-full rounded-full bg-transparent ${checked ? "!bg-primary" : ""}`}
             >
               {" "}
             </span>
           </div>
         </div>
-        Checkbox Text
+        {label}
       </label>
     </div>
   );

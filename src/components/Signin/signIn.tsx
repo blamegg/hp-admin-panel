@@ -14,7 +14,6 @@ import { loginUser } from "@/redux/slice/authSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { toast } from "sonner";
 import Button from "../common/Button";
-import { useMutation } from "@tanstack/react-query";
 
 const schema = z.object({
   email: z
@@ -34,6 +33,7 @@ export interface SignInFormData {
 export const Signin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const router = useRouter();
   const {
     control,
@@ -50,10 +50,22 @@ export const Signin = () => {
   );
 
   useEffect(() => {
-    if (user) {
-      router.push("/dashboard");
+    console.log("Signin useEffect triggered:", { user, loginStatus, isNavigating });
+    
+    // Only navigate if we haven't already started navigating
+    if (user && loginStatus === "success" && !isNavigating) {
+      setIsNavigating(true);
+      
+      // Use a small delay to ensure state is fully updated
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 100);
     }
-  }, [router, user]);
+  }, [router, user, loginStatus, isNavigating]);
+
+  // Debug effect to log state changes
+  useEffect(() => {
+  }, [user, loginStatus, isNavigating]);
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -65,24 +77,47 @@ export const Signin = () => {
     setRememberMe(event.target.checked);
   };
 
+ 
   const onSubmit = async (data: SignInFormData) => {
     let toastMessage = "";
 
     try {
       const result = await dispatch(loginUser(data)).unwrap();
+      
       toastMessage = result.message || "Login successful!";
       if (typeof toastMessage !== "string") toastMessage = "unknown error";
       toast.success(toastMessage);
-      router.push("/dashboard");
       reset();
+      
+      // Force navigation after successful login with multiple attempts
+      const attemptNavigation = () => {
+        router.push("/dashboard");
+      };
+      
+      // Try immediate navigation
+      attemptNavigation();
+      
+      // Fallback navigation after a delay
+      setTimeout(() => {
+        console.log("Fallback navigation attempt...");
+        router.push("/dashboard");
+      }, 1000);
+      
+      // Second fallback
+      setTimeout(() => {
+        console.log("Second fallback navigation attempt...");
+        router.push("/dashboard");
+      }, 2000);
+      
     } catch (error: any) {
+      console.error("Login error:", error);
       toastMessage = error || "Login failed. Please try again.";
       if (typeof toastMessage !== "string") toastMessage = "unknown error";
       toast.error(toastMessage);
+      setIsNavigating(false); // Reset navigation state on error
     }
   };
 
-  console.log(loginStatus, "loginStatus");
 
   return (
     <div
@@ -200,7 +235,7 @@ export const Signin = () => {
                 Don&apos;t have an account?{" "}
                 <Link
                   className="font-semibold text-primary hover:underline"
-                  href="/register"
+                  href="/auth/signup"
                 >
                   Sign up
                 </Link>

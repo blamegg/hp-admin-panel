@@ -5,6 +5,21 @@ import authReducer from "./slice/authSlice";
 import appReducer from "./slice/appSlice";
 import messageReducer from "./slice/MessageSlice";
 import menuReducer from "./slice/menuList";
+import roleReducer from "./slice/roleSlice";
+import leavesReducer from './slice/leaves/leaveSclice';
+import leaveTypesReducer from "./slice/leaves/leaveTypesSlice";
+import leaveTypesListReducer from "./slice/leaves/leaveTypesListSlice";
+import leaveSummaryReducer from "./slice/leaves/leaveSummarySlice";
+import leaveModes from './slice/leaves/leaveModeListSlice';
+import holidayTypesReducer from "./slice/holiday/holidayTypesSlice";
+import holidayTypesListReducer from './slice/holiday/holidayTypesListSlice';
+import leaveModeListReducer from "./slice/leaves/leaveModeListSlice";
+import holidayReducer from "./slice/holiday/holidaySlice";
+import permissionReducer from './slice/permissionSlice';
+import blogReducer from './slice/blog/blogSlice';
+import blogCommentsReducer from './slice/blog/blogCommentsSlice';
+import assetsReducer from './slice/assetsSlice';
+
 
 const authPersistConfig = {
   key: "auth",
@@ -19,6 +34,20 @@ const store = configureStore({
     app: appReducer,
     message: messageReducer,
     menu: menuReducer,
+    role: roleReducer,
+    appliedLeaves: leavesReducer,
+    leaveModes: leaveModes,
+    leaveTypes: leaveTypesReducer,
+    leaveTypesList: leaveTypesListReducer,
+    leaveSummaryReducer: leaveSummaryReducer,
+    holidayTypes: holidayTypesReducer,
+    holidayTypesList: holidayTypesListReducer,
+    leaveModeList: leaveModeListReducer,
+    holidays: holidayReducer,
+    permission: permissionReducer,
+    blogs: blogReducer,
+    blogComments: blogCommentsReducer,
+    assets: assetsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

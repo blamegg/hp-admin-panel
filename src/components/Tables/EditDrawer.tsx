@@ -3,19 +3,19 @@ import { Drawer } from "@mui/material";
 import React, { useEffect } from "react";
 import Button from "@/components/common/Button";
 import ModalHeader from "../common/ModalHeader";
-import { UserDrawerProps } from "@/types/CreateUser";
 import Input from "../common/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  EditUserFormInputs,
-  editUserSchema,
-  UserFormInputs,
-  userSchema,
-} from "@/schema/createUserSchema";
+import { EditUserFormInputs, editUserSchema, } from "@/schema/createUserSchema";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateUserFn } from "@/utility/queryFetcher";
+import { CurrentRoleDataInterFace, updateUserFn } from "@/utility/queryFetcher";
 import { toast } from "sonner";
+import Select from "../common/Select";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+import { fetchRoleFn } from "@/redux/slice/roleSlice";
 
 const EditDrawer = ({
   direction,
@@ -25,18 +25,13 @@ const EditDrawer = ({
   setSelected,
 }: any) => {
   const queryClient = useQueryClient();
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<EditUserFormInputs>({
-    resolver: zodResolver(editUserSchema),
-  });
+  const dispatch = useDispatch<AppDispatch>();
+  
+  const { register, handleSubmit, reset, formState: { errors }, getValues, } = useForm<EditUserFormInputs>({ resolver: zodResolver(editUserSchema), });
   const updateUserMn = useMutation({
     mutationFn: (payload: any) => updateUserFn(payload, payload.userId),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["menu-list"] });
+      queryClient.refetchQueries({ queryKey: ["users"] });
       toast.success("User is updated successfully");
       toggleDrawer(false);
     },
@@ -55,15 +50,25 @@ const EditDrawer = ({
         name: selected.name || "",
         email: selected.email || "",
         mobile: String(selected.mobile) || "",
-        password: "",
+        role_id: selected.role._id || ""
       });
     }
   }, [selected, reset]);
 
+  // Fetch roles when drawer is opened
+  useEffect(() => {
+    if (isDrawerOpen) {
+      dispatch(fetchRoleFn({ page: 1, limit: 100 })); // Fetch all roles for dropdown
+    }
+  }, [isDrawerOpen, dispatch]);
+
   const onSubmit = (data: EditUserFormInputs) => {
-    console.log(data, "password");
     updateUserMn.mutate({ ...data, userId: selected._id });
   };
+
+  const roles = useSelector((state: RootState) => state.role.allRoles );
+  const roleList = roles?.map((role: CurrentRoleDataInterFace) => ({ value: role._id, label: role.name }));
+
 
   return (
     <Drawer
@@ -80,59 +85,65 @@ const EditDrawer = ({
         },
       }}
     >
-      <div role="presentation">
+      <div role="presentation" className="">
         <ModalHeader text={"Edit User"} toggleDrawer={toggleDrawer} />
-        <div className="mt-6 px-6">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid gap-4 md:grid-cols-1">
-              <div>
-                <Input
-                  label="Email"
-                  type="email"
-                  placeholder="example@example.com"
-                  register={register("email")}
-                  error={errors.email?.message}
-                  disabled={true}
-                />
+        <div className="mt-6 w-full ">
+          <div className="px-4">
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="grid gap-4 md:grid-cols-1 w-full">
+                <div>
+                  <Input
+                    label="Email"
+                    type="email"
+                    placeholder="example@example.com"
+                    register={register("email")}
+                    error={errors.email?.message}
+                    disabled={true}
+                  />
+                </div>
+                <div>
+                  <Input
+                    label="Name"
+                    type="text"
+                    placeholder="John Doe"
+                    register={register("name")}
+                    error={errors.name?.message}
+                  />
+                </div>
+                <div>
+                  <Input
+                    label="Phone Number"
+                    type="text"
+                    placeholder="+1234567890"
+                    register={register("mobile")}
+                    error={errors.mobile?.message}
+                  />
+                </div>
+                <div>
+                  <Select
+                    label="Role"
+                    options={roleList}
+                    error={errors.role_id?.message}
+                    register={register("role_id")}
+                  />
+                </div>
               </div>
-              <div>
-                <Input
-                  label="Name"
-                  type="text"
-                  placeholder="John Doe"
-                  register={register("name")}
-                  error={errors.name?.message}
-                />
-              </div>
-              <div>
-                <Input
-                  label="Phone Number"
-                  type="text"
-                  placeholder="+1234567890"
-                  register={register("mobile")}
-                  error={errors.mobile?.message}
-                />
-              </div>
-              <div>
-                <Input
-                  label="Password"
-                  type="password"
-                  placeholder="••••••••"
-                  register={register("password")}
-                  error={errors.password?.message}
-                />
-              </div>
-            </div>
 
-            <div className="mt-6">
-              <Button
-                name="Submit"
-                type="submit"
-                loading={updateUserMn.isPending}
-                className="bg-red-600 h-[30px] w-[100px] text-[16px] text-white"
-              />
-            </div>
-          </form>
+              <div className="mt-6">
+              </div>
+
+            </form>
+          </div>
+          <div className='flex justify-end items-center gap-2 absolute bottom-0 h-[60px] w-[100%] pr-8 border-t-2 border-gray'>
+            <Button type="button" name="Close" className="mr-4 bg-graydark" onClick={() => toggleDrawer(false)} />
+            <Button
+              name="Submit"
+              type="submit"
+              loading={updateUserMn.isPending}
+              onClick={handleSubmit(onSubmit)}
+              className="bg-success"
+            />
+          </div>
         </div>
       </div>
     </Drawer>

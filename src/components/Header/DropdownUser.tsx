@@ -1,3 +1,168 @@
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+import ClickOutside from "@/components/ClickOutside";
+import { useDirection } from "@/context/DirectionContext";
+
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import { logoutUser, clearAuthState } from "@/redux/slice/authSlice";
+
+import { clearAllLocalData } from "@/utility/helper";
+import { toast } from "sonner";
+
+const DropdownUser = () => {
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  const { user } = useSelector((state: RootState) => state.authReducer);
+  const permissions = useSelector((state: RootState) => state.authReducer.permissions);
+  const userInfo = user?.user;
+
+  const hasChangePasswordPermission = permissions.includes("Change Password");
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+    } catch (error: any) {
+      if (!error?.includes("already logged out")) {
+        toast.error(error || "Logout failed. Please try again.");
+      }
+    } finally {
+      try {
+        clearAllLocalData();
+        dispatch(clearAuthState());
+        toast.success("Logged out successfully!");
+      } catch (clearError) {
+        console.error("Error clearing local data:", clearError);
+      }
+      router.push("/");
+    }
+  };
+
+  return (
+    <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
+      <Link
+        onClick={() => setDropdownOpen(!dropdownOpen)}
+        className="flex items-center gap-4"
+        href="#"
+      >
+        <span className="hidden text-right lg:block">
+          <span className="block text-[11px] font-semibold leading-4 text-black dark:text-white">
+            {userInfo && userInfo.name}
+          </span>
+          <span className="block text-[11px] leading-4">
+            {userInfo && userInfo.email}
+          </span>
+        </span>
+
+        <span className="h-8 w-8 rounded-full">
+          <Image
+            width={50}
+            height={50}
+            src="/images/user/user-01.png"
+            alt="User"
+          />
+        </span>
+
+        <svg
+          className="hidden fill-current sm:block"
+          width="12"
+          height="8"
+          viewBox="0 0 12 8"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M0.410765 0.910734C0.736202 0.585297 1.26384 0.585297 1.58928 0.910734L6.00002 5.32148L10.4108 0.910734C10.7362 0.585297 11.2638 0.585297 11.5893 0.910734C11.9147 1.23617 11.9147 1.76381 11.5893 2.08924L6.58928 7.08924C6.26384 7.41468 5.7362 7.41468 5.41077 7.08924L0.410765 2.08924C0.0853277 1.76381 0.0853277 1.23617 0.410765 0.910734Z"
+          />
+        </svg>
+      </Link>
+
+      {dropdownOpen && (
+        <div className="absolute right-0 mt-3 flex w-max flex-col rounded-sm border border-stroke bg-white pe-5 shadow-default dark:border-strokedark dark:bg-boxdark">
+          <ul className="flex flex-col gap-2 border-b border-stroke px-3 py-2 dark:border-strokedark">
+            <li>
+              <Link
+                href="/profile"
+                className="flex items-center gap-3.5 font-medium duration-300 ease-in-out hover:text-primary"
+              >
+                {/* Profile SVG */}
+                <svg className="fill-current" width="20" height="20" viewBox="0 0 22 22" fill="none">
+                  <path d="M11 9.625C8.422 9.625 6.359 7.597 6.359 5.122C6.359 2.647 8.422 0.619 11 0.619C13.578 0.619 15.641 2.647 15.641 5.122C15.641 7.597 13.578 9.625 11 9.625Z" />
+                  <path d="M17.772 21.416H4.228C3.541 21.416 2.991 20.866 2.991 20.178V17.084C2.991 13.716 5.741 10.966 9.109 10.966H12.925C16.294 10.966 19.044 13.716 19.044 17.084V20.178C19.009 20.831 18.459 21.416 17.772 21.416Z" />
+                </svg>
+                <p className="text-[13px]">My Profile</p>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="#"
+                className="flex items-center gap-3.5 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+              >
+                {/* Contacts SVG */}
+                <svg className="fill-current" width="20" height="20" viewBox="0 0 22 22" fill="none">
+                  <path d="M17.669 1.444C17.119 0.894 16.431 0.619 15.675 0.619H7.425C6.256 0.619 5.259 1.581 5.259 2.784V4.125H4.297C3.884 4.125 3.506 4.469 3.506 4.916C3.506 5.362 3.85 5.706 4.297 5.706H5.259V10.278H4.297C3.884 10.278 3.506 10.622 3.506 11.069C3.506 11.481 3.85 11.859 4.297 11.859H5.259V16.431H4.297C3.884 16.431 3.506 16.775 3.506 17.222C3.506 17.669 3.85 18.012 4.297 18.012H5.259V19.25C5.259 20.419 6.222 21.416 7.425 21.416H15.675C17.222 21.416 18.494 20.144 18.528 18.597V3.472C18.494 2.681 18.219 1.959 17.669 1.444Z" />
+                </svg>
+                <p className="text-[13px]">My Contacts</p>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/settings"
+                className="flex items-center gap-3.5 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+              >
+                {/* Settings SVG */}
+                <svg className="fill-current" width="20" height="20" viewBox="0 0 22 22" fill="none">
+                  <path d="M11 6.325C8.422 6.325 6.325 8.422 6.325 11C6.325 13.578 8.422 15.675 11 15.675C13.578 15.675 15.675 13.578 15.675 11C15.675 8.422 13.578 6.325 11 6.325ZM11 14.128C9.281 14.128 7.872 12.719 7.872 11C7.872 9.281 9.281 7.872 11 7.872C12.719 7.872 14.128 9.281 14.128 11C14.128 12.719 12.719 14.128 11 14.128Z" />
+                </svg>
+                <p className="text-[13px]">Account Settings</p>
+              </Link>
+            </li>
+            {hasChangePasswordPermission && (
+              <li>
+                <Link
+                  href="/changePassword"
+                  className="flex items-center gap-3.5 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+                >
+                  {/* Password SVG */}
+                  <svg className="fill-current" width="20" height="20" viewBox="0 0 22 22" fill="none">
+                    <path d="M16.5 8.25H5.5C4.672 8.25 4 8.922 4 9.75V18.75C4 19.578 4.672 20.25 5.5 20.25H16.5C17.328 20.25 18 19.578 18 18.75V9.75C18 8.922 17.328 8.25 16.5 8.25Z" />
+                    <path d="M11 12.75C12.243 12.75 13.25 11.743 13.25 10.5C13.25 9.257 12.243 8.25 11 8.25C9.757 8.25 8.75 9.257 8.75 10.5C8.75 11.743 9.757 12.75 11 12.75Z" />
+                    <path d="M11 14.25C8.5 14.25 6.5 16.25 6.5 18.75H15.5C15.5 16.25 13.5 14.25 11 14.25Z" />
+                    <path d="M7.5 6.75V4.5C7.5 2.843 8.843 1.5 10.5 1.5H11.5C13.157 1.5 14.5 2.843 14.5 4.5V6.75" />
+                  </svg>
+                  <p className="text-[13px]">Change Password</p>
+                </Link>
+              </li>
+            )}
+          </ul>
+          <div
+            onClick={handleLogout}
+            className="flex cursor-pointer items-center gap-3.5 px-3 py-1 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+          >
+            {/* Logout SVG */}
+            <svg className="fill-current" width="20" height="20" viewBox="0 0 22 22" fill="none">
+              <path d="M6.05 11.756h6.153c.413 0 .757-.344.757-.756s-.344-.756-.757-.756H6.084L8.216 8.078a.75.75 0 10-1.101-1.101L3.678 10.484a.75.75 0 000 1.101l3.437 3.506a.75.75 0 001.101-1.101L6.05 11.756Z" />
+            </svg>
+            <p className="text-[13px]">Log Out</p>
+          </div>
+        </div>
+      )}
+    </ClickOutside>
+  );
+};
+
+export default DropdownUser;
+
+
+// do not delete this 
+/* 
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -5,30 +170,48 @@ import ClickOutside from "@/components/ClickOutside";
 import { useDirection } from "@/context/DirectionContext";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { logoutUser } from "@/redux/slice/authSlice";
+import { logoutUser, clearAuthState } from "@/redux/slice/authSlice";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { removeTokenCookie } from "@/utility/helper";
+import { clearAllLocalData } from "@/utility/helper";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.authReducer);
+  const test = useSelector((state: RootState) => state);
+  const permissions = useSelector((state: RootState) => state?.authReducer.permissions);
   const userInfo = user?.user;
 
-  const handleLogout = async () => {
-    let toastMessage = "";
+  // Check if user has CHANGE_PASSWORD permission
+  const hasChangePasswordPermission = permissions.includes('Change Password');
 
+
+  const handleLogout = async () => {
     try {
-      const result = await dispatch(logoutUser()).unwrap();
-      toastMessage = result.message || "Login successful!";
-      toast.success(toastMessage);
-      router.push("/");
-      removeTokenCookie();
+      // Try to call logout API
+      await dispatch(logoutUser()).unwrap();
     } catch (error: any) {
-      toastMessage = error || "Login failed. Please try again.";
-      toast.error(toastMessage);
+      
+      if (!error?.includes("already logged out")) {
+        toast.error(error || "Logout failed. Please try again.");
+      }
+    } finally {
+      try {
+        // Clear all local data (cookies, localStorage, sessionStorage)
+        clearAllLocalData();
+        
+        // Ensure Redux state is cleared
+        dispatch(clearAuthState());
+        
+        toast.success("Logged out successfully!");
+      } catch (clearError) {
+        console.error("Error clearing local data:", clearError);
+      }
+      
+      // Always redirect to login page
+      router.push("/");
     }
   };
 
@@ -150,6 +333,41 @@ const DropdownUser = () => {
                 <p className="text-[13px]">Account Settings</p>
               </Link>
             </li>
+            {hasChangePasswordPermission && (
+              <li>
+                <Link
+                  href="/changePassword"
+                  className="flex items-center gap-3.5 text-[14px] font-medium duration-300 ease-in-out hover:text-primary"
+                >
+                  <svg
+                    className="fill-current"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16.5 8.25H5.5C4.67157 8.25 4 8.92157 4 9.75V18.75C4 19.5784 4.67157 20.25 5.5 20.25H16.5C17.3284 20.25 18 19.5784 18 18.75V9.75C18 8.92157 17.3284 8.25 16.5 8.25Z"
+                      fill=""
+                    />
+                    <path
+                      d="M11 12.75C12.2426 12.75 13.25 11.7426 13.25 10.5C13.25 9.25736 12.2426 8.25 11 8.25C9.75736 8.25 8.75 9.25736 8.75 10.5C8.75 11.7426 9.75736 12.75 11 12.75Z"
+                      fill=""
+                    />
+                    <path
+                      d="M11 14.25C8.5 14.25 6.5 16.25 6.5 18.75H15.5C15.5 16.25 13.5 14.25 11 14.25Z"
+                      fill=""
+                    />
+                    <path
+                      d="M7.5 6.75V4.5C7.5 2.84315 8.84315 1.5 10.5 1.5H11.5C13.1569 1.5 14.5 2.84315 14.5 4.5V6.75"
+                      fill=""
+                    />
+                  </svg>
+                  <p className="text-[13px]">Change Password</p>
+                </Link>
+              </li>
+            )}
           </ul>
           <div
             onClick={() => handleLogout()}
@@ -181,3 +399,5 @@ const DropdownUser = () => {
 };
 
 export default DropdownUser;
+
+*/

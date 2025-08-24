@@ -4,9 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @layer base {
   body {
     @apply relative z-1 bg-whiten font-satoshi text-base font-normal text-body;
+    overflow-y: initial !important;
+    padding-right: 0 !important;     
   }
 }
 
@@ -30,6 +33,10 @@
 
   .inbox-height {
     @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+  }
+
+  .border-gray-200 {
+    border-color: #E5E7EB;
   }
 }
 
@@ -245,7 +252,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .MuiTableCell-root {
-  padding: 4px !important;
+  padding: 4px;
 }
 
 ::-webkit-scrollbar {
@@ -278,4 +285,79 @@ input:checked ~ span:last-child {
   .print:hidden {
     display: none; /* Hide elements with the class 'print:hidden' when printing */
   }
+}
+/* ===== Month View Styling ===== */
+
+/* 🔴 Red text for Sundays and Saturdays */
+.rbc-month-view .rbc-row .rbc-date-cell:nth-child(1),
+.rbc-month-view .rbc-row .rbc-date-cell:nth-child(7) {
+  color: red !important;
+  font-weight: bold;
+}
+
+/* 🟦 Background for Sundays and Saturdays */
+.rbc-month-view .rbc-row-bg .rbc-day-bg:nth-child(1),
+.rbc-month-view .rbc-row-bg .rbc-day-bg:nth-child(7) {
+  background-color: white !important;
+}
+
+/* 🔷 Today's Highlight in Month View */
+.rbc-month-view .rbc-day-bg.rbc-today {
+  background-color: #cdf4f9 !important;
+}
+.rbc-month-view .rbc-date-cell.rbc-today {
+  color: #00796b !important;
+  font-weight: bold;
+}
+
+/* ===== Week/Day View Layout Fixes ===== */
+
+/* 🧱 Hide the left-side time gutter */
+.rbc-time-gutter {
+  display: none !important;
+}
+
+/* 📏 Hide time slots (hourly rows) */
+.rbc-timeslot-group,
+.rbc-time-content {
+  display: none !important;
+}
+
+/* 🧱 Expand all-day cell */
+.rbc-allday-cell {
+  display: block !important;
+  height: 100% !important;
+  background: #f9fafb;
+}
+
+/* 🧩 Make all parents fill height */
+.rbc-time-view,
+.rbc-time-header,
+.rbc-time-header-content,
+.rbc-time-slot {
+  height: 100% !important;
+}
+
+/* 🪄 Style events */
+.rbc-event {
+  height: 2rem;
+  font-size: 0.875rem;
+
+}
+
+/* 🧾 Remove padding on left in week/day views */
+.rbc-time-header-content {
+  margin-left: 0 !important;
+  cursor: pointer !important;
+}
+/* ✅ Remove the time gutter (the time labels column) */
+.rbc-time-gutter {
+  display: none !important;
+}
+
+/* Style images inside the Quill editor to be small by default */
+.ql-editor img {
+  max-width: 200px;
+  height: auto;
+  display: inline-block;
 }
